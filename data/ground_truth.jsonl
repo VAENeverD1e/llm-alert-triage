@@ -1,0 +1,5 @@
+{"alert_id": "ALT-1001", "technique_id": "T1059.001", "expected_verdict": "Escalate", "notes": "Encoded powershell downloading payload from untrusted IP"}
+{"alert_id": "ALT-1002", "technique_id": "T1059.001", "expected_verdict": "Close", "notes": "SCCM scheduled inventory script using standard encoded flags"}
+{"alert_id": "ALT-1003", "technique_id": "T1003.001", "expected_verdict": "Escalate", "notes": "procdump.exe targeting lsass process space"}
+{"alert_id": "ALT-1004", "technique_id": "T1053.005", "expected_verdict": "Escalate", "notes": "schtasks creation targeting cmd.exe under AppData directory"}
+{"alert_id": "ALT-1005", "technique_id": "T1078.003", "expected_verdict": "Close", "notes": "Authorized IT maintenance login from designated bastion host"}

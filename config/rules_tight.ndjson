@@ -1,0 +1,5 @@
+{"rule_id": "T1059.001", "name": "PowerShell Script Execution with Encoded Command", "severity": "high", "exclusions": ["user.name: SYSTEM", "process.parent.name: sccm.exe"], "enabled": true}
+{"rule_id": "T1003.001", "name": "LSASS Memory Dump Attempt", "severity": "critical", "exclusions": ["process.name: Taskmgr.exe", "user.name: AdminBackup"], "enabled": true}
+{"rule_id": "T1053.005", "name": "Scheduled Task Created via schtasks", "severity": "medium", "exclusions": ["process.parent.name: svchost.exe"], "enabled": true}
+{"rule_id": "T1071.001", "name": "Unusual Outbound C2 Traffic to Unknown IP", "severity": "high", "exclusions": ["destination.ip: 10.0.0.0/8"], "enabled": true}
+{"rule_id": "T1078.003", "name": "Privileged Account Login Outside Working Hours", "severity": "medium", "exclusions": ["user.name: automated_maintenance"], "enabled": true}
