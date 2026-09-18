@@ -1,0 +1,1092 @@
+{
+    "_index": ".internal.alerts-security.alerts-default-000003",
+    "_id": "537c522f7e23747508739dfaf73d6d71277d8312fbd0a31f129f909a8752b619",
+    "_score": 1,
+    "_source": {
+        "kibana.alert.severity": "high",
+        "kibana.alert.workflow_status_updated_at": "2026-07-27T08:20:26.483Z",
+        "agent": {
+            "name": "DESKTOP-THONLNR",
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "ephemeral_id": "64addb2f-5b7b-434f-8391-8206263963f2",
+            "type": "filebeat",
+            "version": "8.19.14"
+        },
+        "kibana.alert.rule.references": [],
+        "kibana.alert.rule.updated_by": "siem",
+        "kibana.alert.rule.threat": [
+            {
+                "framework": "MITRE ATT&CK",
+                "technique": [
+                    {
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "name": "Command and Scripting Interpreter",
+                        "subtechnique": [
+                            {
+                                "reference": "https://attack.mitre.org/techniques/T1059/001/",
+                                "name": "PowerShell",
+                                "id": "T1059.001"
+                            }
+                        ],
+                        "id": "T1059"
+                    }
+                ],
+                "tactic": {
+                    "reference": "https://attack.mitre.org/tactics/TA0002/",
+                    "name": "Execution",
+                    "id": "TA0002"
+                }
+            }
+        ],
+        "kibana.alert.original_data_stream.namespace": "default",
+        "kibana.alert.original_event.code": "1",
+        "kibana.alert.rule.description": "Detects execution of PowerShell with the -EncodedCommand flag, which is commonly used to obfuscate script content and evade detection.",
+        "kibana.alert.rule.tags": [],
+        "kibana.alert.rule.producer": "siem",
+        "kibana.alert.rule.to": "now",
+        "kibana.alert.rule.created_by": "siem",
+        "kibana.alert.original_event.ingested": "2026-07-27T08:14:16Z",
+        "ecs": {
+            "version": "8.17.0"
+        },
+        "kibana.alert.risk_score": 73,
+        "host": {
+            "hostname": "DESKTOP-THONLNR",
+            "os": {
+                "build": "19045.3803",
+                "kernel": "10.0.19041.3803 (WinBuild.160101.0800)",
+                "name": "Windows 10 Pro",
+                "type": "windows",
+                "family": "windows",
+                "version": "10.0",
+                "platform": "windows"
+            },
+            "ip": [
+                "fe80::8ac2:9f81:1d7e:a0aa",
+                "192.168.31.132"
+            ],
+            "name": "desktop-thonlnr",
+            "id": "bb537b1e-2db1-4ede-8b49-f3e63a57eff1",
+            "mac": [
+                "00-0C-29-77-18-E4"
+            ],
+            "architecture": "x86_64"
+        },
+        "kibana.alert.rule.name": "Encoded PowerShell Execution Detection",
+        "event.kind": "signal",
+        "kibana.alert.workflow_status": "acknowledged",
+        "kibana.alert.rule.uuid": "629f9c28-0051-4b4a-87a9-a2faa5168924",
+        "kibana.alert.original_event.created": "2026-07-27T08:14:08.569Z",
+        "kibana.alert.original_event.category": [
+            "process"
+        ],
+        "kibana.alert.original_event.module": "windows",
+        "kibana.alert.rule.risk_score_mapping": [],
+        "kibana.alert.rule.interval": "5m",
+        "kibana.alert.reason": "process event with process powershell.exe, parent process powershell.exe, by victim on desktop-thonlnr created high alert Encoded PowerShell Execution Detection.",
+        "kibana.alert.rule.type": "query",
+        "kibana.alert.workflow_user": "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0",
+        "kibana.alert.start": "2026-07-27T08:15:05.326Z",
+        "input": {
+            "type": "winlog"
+        },
+        "kibana.alert.rule.immutable": false,
+        "kibana.alert.original_event.type": [
+            "start"
+        ],
+        "kibana.alert.depth": 1,
+        "kibana.alert.rule.enabled": true,
+        "kibana.alert.rule.version": 1,
+        "kibana.alert.rule.from": "now-6m",
+        "kibana.alert.rule.parameters": {
+            "severity_mapping": [],
+            "references": [],
+            "data_view_id": "logs-*",
+            "description": "Detects execution of PowerShell with the -EncodedCommand flag, which is commonly used to obfuscate script content and evade detection.",
+            "language": "kuery",
+            "type": "query",
+            "exceptions_list": [],
+            "from": "now-6m",
+            "severity": "high",
+            "max_signals": 100,
+            "rule_source": {
+                "type": "internal"
+            },
+            "risk_score": 73,
+            "risk_score_mapping": [],
+            "author": [],
+            "query": "process.name : (\"powershell.exe\" OR \"pwsh.exe\") AND (\n  process.command_line : *FromBase64String* OR\n  process.command_line : *IEX* OR\n  process.command_line : *Invoke-Expression* OR\n  process.command_line : *-e * OR \n  process.command_line : *-en * OR \n  process.command_line : *-enc * OR \n  process.command_line : *-encodedCommand *\n)",
+            "filters": [],
+            "version": 1,
+            "rule_id": "b54e39d0-fa3b-454e-9998-bfc6d0b018c0",
+            "license": "",
+            "required_fields": [],
+            "immutable": false,
+            "related_integrations": [],
+            "meta": {
+                "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+            },
+            "setup": "",
+            "false_positives": [],
+            "threat": [
+                {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1059/",
+                            "name": "Command and Scripting Interpreter",
+                            "subtechnique": [
+                                {
+                                    "reference": "https://attack.mitre.org/techniques/T1059/001/",
+                                    "name": "PowerShell",
+                                    "id": "T1059.001"
+                                }
+                            ],
+                            "id": "T1059"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0002/",
+                        "name": "Execution",
+                        "id": "TA0002"
+                    }
+                }
+            ],
+            "to": "now"
+        },
+        "kibana.alert.rule.revision": 5,
+        "log": {
+            "level": "information"
+        },
+        "kibana.alert.status": "active",
+        "kibana.alert.last_detected": "2026-07-27T08:15:05.326Z",
+        "elastic_agent": {
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "version": "8.19.14",
+            "snapshot": false
+        },
+        "kibana.alert.ancestors": [
+            {
+                "depth": 0,
+                "index": ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003",
+                "id": "TLSjop8BEWnoqq1_kNg7",
+                "type": "event"
+            }
+        ],
+        "kibana.alert.original_event.dataset": "windows.sysmon_operational",
+        "kibana.alert.original_data_stream.dataset": "windows.sysmon_operational",
+        "kibana.alert.rule.exceptions_list": [],
+        "kibana.alert.rule.actions": [],
+        "kibana.alert.rule.rule_type_id": "siem.queryRule",
+        "related": {
+            "user": [
+                "victim"
+            ],
+            "hash": [
+                "64dd55e1c2373deed25c2776f553c632e58c45e56a0e4639dfd54ee97eab9c19",
+                "6726185b70b5adf05e8a1a1df82ebf30",
+                "e3007c8e0098d06abf617eee6f0c5abd"
+            ]
+        },
+        "kibana.alert.original_event.provider": "Microsoft-Windows-Sysmon",
+        "kibana.alert.rule.license": "",
+        "event": {
+            "agent_id_status": "verified",
+            "ingested": "2026-07-27T08:14:16Z",
+            "code": "1",
+            "provider": "Microsoft-Windows-Sysmon",
+            "created": "2026-07-27T08:14:08.569Z",
+            "module": "windows",
+            "action": "Process creation",
+            "category": [
+                "process"
+            ],
+            "type": [
+                "start"
+            ],
+            "dataset": "windows.sysmon_operational"
+        },
+        "kibana.alert.original_event.kind": "event",
+        "kibana.alert.workflow_tags": [],
+        "kibana.alert.workflow_assignee_ids": [],
+        "kibana.alert.rule.severity_mapping": [],
+        "process": {
+            "args": [
+                "powershell.exe",
+                "&",
+                "{#",
+                "Encoded",
+                "payload",
+                "in",
+                "next",
+                "command",
+                "is",
+                "the",
+                "following",
+                "\"Set-Content -path \"$env:SystemRoot/Temp/art-marker.txt\" -value \"Hello",
+                "from",
+                "the",
+                "Atomic",
+                "Red",
+                "Team\"\"\nreg.exe",
+                "add",
+                "\"HKEY_CURRENT_USER\\Software\\Classes\\AtomicRedTeam\"",
+                "/v",
+                "ART",
+                "/t",
+                "REG_SZ",
+                "/d",
+                "\"U2V0LUNvbnRlbnQgLXBhdGggIiRlbnY6U3lzdGVtUm9vdC9UZW1wL2FydC1tYXJrZXIudHh0IiAtdmFsdWUgIkhlbGxvIGZyb20gdGhlIEF0b21pYyBSZWQgVGVhbSI=\"",
+                "/f\niex",
+                "([Text.Encoding]::ASCII.GetString([Convert]::FromBase64String((gp",
+                "'HKCU:\\Software\\Classes\\AtomicRedTeam').ART)))}"
+            ],
+            "parent": {
+                "args": [
+                    "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+                ],
+                "name": "powershell.exe",
+                "pid": 6596,
+                "args_count": 1,
+                "entity_id": "{bb537b1e-132b-6a67-ae00-000000001e00}",
+                "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "command_line": "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" "
+            },
+            "pe": {
+                "file_version": "10.0.19041.3636 (WinBuild.160101.0800)",
+                "product": "Microsoft® Windows® Operating System",
+                "imphash": "e3007c8e0098d06abf617eee6f0c5abd",
+                "description": "Windows PowerShell",
+                "original_file_name": "PowerShell.EXE",
+                "company": "Microsoft Corporation"
+            },
+            "name": "powershell.exe",
+            "pid": 8932,
+            "working_directory": "C:\\Users\\victim\\AppData\\Local\\Temp\\",
+            "args_count": 28,
+            "entity_id": "{bb537b1e-134e-6a67-be00-000000001e00}",
+            "hash": {
+                "sha256": "64dd55e1c2373deed25c2776f553c632e58c45e56a0e4639dfd54ee97eab9c19",
+                "md5": "6726185b70b5adf05e8a1a1df82ebf30"
+            },
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "command_line": "\"powershell.exe\" & {# Encoded payload in next command is the following \\\"\"Set-Content -path \\\"\"$env:SystemRoot/Temp/art-marker.txt\\\"\" -value \\\"\"Hello from the Atomic Red Team\\\"\"\\\"\"\nreg.exe add \\\"\"HKEY_CURRENT_USER\\Software\\Classes\\AtomicRedTeam\\\"\" /v ART /t REG_SZ /d \\\"\"U2V0LUNvbnRlbnQgLXBhdGggIiRlbnY6U3lzdGVtUm9vdC9UZW1wL2FydC1tYXJrZXIudHh0IiAtdmFsdWUgIkhlbGxvIGZyb20gdGhlIEF0b21pYyBSZWQgVGVhbSI=\\\"\" /f\niex ([Text.Encoding]::ASCII.GetString([Convert]::FromBase64String((gp 'HKCU:\\Software\\Classes\\AtomicRedTeam').ART)))}"
+        },
+        "winlog": {
+            "computer_name": "DESKTOP-THONLNR",
+            "process": {
+                "pid": 3088,
+                "thread": {
+                    "id": 4392
+                }
+            },
+            "channel": "Microsoft-Windows-Sysmon/Operational",
+            "event_data": {
+                "Company": "Microsoft Corporation",
+                "Description": "Windows PowerShell",
+                "LogonGuid": "{bb537b1e-131e-6a67-7f6a-070000000000}",
+                "TerminalSessionId": "1",
+                "IntegrityLevel": "Medium",
+                "FileVersion": "10.0.19041.3636 (WinBuild.160101.0800)",
+                "Product": "Microsoft® Windows® Operating System",
+                "ParentUser": "DESKTOP-THONLNR\\victim",
+                "LogonId": "0x76a7f"
+            },
+            "opcode": "Info",
+            "version": 5,
+            "record_id": "11515",
+            "task": "Process Create (rule: ProcessCreate)",
+            "event_id": "1",
+            "provider_guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "api": "wineventlog",
+            "provider_name": "Microsoft-Windows-Sysmon",
+            "user": {
+                "identifier": "S-1-5-18",
+                "domain": "NT AUTHORITY",
+                "name": "SYSTEM",
+                "type": "User"
+            }
+        },
+        "kibana.alert.rule.max_signals": 100,
+        "kibana.alert.rule.updated_at": "2026-04-15T08:44:15.166Z",
+        "kibana.alert.rule.risk_score": 73,
+        "kibana.alert.rule.author": [],
+        "kibana.alert.rule.false_positives": [],
+        "message": "Process Create:\nRuleName: -\nUtcTime: 2026-07-27 08:14:06.726\nProcessGuid: {bb537b1e-134e-6a67-be00-000000001e00}\nProcessId: 8932\nImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nFileVersion: 10.0.19041.3636 (WinBuild.160101.0800)\nDescription: Windows PowerShell\nProduct: Microsoft® Windows® Operating System\nCompany: Microsoft Corporation\nOriginalFileName: PowerShell.EXE\nCommandLine: \"powershell.exe\" & {# Encoded payload in next command is the following \\\"\"Set-Content -path \\\"\"$env:SystemRoot/Temp/art-marker.txt\\\"\" -value \\\"\"Hello from the Atomic Red Team\\\"\"\\\"\"\nreg.exe add \\\"\"HKEY_CURRENT_USER\\Software\\Classes\\AtomicRedTeam\\\"\" /v ART /t REG_SZ /d \\\"\"U2V0LUNvbnRlbnQgLXBhdGggIiRlbnY6U3lzdGVtUm9vdC9UZW1wL2FydC1tYXJrZXIudHh0IiAtdmFsdWUgIkhlbGxvIGZyb20gdGhlIEF0b21pYyBSZWQgVGVhbSI=\\\"\" /f\niex ([Text.Encoding]::ASCII.GetString([Convert]::FromBase64String((gp 'HKCU:\\Software\\Classes\\AtomicRedTeam').ART)))}\nCurrentDirectory: C:\\Users\\victim\\AppData\\Local\\Temp\\\nUser: DESKTOP-THONLNR\\victim\nLogonGuid: {bb537b1e-131e-6a67-7f6a-070000000000}\nLogonId: 0x76A7F\nTerminalSessionId: 1\nIntegrityLevel: Medium\nHashes: MD5=6726185B70B5ADF05E8A1A1DF82EBF30,SHA256=64DD55E1C2373DEED25C2776F553C632E58C45E56A0E4639DFD54EE97EAB9C19,IMPHASH=E3007C8E0098D06ABF617EEE6F0C5ABD\nParentProcessGuid: {bb537b1e-132b-6a67-ae00-000000001e00}\nParentProcessId: 6596\nParentImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nParentCommandLine: \"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" \nParentUser: DESKTOP-THONLNR\\victim",
+        "kibana.alert.rule.consumer": "siem",
+        "kibana.alert.rule.indices": [
+            "logs-*"
+        ],
+        "kibana.alert.rule.category": "Custom Query Rule",
+        "@timestamp": "2026-07-27T08:15:05.231Z",
+        "kibana.alert.original_data_stream.type": "logs",
+        "kibana.alert.original_event.action": "Process creation",
+        "kibana.alert.rule.created_at": "2026-04-08T06:01:26.071Z",
+        "kibana.alert.rule.severity": "high",
+        "kibana.alert.intended_timestamp": "2026-07-27T08:15:05.231Z",
+        "data_stream": {
+            "namespace": "default",
+            "type": "logs",
+            "dataset": "windows.sysmon_operational"
+        },
+        "kibana.alert.original_event.agent_id_status": "verified",
+        "kibana.alert.rule.execution.timestamp": "2026-07-27T08:15:05.326Z",
+        "kibana.alert.rule.execution.uuid": "88079461-3345-4a4a-9ed0-10af2708a22b",
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.uuid": "537c522f7e23747508739dfaf73d6d71277d8312fbd0a31f129f909a8752b619",
+        "kibana.alert.rule.meta.kibana_siem_app_url": "http://192.168.31.130:5601/app/security",
+        "kibana.version": "8.19.13",
+        "kibana.alert.rule.execution.type": "scheduled",
+        "user": {
+            "domain": "DESKTOP-THONLNR",
+            "name": "victim",
+            "id": "S-1-5-18"
+        },
+        "kibana.alert.original_time": "2026-07-27T08:14:06.726Z",
+        "kibana.alert.rule.rule_id": "b54e39d0-fa3b-454e-9998-bfc6d0b018c0"
+    },
+    "fields": {
+        "kibana.alert.workflow_status_updated_at": [
+            "2026-07-27T08:20:26.483Z"
+        ],
+        "process.hash.md5": [
+            "6726185b70b5adf05e8a1a1df82ebf30"
+        ],
+        "kibana.alert.rule.updated_by": [
+            "siem"
+        ],
+        "elastic_agent.version": [
+            "8.19.14"
+        ],
+        "host.os.name.text": [
+            "Windows 10 Pro"
+        ],
+        "process.hash.sha256": [
+            "64dd55e1c2373deed25c2776f553c632e58c45e56a0e4639dfd54ee97eab9c19"
+        ],
+        "host.hostname": [
+            "DESKTOP-THONLNR"
+        ],
+        "signal.original_event.created": [
+            "2026-07-27T08:14:08.569Z"
+        ],
+        "host.mac": [
+            "00-0C-29-77-18-E4"
+        ],
+        "signal.rule.threat.technique.subtechnique.id": [
+            "T1059.001"
+        ],
+        "winlog.process.pid": [
+            3088
+        ],
+        "kibana.alert.rule.threat.technique.id": [
+            "T1059"
+        ],
+        "signal.rule.enabled": [
+            "true"
+        ],
+        "host.os.version": [
+            "10.0"
+        ],
+        "signal.rule.max_signals": [
+            100
+        ],
+        "kibana.alert.risk_score": [
+            73
+        ],
+        "signal.rule.updated_at": [
+            "2026-04-15T08:44:15.166Z"
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.reference": [
+            "https://attack.mitre.org/techniques/T1059/001/"
+        ],
+        "winlog.event_data.Company": [
+            "Microsoft Corporation"
+        ],
+        "host.os.type": [
+            "windows"
+        ],
+        "signal.original_event.code": [
+            "1"
+        ],
+        "kibana.alert.original_event.module": [
+            "windows"
+        ],
+        "kibana.alert.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.type": [
+            "query"
+        ],
+        "event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.rule.immutable": [
+            "false"
+        ],
+        "kibana.alert.rule.version": [
+            "1"
+        ],
+        "process.command_line.text": [
+            "\"powershell.exe\" & {# Encoded payload in next command is the following \\\"\"Set-Content -path \\\"\"$env:SystemRoot/Temp/art-marker.txt\\\"\" -value \\\"\"Hello from the Atomic Red Team\\\"\"\\\"\"\nreg.exe add \\\"\"HKEY_CURRENT_USER\\Software\\Classes\\AtomicRedTeam\\\"\" /v ART /t REG_SZ /d \\\"\"U2V0LUNvbnRlbnQgLXBhdGggIiRlbnY6U3lzdGVtUm9vdC9UZW1wL2FydC1tYXJrZXIudHh0IiAtdmFsdWUgIkhlbGxvIGZyb20gdGhlIEF0b21pYyBSZWQgVGVhbSI=\\\"\" /f\niex ([Text.Encoding]::ASCII.GetString([Convert]::FromBase64String((gp 'HKCU:\\Software\\Classes\\AtomicRedTeam').ART)))}"
+        ],
+        "winlog.event_data.Description": [
+            "Windows PowerShell"
+        ],
+        "process.working_directory": [
+            "C:\\Users\\victim\\AppData\\Local\\Temp\\"
+        ],
+        "process.entity_id": [
+            "{bb537b1e-134e-6a67-be00-000000001e00}"
+        ],
+        "host.ip": [
+            "fe80::8ac2:9f81:1d7e:a0aa",
+            "192.168.31.132"
+        ],
+        "agent.type": [
+            "filebeat"
+        ],
+        "process.pe.original_file_name": [
+            "PowerShell.EXE"
+        ],
+        "process.executable.text": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "signal.original_event.category": [
+            "process"
+        ],
+        "winlog.api": [
+            "wineventlog"
+        ],
+        "signal.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "host.id": [
+            "bb537b1e-2db1-4ede-8b49-f3e63a57eff1"
+        ],
+        "elastic_agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "process.working_directory.text": [
+            "C:\\Users\\victim\\AppData\\Local\\Temp\\"
+        ],
+        "kibana.alert.rule.indices": [
+            "logs-*"
+        ],
+        "signal.rule.threat.technique.subtechnique.reference": [
+            "https://attack.mitre.org/techniques/T1059/001/"
+        ],
+        "signal.rule.updated_by": [
+            "siem"
+        ],
+        "winlog.channel": [
+            "Microsoft-Windows-Sysmon/Operational"
+        ],
+        "host.os.platform": [
+            "windows"
+        ],
+        "kibana.alert.intended_timestamp": [
+            "2026-07-27T08:15:05.231Z"
+        ],
+        "kibana.alert.rule.severity": [
+            "high"
+        ],
+        "winlog.opcode": [
+            "Info"
+        ],
+        "kibana.alert.rule.execution.timestamp": [
+            "2026-07-27T08:15:05.326Z"
+        ],
+        "signal.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1059/"
+        ],
+        "kibana.version": [
+            "8.19.13"
+        ],
+        "winlog.event_data.TerminalSessionId": [
+            "1"
+        ],
+        "signal.ancestors.type": [
+            "event"
+        ],
+        "user.name.text": [
+            "victim"
+        ],
+        "winlog.event_data.LogonId": [
+            "0x76a7f"
+        ],
+        "kibana.alert.ancestors.id": [
+            "TLSjop8BEWnoqq1_kNg7"
+        ],
+        "process.name.text": [
+            "powershell.exe"
+        ],
+        "kibana.alert.original_data_stream.namespace": [
+            "default"
+        ],
+        "kibana.alert.original_event.code": [
+            "1"
+        ],
+        "kibana.alert.rule.description": [
+            "Detects execution of PowerShell with the -EncodedCommand flag, which is commonly used to obfuscate script content and evade detection."
+        ],
+        "related.hash": [
+            "64dd55e1c2373deed25c2776f553c632e58c45e56a0e4639dfd54ee97eab9c19",
+            "6726185b70b5adf05e8a1a1df82ebf30",
+            "e3007c8e0098d06abf617eee6f0c5abd"
+        ],
+        "winlog.computer_name": [
+            "DESKTOP-THONLNR"
+        ],
+        "kibana.alert.rule.producer": [
+            "siem"
+        ],
+        "kibana.alert.rule.to": [
+            "now"
+        ],
+        "kibana.alert.original_event.ingested": [
+            "2026-07-27T08:14:16.000Z"
+        ],
+        "signal.rule.id": [
+            "629f9c28-0051-4b4a-87a9-a2faa5168924"
+        ],
+        "signal.reason": [
+            "process event with process powershell.exe, parent process powershell.exe, by victim on desktop-thonlnr created high alert Encoded PowerShell Execution Detection."
+        ],
+        "signal.rule.risk_score": [
+            73
+        ],
+        "host.os.name": [
+            "Windows 10 Pro"
+        ],
+        "log.level": [
+            "information"
+        ],
+        "signal.status": [
+            "acknowledged"
+        ],
+        "kibana.alert.rule.threat.tactic.name": [
+            "Execution"
+        ],
+        "kibana.alert.rule.uuid": [
+            "629f9c28-0051-4b4a-87a9-a2faa5168924"
+        ],
+        "kibana.alert.original_event.category": [
+            "process"
+        ],
+        "signal.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "process.name": [
+            "powershell.exe"
+        ],
+        "process.parent.executable.text": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "kibana.alert.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003"
+        ],
+        "process.pe.description": [
+            "Windows PowerShell"
+        ],
+        "agent.version": [
+            "8.19.14"
+        ],
+        "host.os.family": [
+            "windows"
+        ],
+        "kibana.alert.rule.from": [
+            "now-6m"
+        ],
+        "kibana.alert.rule.parameters": [
+            {
+                "severity": "high",
+                "max_signals": 100,
+                "rule_source": {
+                    "type": "internal"
+                },
+                "data_view_id": "logs-*",
+                "risk_score": 73,
+                "query": "process.name : (\"powershell.exe\" OR \"pwsh.exe\") AND (\n  process.command_line : *FromBase64String* OR\n  process.command_line : *IEX* OR\n  process.command_line : *Invoke-Expression* OR\n  process.command_line : *-e * OR \n  process.command_line : *-en * OR \n  process.command_line : *-enc * OR \n  process.command_line : *-encodedCommand *\n)",
+                "description": "Detects execution of PowerShell with the -EncodedCommand flag, which is commonly used to obfuscate script content and evade detection.",
+                "language": "kuery",
+                "type": "query",
+                "version": 1,
+                "rule_id": "b54e39d0-fa3b-454e-9998-bfc6d0b018c0",
+                "license": "",
+                "immutable": false,
+                "meta": {
+                    "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+                },
+                "setup": "",
+                "from": "now-6m",
+                "threat": {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1059/",
+                            "name": "Command and Scripting Interpreter",
+                            "subtechnique": [
+                                {
+                                    "reference": "https://attack.mitre.org/techniques/T1059/001/",
+                                    "name": "PowerShell",
+                                    "id": "T1059.001"
+                                }
+                            ],
+                            "id": "T1059"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0002/",
+                        "name": "Execution",
+                        "id": "TA0002"
+                    }
+                },
+                "to": "now"
+            }
+        ],
+        "kibana.alert.rule.threat.tactic.id": [
+            "TA0002"
+        ],
+        "signal.original_event.kind": [
+            "event"
+        ],
+        "kibana.alert.rule.threat.technique.name": [
+            "Command and Scripting Interpreter"
+        ],
+        "winlog.event_data.ParentUser": [
+            "DESKTOP-THONLNR\\victim"
+        ],
+        "signal.depth": [
+            1
+        ],
+        "signal.rule.immutable": [
+            "false"
+        ],
+        "process.parent.name.text": [
+            "powershell.exe"
+        ],
+        "host.os.build": [
+            "19045.3803"
+        ],
+        "signal.rule.name": [
+            "Encoded PowerShell Execution Detection"
+        ],
+        "event.module": [
+            "windows"
+        ],
+        "host.os.kernel": [
+            "10.0.19041.3803 (WinBuild.160101.0800)"
+        ],
+        "kibana.alert.rule.license": [
+            ""
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.id": [
+            "T1059.001"
+        ],
+        "kibana.alert.original_event.kind": [
+            "event"
+        ],
+        "winlog.task": [
+            "Process Create (rule: ProcessCreate)"
+        ],
+        "winlog.user.domain": [
+            "NT AUTHORITY"
+        ],
+        "process.parent.command_line.text": [
+            "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" "
+        ],
+        "signal.rule.description": [
+            "Detects execution of PowerShell with the -EncodedCommand flag, which is commonly used to obfuscate script content and evade detection."
+        ],
+        "process.args": [
+            "powershell.exe",
+            "&",
+            "{#",
+            "Encoded",
+            "payload",
+            "in",
+            "next",
+            "command",
+            "is",
+            "the",
+            "following",
+            "\"Set-Content -path \"$env:SystemRoot/Temp/art-marker.txt\" -value \"Hello",
+            "from",
+            "the",
+            "Atomic",
+            "Red",
+            "Team\"\"\nreg.exe",
+            "add",
+            "\"HKEY_CURRENT_USER\\Software\\Classes\\AtomicRedTeam\"",
+            "/v",
+            "ART",
+            "/t",
+            "REG_SZ",
+            "/d",
+            "\"U2V0LUNvbnRlbnQgLXBhdGggIiRlbnY6U3lzdGVtUm9vdC9UZW1wL2FydC1tYXJrZXIudHh0IiAtdmFsdWUgIkhlbGxvIGZyb20gdGhlIEF0b21pYyBSZWQgVGVhbSI=\"",
+            "/f\niex",
+            "([Text.Encoding]::ASCII.GetString([Convert]::FromBase64String((gp",
+            "'HKCU:\\Software\\Classes\\AtomicRedTeam').ART)))}"
+        ],
+        "message": [
+            "Process Create:\nRuleName: -\nUtcTime: 2026-07-27 08:14:06.726\nProcessGuid: {bb537b1e-134e-6a67-be00-000000001e00}\nProcessId: 8932\nImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nFileVersion: 10.0.19041.3636 (WinBuild.160101.0800)\nDescription: Windows PowerShell\nProduct: Microsoft® Windows® Operating System\nCompany: Microsoft Corporation\nOriginalFileName: PowerShell.EXE\nCommandLine: \"powershell.exe\" & {# Encoded payload in next command is the following \\\"\"Set-Content -path \\\"\"$env:SystemRoot/Temp/art-marker.txt\\\"\" -value \\\"\"Hello from the Atomic Red Team\\\"\"\\\"\"\nreg.exe add \\\"\"HKEY_CURRENT_USER\\Software\\Classes\\AtomicRedTeam\\\"\" /v ART /t REG_SZ /d \\\"\"U2V0LUNvbnRlbnQgLXBhdGggIiRlbnY6U3lzdGVtUm9vdC9UZW1wL2FydC1tYXJrZXIudHh0IiAtdmFsdWUgIkhlbGxvIGZyb20gdGhlIEF0b21pYyBSZWQgVGVhbSI=\\\"\" /f\niex ([Text.Encoding]::ASCII.GetString([Convert]::FromBase64String((gp 'HKCU:\\Software\\Classes\\AtomicRedTeam').ART)))}\nCurrentDirectory: C:\\Users\\victim\\AppData\\Local\\Temp\\\nUser: DESKTOP-THONLNR\\victim\nLogonGuid: {bb537b1e-131e-6a67-7f6a-070000000000}\nLogonId: 0x76A7F\nTerminalSessionId: 1\nIntegrityLevel: Medium\nHashes: MD5=6726185B70B5ADF05E8A1A1DF82EBF30,SHA256=64DD55E1C2373DEED25C2776F553C632E58C45E56A0E4639DFD54EE97EAB9C19,IMPHASH=E3007C8E0098D06ABF617EEE6F0C5ABD\nParentProcessGuid: {bb537b1e-132b-6a67-ae00-000000001e00}\nParentProcessId: 6596\nParentImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nParentCommandLine: \"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" \nParentUser: DESKTOP-THONLNR\\victim"
+        ],
+        "kibana.alert.original_data_stream.type": [
+            "logs"
+        ],
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.severity": [
+            "high"
+        ],
+        "signal.ancestors.depth": [
+            0
+        ],
+        "event.category": [
+            "process"
+        ],
+        "process.parent.command_line": [
+            "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" "
+        ],
+        "process.parent.name": [
+            "powershell.exe"
+        ],
+        "process.parent.pid": [
+            6596
+        ],
+        "kibana.alert.reason.text": [
+            "process event with process powershell.exe, parent process powershell.exe, by victim on desktop-thonlnr created high alert Encoded PowerShell Execution Detection."
+        ],
+        "kibana.alert.ancestors.depth": [
+            0
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.name": [
+            "PowerShell"
+        ],
+        "agent.name": [
+            "DESKTOP-THONLNR"
+        ],
+        "event.agent_id_status": [
+            "verified"
+        ],
+        "user.id": [
+            "S-1-5-18"
+        ],
+        "input.type": [
+            "winlog"
+        ],
+        "process.pe.product": [
+            "Microsoft® Windows® Operating System"
+        ],
+        "signal.rule.threat.technique.subtechnique.name": [
+            "PowerShell"
+        ],
+        "kibana.alert.workflow_user": [
+            "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0"
+        ],
+        "related.user": [
+            "victim"
+        ],
+        "host.architecture": [
+            "x86_64"
+        ],
+        "kibana.alert.start": [
+            "2026-07-27T08:15:05.326Z"
+        ],
+        "event.code": [
+            "1"
+        ],
+        "kibana.alert.original_event.type": [
+            "start"
+        ],
+        "winlog.event_data.FileVersion": [
+            "10.0.19041.3636 (WinBuild.160101.0800)"
+        ],
+        "agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "signal.original_event.module": [
+            "windows"
+        ],
+        "signal.rule.from": [
+            "now-6m"
+        ],
+        "winlog.event_data.LogonGuid": [
+            "{bb537b1e-131e-6a67-7f6a-070000000000}"
+        ],
+        "kibana.alert.rule.enabled": [
+            "true"
+        ],
+        "kibana.alert.ancestors.type": [
+            "event"
+        ],
+        "winlog.process.thread.id": [
+            4392
+        ],
+        "signal.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003"
+        ],
+        "user.name": [
+            "victim"
+        ],
+        "kibana.alert.original_data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "elastic_agent.snapshot": [
+            false
+        ],
+        "user.domain": [
+            "DESKTOP-THONLNR"
+        ],
+        "signal.original_event.type": [
+            "start"
+        ],
+        "process.pe.file_version": [
+            "10.0.19041.3636 (WinBuild.160101.0800)"
+        ],
+        "kibana.alert.rule.max_signals": [
+            100
+        ],
+        "kibana.alert.rule.risk_score": [
+            73
+        ],
+        "signal.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "signal.rule.threat.technique.id": [
+            "T1059"
+        ],
+        "winlog.user.name": [
+            "SYSTEM"
+        ],
+        "kibana.alert.rule.consumer": [
+            "siem"
+        ],
+        "kibana.alert.rule.category": [
+            "Custom Query Rule"
+        ],
+        "event.action": [
+            "Process creation"
+        ],
+        "event.ingested": [
+            "2026-07-27T08:14:16.000Z"
+        ],
+        "process.pe.company": [
+            "Microsoft Corporation"
+        ],
+        "@timestamp": [
+            "2026-07-27T08:15:05.231Z"
+        ],
+        "kibana.alert.original_event.action": [
+            "Process creation"
+        ],
+        "kibana.alert.original_event.agent_id_status": [
+            "verified"
+        ],
+        "data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "agent.ephemeral_id": [
+            "64addb2f-5b7b-434f-8391-8206263963f2"
+        ],
+        "kibana.alert.rule.execution.uuid": [
+            "88079461-3345-4a4a-9ed0-10af2708a22b"
+        ],
+        "kibana.alert.uuid": [
+            "537c522f7e23747508739dfaf73d6d71277d8312fbd0a31f129f909a8752b619"
+        ],
+        "kibana.alert.rule.meta.kibana_siem_app_url": [
+            "http://192.168.31.130:5601/app/security"
+        ],
+        "signal.rule.threat.technique.name": [
+            "Command and Scripting Interpreter"
+        ],
+        "signal.rule.license": [
+            ""
+        ],
+        "kibana.alert.rule.rule_id": [
+            "b54e39d0-fa3b-454e-9998-bfc6d0b018c0"
+        ],
+        "signal.rule.type": [
+            "query"
+        ],
+        "winlog.provider_guid": [
+            "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+        ],
+        "winlog.provider_name": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "process.pid": [
+            8932
+        ],
+        "signal.rule.created_by": [
+            "siem"
+        ],
+        "signal.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.created_by": [
+            "siem"
+        ],
+        "process.parent.entity_id": [
+            "{bb537b1e-132b-6a67-ae00-000000001e00}"
+        ],
+        "winlog.record_id": [
+            "11515"
+        ],
+        "kibana.alert.rule.name": [
+            "Encoded PowerShell Execution Detection"
+        ],
+        "host.name": [
+            "desktop-thonlnr"
+        ],
+        "kibana.alert.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1059/"
+        ],
+        "event.kind": [
+            "signal"
+        ],
+        "winlog.version": [
+            5
+        ],
+        "signal.rule.created_at": [
+            "2026-04-08T06:01:26.071Z"
+        ],
+        "kibana.alert.workflow_status": [
+            "acknowledged"
+        ],
+        "kibana.alert.original_event.created": [
+            "2026-07-27T08:14:08.569Z"
+        ],
+        "kibana.alert.reason": [
+            "process event with process powershell.exe, parent process powershell.exe, by victim on desktop-thonlnr created high alert Encoded PowerShell Execution Detection."
+        ],
+        "signal.rule.threat.tactic.id": [
+            "TA0002"
+        ],
+        "process.parent.args_count": [
+            1
+        ],
+        "data_stream.type": [
+            "logs"
+        ],
+        "signal.ancestors.id": [
+            "TLSjop8BEWnoqq1_kNg7"
+        ],
+        "signal.original_time": [
+            "2026-07-27T08:14:06.726Z"
+        ],
+        "ecs.version": [
+            "8.17.0"
+        ],
+        "signal.rule.severity": [
+            "high"
+        ],
+        "event.created": [
+            "2026-07-27T08:14:08.569Z"
+        ],
+        "kibana.alert.depth": [
+            1
+        ],
+        "kibana.alert.rule.revision": [
+            5
+        ],
+        "signal.rule.version": [
+            "1"
+        ],
+        "kibana.alert.status": [
+            "active"
+        ],
+        "kibana.alert.last_detected": [
+            "2026-07-27T08:15:05.326Z"
+        ],
+        "kibana.alert.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "winlog.user.type": [
+            "User"
+        ],
+        "kibana.alert.rule.rule_type_id": [
+            "siem.queryRule"
+        ],
+        "kibana.alert.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "signal.rule.rule_id": [
+            "b54e39d0-fa3b-454e-9998-bfc6d0b018c0"
+        ],
+        "signal.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0002/"
+        ],
+        "process.executable": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "winlog.user.identifier": [
+            "S-1-5-18"
+        ],
+        "process.parent.executable": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "signal.rule.threat.tactic.name": [
+            "Execution"
+        ],
+        "kibana.alert.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "process.args_count": [
+            28
+        ],
+        "kibana.alert.rule.updated_at": [
+            "2026-04-15T08:44:15.166Z"
+        ],
+        "data_stream.namespace": [
+            "default"
+        ],
+        "winlog.event_data.IntegrityLevel": [
+            "Medium"
+        ],
+        "winlog.event_id": [
+            "1"
+        ],
+        "kibana.alert.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0002/"
+        ],
+        "process.parent.args": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "signal.original_event.action": [
+            "Process creation"
+        ],
+        "kibana.alert.rule.created_at": [
+            "2026-04-08T06:01:26.071Z"
+        ],
+        "process.pe.imphash": [
+            "e3007c8e0098d06abf617eee6f0c5abd"
+        ],
+        "signal.rule.to": [
+            "now"
+        ],
+        "event.type": [
+            "start"
+        ],
+        "process.command_line": [
+            "\"powershell.exe\" & {# Encoded payload in next command is the following \\\"\"Set-Content -path \\\"\"$env:SystemRoot/Temp/art-marker.txt\\\"\" -value \\\"\"Hello from the Atomic Red Team\\\"\"\\\"\"\nreg.exe add \\\"\"HKEY_CURRENT_USER\\Software\\Classes\\AtomicRedTeam\\\"\" /v ART /t REG_SZ /d \\\"\"U2V0LUNvbnRlbnQgLXBhdGggIiRlbnY6U3lzdGVtUm9vdC9UZW1wL2FydC1tYXJrZXIudHh0IiAtdmFsdWUgIkhlbGxvIGZyb20gdGhlIEF0b21pYyBSZWQgVGVhbSI=\\\"\" /f\niex ([Text.Encoding]::ASCII.GetString([Convert]::FromBase64String((gp 'HKCU:\\Software\\Classes\\AtomicRedTeam').ART)))}"
+        ],
+        "kibana.alert.rule.execution.type": [
+            "scheduled"
+        ],
+        "winlog.event_data.Product": [
+            "Microsoft® Windows® Operating System"
+        ],
+        "event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "kibana.alert.original_time": [
+            "2026-07-27T08:14:06.726Z"
+        ]
+    }
+}

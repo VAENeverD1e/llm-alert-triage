@@ -1,0 +1,936 @@
+{
+    "_index": ".internal.alerts-security.alerts-default-000003",
+    "_id": "0bbb96f05b645b9e4b4452c0f93b7eabe4e35da0af065cad7572cd11193becfc",
+    "_score": 1,
+    "_source": {
+        "kibana.alert.severity": "medium",
+        "kibana.alert.workflow_status_updated_at": "2026-07-27T08:40:52.367Z",
+        "agent": {
+            "name": "DESKTOP-THONLNR",
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "ephemeral_id": "64addb2f-5b7b-434f-8391-8206263963f2",
+            "type": "filebeat",
+            "version": "8.19.14"
+        },
+        "kibana.alert.rule.references": [],
+        "kibana.alert.rule.updated_by": "siem",
+        "kibana.alert.rule.threat": [
+            {
+                "framework": "MITRE ATT&CK",
+                "technique": [
+                    {
+                        "reference": "https://attack.mitre.org/techniques/T1547/",
+                        "name": "Boot or Logon Autostart Execution",
+                        "subtechnique": [],
+                        "id": "T1547"
+                    }
+                ],
+                "tactic": {
+                    "reference": "https://attack.mitre.org/tactics/TA0003/",
+                    "name": "Persistence",
+                    "id": "TA0003"
+                }
+            }
+        ],
+        "kibana.alert.original_data_stream.namespace": "default",
+        "kibana.alert.original_event.code": "13",
+        "kibana.alert.rule.description": "Detects potential persistence via modification of Windows Registry Run keys (MITRE ATT&CK T1547.001). Adversaries may add or alter values under HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run or HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run to ensure malicious executables run at system startup. This rule helps identify suspicious registry changes that could indicate persistence mechanisms. Analysts should validate the modified key, investigate the associated executable, and determine whether it is authorized software or malicious activity.",
+        "kibana.alert.rule.tags": [],
+        "kibana.alert.rule.producer": "siem",
+        "kibana.alert.rule.to": "now",
+        "kibana.alert.rule.created_by": "siem",
+        "kibana.alert.original_event.ingested": "2026-07-27T08:36:08Z",
+        "ecs": {
+            "version": "8.17.0"
+        },
+        "kibana.alert.risk_score": 47,
+        "host": {
+            "hostname": "DESKTOP-THONLNR",
+            "os": {
+                "build": "19045.3803",
+                "kernel": "10.0.19041.3803 (WinBuild.160101.0800)",
+                "name": "Windows 10 Pro",
+                "type": "windows",
+                "family": "windows",
+                "version": "10.0",
+                "platform": "windows"
+            },
+            "ip": [
+                "fe80::8ac2:9f81:1d7e:a0aa",
+                "192.168.31.132"
+            ],
+            "name": "desktop-thonlnr",
+            "id": "bb537b1e-2db1-4ede-8b49-f3e63a57eff1",
+            "mac": [
+                "00-0C-29-77-18-E4"
+            ],
+            "architecture": "x86_64"
+        },
+        "kibana.alert.rule.name": "Registry Run Key Persistence",
+        "event.kind": "signal",
+        "kibana.alert.workflow_status": "acknowledged",
+        "kibana.alert.rule.uuid": "691ebc64-fbb1-4728-b9b4-5442b6d7d69c",
+        "kibana.alert.original_event.created": "2026-07-27T08:36:03.493Z",
+        "kibana.alert.original_event.category": [
+            "configuration",
+            "registry"
+        ],
+        "kibana.alert.original_event.module": "windows",
+        "kibana.alert.rule.risk_score_mapping": [],
+        "kibana.alert.rule.interval": "5m",
+        "kibana.alert.reason": "configuration, registry event with process reg.exe, by victim on desktop-thonlnr created medium alert Registry Run Key Persistence.",
+        "kibana.alert.rule.type": "query",
+        "kibana.alert.workflow_user": "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0",
+        "kibana.alert.start": "2026-07-27T08:39:50.737Z",
+        "input": {
+            "type": "winlog"
+        },
+        "kibana.alert.rule.immutable": false,
+        "kibana.alert.original_event.type": [
+            "change"
+        ],
+        "kibana.alert.depth": 1,
+        "kibana.alert.rule.enabled": true,
+        "kibana.alert.rule.version": 1,
+        "kibana.alert.rule.from": "now-6m",
+        "kibana.alert.rule.parameters": {
+            "severity_mapping": [],
+            "references": [],
+            "description": "Detects potential persistence via modification of Windows Registry Run keys (MITRE ATT&CK T1547.001). Adversaries may add or alter values under HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run or HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run to ensure malicious executables run at system startup. This rule helps identify suspicious registry changes that could indicate persistence mechanisms. Analysts should validate the modified key, investigate the associated executable, and determine whether it is authorized software or malicious activity.",
+            "language": "kuery",
+            "type": "query",
+            "exceptions_list": [],
+            "from": "now-6m",
+            "severity": "medium",
+            "max_signals": 100,
+            "rule_source": {
+                "type": "internal"
+            },
+            "risk_score": 47,
+            "risk_score_mapping": [],
+            "author": [],
+            "query": "event.code: 13 AND\n  registry.path: (*\\\\CurrentVersion\\\\Run\\\\* OR *\\\\CurrentVersion\\\\RunOnce\\\\*) AND\n  NOT process.name: (\"MsMpEng.exe\" OR \"svchost.exe\" OR \"OneDrive.exe\")",
+            "index": [
+                "apm-*-transaction*",
+                "auditbeat-*",
+                "endgame-*",
+                "filebeat-*",
+                "logs-*",
+                "packetbeat-*",
+                "traces-apm*",
+                "winlogbeat-*",
+                "-*elastic-cloud-logs-*"
+            ],
+            "filters": [],
+            "version": 1,
+            "rule_id": "97cfa581-0f64-4304-b1c6-72d587c265b1",
+            "license": "",
+            "required_fields": [],
+            "immutable": false,
+            "related_integrations": [],
+            "meta": {
+                "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+            },
+            "setup": "",
+            "false_positives": [],
+            "threat": [
+                {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1547/",
+                            "name": "Boot or Logon Autostart Execution",
+                            "subtechnique": [],
+                            "id": "T1547"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0003/",
+                        "name": "Persistence",
+                        "id": "TA0003"
+                    }
+                }
+            ],
+            "to": "now"
+        },
+        "kibana.alert.rule.revision": 0,
+        "log": {
+            "level": "information"
+        },
+        "kibana.alert.status": "active",
+        "kibana.alert.last_detected": "2026-07-27T08:39:50.737Z",
+        "elastic_agent": {
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "version": "8.19.14",
+            "snapshot": false
+        },
+        "kibana.alert.ancestors": [
+            {
+                "depth": 0,
+                "index": ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003",
+                "id": "77W3op8BEWnoqq1_lkDR",
+                "type": "event"
+            }
+        ],
+        "rule": {
+            "name": "T1060,RunKey"
+        },
+        "kibana.alert.original_event.dataset": "windows.sysmon_operational",
+        "kibana.alert.original_data_stream.dataset": "windows.sysmon_operational",
+        "kibana.alert.rule.exceptions_list": [],
+        "kibana.alert.rule.actions": [],
+        "kibana.alert.rule.rule_type_id": "siem.queryRule",
+        "related": {
+            "user": [
+                "victim"
+            ]
+        },
+        "kibana.alert.original_event.provider": "Microsoft-Windows-Sysmon",
+        "kibana.alert.rule.license": "",
+        "event": {
+            "agent_id_status": "verified",
+            "ingested": "2026-07-27T08:36:08Z",
+            "code": "13",
+            "provider": "Microsoft-Windows-Sysmon",
+            "created": "2026-07-27T08:36:03.493Z",
+            "module": "windows",
+            "action": "RegistryEvent (Value Set)",
+            "category": [
+                "configuration",
+                "registry"
+            ],
+            "type": [
+                "change"
+            ],
+            "dataset": "windows.sysmon_operational"
+        },
+        "kibana.alert.original_event.kind": "event",
+        "kibana.alert.workflow_tags": [],
+        "kibana.alert.workflow_assignee_ids": [],
+        "registry": {
+            "hive": "HKU",
+            "path": "HKU\\S-1-5-21-3933135484-4220633899-146828341-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Atomic Red Team",
+            "data": {
+                "strings": [
+                    "C:\\Path\\AtomicRedTeam.exe"
+                ],
+                "type": "REG_SZ"
+            },
+            "value": "Atomic Red Team",
+            "key": "S-1-5-21-3933135484-4220633899-146828341-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Atomic Red Team"
+        },
+        "kibana.alert.rule.severity_mapping": [],
+        "process": {
+            "name": "reg.exe",
+            "pid": 4164,
+            "entity_id": "{bb537b1e-1872-6a67-7b01-000000001e00}",
+            "executable": "C:\\Windows\\system32\\reg.exe"
+        },
+        "winlog": {
+            "computer_name": "DESKTOP-THONLNR",
+            "process": {
+                "pid": 3088,
+                "thread": {
+                    "id": 4392
+                }
+            },
+            "channel": "Microsoft-Windows-Sysmon/Operational",
+            "event_data": {
+                "EventType": "SetValue"
+            },
+            "opcode": "Info",
+            "version": 2,
+            "record_id": "11731",
+            "task": "Registry value set (rule: RegistryEvent)",
+            "event_id": "13",
+            "provider_guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "api": "wineventlog",
+            "provider_name": "Microsoft-Windows-Sysmon",
+            "user": {
+                "identifier": "S-1-5-18",
+                "domain": "NT AUTHORITY",
+                "name": "SYSTEM",
+                "type": "User"
+            }
+        },
+        "kibana.alert.rule.max_signals": 100,
+        "kibana.alert.rule.updated_at": "2026-04-18T05:19:56.143Z",
+        "kibana.alert.rule.risk_score": 47,
+        "kibana.alert.rule.author": [],
+        "kibana.alert.rule.false_positives": [],
+        "message": "Registry value set:\nRuleName: T1060,RunKey\nEventType: SetValue\nUtcTime: 2026-07-27 08:36:02.183\nProcessGuid: {bb537b1e-1872-6a67-7b01-000000001e00}\nProcessId: 4164\nImage: C:\\Windows\\system32\\reg.exe\nTargetObject: HKU\\S-1-5-21-3933135484-4220633899-146828341-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Atomic Red Team\nDetails: C:\\Path\\AtomicRedTeam.exe\nUser: DESKTOP-THONLNR\\victim",
+        "kibana.alert.rule.consumer": "siem",
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "kibana.alert.rule.category": "Custom Query Rule",
+        "@timestamp": "2026-07-27T08:39:50.672Z",
+        "kibana.alert.original_data_stream.type": "logs",
+        "kibana.alert.original_event.action": "RegistryEvent (Value Set)",
+        "kibana.alert.rule.created_at": "2026-04-18T05:19:20.965Z",
+        "kibana.alert.rule.severity": "medium",
+        "kibana.alert.intended_timestamp": "2026-07-27T08:39:50.672Z",
+        "data_stream": {
+            "namespace": "default",
+            "type": "logs",
+            "dataset": "windows.sysmon_operational"
+        },
+        "kibana.alert.original_event.agent_id_status": "verified",
+        "kibana.alert.rule.execution.timestamp": "2026-07-27T08:39:50.737Z",
+        "kibana.alert.rule.execution.uuid": "15d9ac5a-eb9d-4ad7-8243-ab157140258e",
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.uuid": "0bbb96f05b645b9e4b4452c0f93b7eabe4e35da0af065cad7572cd11193becfc",
+        "kibana.alert.rule.meta.kibana_siem_app_url": "http://192.168.31.130:5601/app/security",
+        "kibana.version": "8.19.13",
+        "kibana.alert.rule.execution.type": "scheduled",
+        "user": {
+            "domain": "DESKTOP-THONLNR",
+            "name": "victim",
+            "id": "S-1-5-18"
+        },
+        "kibana.alert.original_time": "2026-07-27T08:36:02.183Z",
+        "kibana.alert.rule.rule_id": "97cfa581-0f64-4304-b1c6-72d587c265b1"
+    },
+    "fields": {
+        "kibana.alert.severity": [
+            "medium"
+        ],
+        "kibana.alert.workflow_status_updated_at": [
+            "2026-07-27T08:40:52.367Z"
+        ],
+        "kibana.alert.rule.updated_by": [
+            "siem"
+        ],
+        "signal.ancestors.depth": [
+            0
+        ],
+        "event.category": [
+            "configuration",
+            "registry"
+        ],
+        "elastic_agent.version": [
+            "8.19.14"
+        ],
+        "host.os.name.text": [
+            "Windows 10 Pro"
+        ],
+        "host.hostname": [
+            "DESKTOP-THONLNR"
+        ],
+        "signal.original_event.created": [
+            "2026-07-27T08:36:03.493Z"
+        ],
+        "host.mac": [
+            "00-0C-29-77-18-E4"
+        ],
+        "winlog.process.pid": [
+            3088
+        ],
+        "kibana.alert.reason.text": [
+            "configuration, registry event with process reg.exe, by victim on desktop-thonlnr created medium alert Registry Run Key Persistence."
+        ],
+        "kibana.alert.rule.threat.technique.id": [
+            "T1547"
+        ],
+        "kibana.alert.ancestors.depth": [
+            0
+        ],
+        "signal.rule.enabled": [
+            "true"
+        ],
+        "host.os.version": [
+            "10.0"
+        ],
+        "signal.rule.max_signals": [
+            100
+        ],
+        "kibana.alert.risk_score": [
+            47
+        ],
+        "signal.rule.updated_at": [
+            "2026-04-18T05:19:56.143Z"
+        ],
+        "agent.name": [
+            "DESKTOP-THONLNR"
+        ],
+        "event.agent_id_status": [
+            "verified"
+        ],
+        "registry.path": [
+            "HKU\\S-1-5-21-3933135484-4220633899-146828341-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Atomic Red Team"
+        ],
+        "host.os.type": [
+            "windows"
+        ],
+        "user.id": [
+            "S-1-5-18"
+        ],
+        "signal.original_event.code": [
+            "13"
+        ],
+        "kibana.alert.original_event.module": [
+            "windows"
+        ],
+        "kibana.alert.rule.interval": [
+            "5m"
+        ],
+        "input.type": [
+            "winlog"
+        ],
+        "kibana.alert.rule.type": [
+            "query"
+        ],
+        "registry.data.strings": [
+            "C:\\Path\\AtomicRedTeam.exe"
+        ],
+        "kibana.alert.workflow_user": [
+            "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0"
+        ],
+        "related.user": [
+            "victim"
+        ],
+        "host.architecture": [
+            "x86_64"
+        ],
+        "kibana.alert.start": [
+            "2026-07-27T08:39:50.737Z"
+        ],
+        "event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.rule.immutable": [
+            "false"
+        ],
+        "event.code": [
+            "13"
+        ],
+        "kibana.alert.original_event.type": [
+            "change"
+        ],
+        "agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "signal.original_event.module": [
+            "windows"
+        ],
+        "signal.rule.from": [
+            "now-6m"
+        ],
+        "kibana.alert.rule.enabled": [
+            "true"
+        ],
+        "registry.data.type": [
+            "REG_SZ"
+        ],
+        "kibana.alert.rule.version": [
+            "1"
+        ],
+        "kibana.alert.ancestors.type": [
+            "event"
+        ],
+        "winlog.process.thread.id": [
+            4392
+        ],
+        "signal.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003"
+        ],
+        "user.name": [
+            "victim"
+        ],
+        "kibana.alert.original_data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "process.entity_id": [
+            "{bb537b1e-1872-6a67-7b01-000000001e00}"
+        ],
+        "host.ip": [
+            "fe80::8ac2:9f81:1d7e:a0aa",
+            "192.168.31.132"
+        ],
+        "agent.type": [
+            "filebeat"
+        ],
+        "process.executable.text": [
+            "C:\\Windows\\system32\\reg.exe"
+        ],
+        "signal.original_event.category": [
+            "configuration",
+            "registry"
+        ],
+        "winlog.api": [
+            "wineventlog"
+        ],
+        "signal.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "elastic_agent.snapshot": [
+            false
+        ],
+        "user.domain": [
+            "DESKTOP-THONLNR"
+        ],
+        "host.id": [
+            "bb537b1e-2db1-4ede-8b49-f3e63a57eff1"
+        ],
+        "signal.original_event.type": [
+            "change"
+        ],
+        "kibana.alert.rule.max_signals": [
+            100
+        ],
+        "elastic_agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "kibana.alert.rule.risk_score": [
+            47
+        ],
+        "signal.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "signal.rule.threat.technique.id": [
+            "T1547"
+        ],
+        "winlog.user.name": [
+            "SYSTEM"
+        ],
+        "kibana.alert.rule.consumer": [
+            "siem"
+        ],
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "kibana.alert.rule.category": [
+            "Custom Query Rule"
+        ],
+        "event.action": [
+            "RegistryEvent (Value Set)"
+        ],
+        "event.ingested": [
+            "2026-07-27T08:36:08.000Z"
+        ],
+        "@timestamp": [
+            "2026-07-27T08:39:50.672Z"
+        ],
+        "kibana.alert.original_event.action": [
+            "RegistryEvent (Value Set)"
+        ],
+        "signal.rule.updated_by": [
+            "siem"
+        ],
+        "winlog.channel": [
+            "Microsoft-Windows-Sysmon/Operational"
+        ],
+        "host.os.platform": [
+            "windows"
+        ],
+        "kibana.alert.intended_timestamp": [
+            "2026-07-27T08:39:50.672Z"
+        ],
+        "kibana.alert.rule.severity": [
+            "medium"
+        ],
+        "winlog.event_data.EventType": [
+            "SetValue"
+        ],
+        "kibana.alert.original_event.agent_id_status": [
+            "verified"
+        ],
+        "data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "winlog.opcode": [
+            "Info"
+        ],
+        "agent.ephemeral_id": [
+            "64addb2f-5b7b-434f-8391-8206263963f2"
+        ],
+        "kibana.alert.rule.execution.timestamp": [
+            "2026-07-27T08:39:50.737Z"
+        ],
+        "signal.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1547/"
+        ],
+        "kibana.alert.rule.execution.uuid": [
+            "15d9ac5a-eb9d-4ad7-8243-ab157140258e"
+        ],
+        "kibana.alert.uuid": [
+            "0bbb96f05b645b9e4b4452c0f93b7eabe4e35da0af065cad7572cd11193becfc"
+        ],
+        "kibana.alert.rule.meta.kibana_siem_app_url": [
+            "http://192.168.31.130:5601/app/security"
+        ],
+        "kibana.version": [
+            "8.19.13"
+        ],
+        "signal.rule.threat.technique.name": [
+            "Boot or Logon Autostart Execution"
+        ],
+        "signal.rule.license": [
+            ""
+        ],
+        "signal.ancestors.type": [
+            "event"
+        ],
+        "kibana.alert.rule.rule_id": [
+            "97cfa581-0f64-4304-b1c6-72d587c265b1"
+        ],
+        "registry.value": [
+            "Atomic Red Team"
+        ],
+        "user.name.text": [
+            "victim"
+        ],
+        "signal.rule.type": [
+            "query"
+        ],
+        "kibana.alert.ancestors.id": [
+            "77W3op8BEWnoqq1_lkDR"
+        ],
+        "process.name.text": [
+            "reg.exe"
+        ],
+        "kibana.alert.original_data_stream.namespace": [
+            "default"
+        ],
+        "kibana.alert.original_event.code": [
+            "13"
+        ],
+        "winlog.provider_guid": [
+            "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+        ],
+        "winlog.provider_name": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.rule.description": [
+            "Detects potential persistence via modification of Windows Registry Run keys (MITRE ATT&CK T1547.001). Adversaries may add or alter values under HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run or HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run to ensure malicious executables run at system startup. This rule helps identify suspicious registry changes that could indicate persistence mechanisms. Analysts should validate the modified key, investigate the associated executable, and determine whether it is authorized software or malicious activity."
+        ],
+        "process.pid": [
+            4164
+        ],
+        "winlog.computer_name": [
+            "DESKTOP-THONLNR"
+        ],
+        "kibana.alert.rule.producer": [
+            "siem"
+        ],
+        "kibana.alert.rule.to": [
+            "now"
+        ],
+        "signal.rule.created_by": [
+            "siem"
+        ],
+        "signal.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.created_by": [
+            "siem"
+        ],
+        "kibana.alert.original_event.ingested": [
+            "2026-07-27T08:36:08.000Z"
+        ],
+        "registry.hive": [
+            "HKU"
+        ],
+        "signal.rule.id": [
+            "691ebc64-fbb1-4728-b9b4-5442b6d7d69c"
+        ],
+        "signal.reason": [
+            "configuration, registry event with process reg.exe, by victim on desktop-thonlnr created medium alert Registry Run Key Persistence."
+        ],
+        "signal.rule.risk_score": [
+            47
+        ],
+        "winlog.record_id": [
+            "11731"
+        ],
+        "host.os.name": [
+            "Windows 10 Pro"
+        ],
+        "registry.key": [
+            "S-1-5-21-3933135484-4220633899-146828341-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Atomic Red Team"
+        ],
+        "kibana.alert.rule.name": [
+            "Registry Run Key Persistence"
+        ],
+        "log.level": [
+            "information"
+        ],
+        "host.name": [
+            "desktop-thonlnr"
+        ],
+        "kibana.alert.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1547/"
+        ],
+        "signal.status": [
+            "acknowledged"
+        ],
+        "event.kind": [
+            "signal"
+        ],
+        "winlog.version": [
+            2
+        ],
+        "signal.rule.created_at": [
+            "2026-04-18T05:19:20.965Z"
+        ],
+        "kibana.alert.workflow_status": [
+            "acknowledged"
+        ],
+        "rule.name": [
+            "T1060,RunKey"
+        ],
+        "kibana.alert.original_event.created": [
+            "2026-07-27T08:36:03.493Z"
+        ],
+        "kibana.alert.rule.threat.tactic.name": [
+            "Persistence"
+        ],
+        "kibana.alert.rule.uuid": [
+            "691ebc64-fbb1-4728-b9b4-5442b6d7d69c"
+        ],
+        "kibana.alert.original_event.category": [
+            "configuration",
+            "registry"
+        ],
+        "signal.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.reason": [
+            "configuration, registry event with process reg.exe, by victim on desktop-thonlnr created medium alert Registry Run Key Persistence."
+        ],
+        "signal.rule.threat.tactic.id": [
+            "TA0003"
+        ],
+        "data_stream.type": [
+            "logs"
+        ],
+        "signal.ancestors.id": [
+            "77W3op8BEWnoqq1_lkDR"
+        ],
+        "signal.original_time": [
+            "2026-07-27T08:36:02.183Z"
+        ],
+        "process.name": [
+            "reg.exe"
+        ],
+        "ecs.version": [
+            "8.17.0"
+        ],
+        "signal.rule.severity": [
+            "medium"
+        ],
+        "kibana.alert.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003"
+        ],
+        "event.created": [
+            "2026-07-27T08:36:03.493Z"
+        ],
+        "agent.version": [
+            "8.19.14"
+        ],
+        "kibana.alert.depth": [
+            1
+        ],
+        "host.os.family": [
+            "windows"
+        ],
+        "kibana.alert.rule.from": [
+            "now-6m"
+        ],
+        "kibana.alert.rule.parameters": [
+            {
+                "severity": "medium",
+                "max_signals": 100,
+                "rule_source": {
+                    "type": "internal"
+                },
+                "risk_score": 47,
+                "query": "event.code: 13 AND\n  registry.path: (*\\\\CurrentVersion\\\\Run\\\\* OR *\\\\CurrentVersion\\\\RunOnce\\\\*) AND\n  NOT process.name: (\"MsMpEng.exe\" OR \"svchost.exe\" OR \"OneDrive.exe\")",
+                "description": "Detects potential persistence via modification of Windows Registry Run keys (MITRE ATT&CK T1547.001). Adversaries may add or alter values under HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run or HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run to ensure malicious executables run at system startup. This rule helps identify suspicious registry changes that could indicate persistence mechanisms. Analysts should validate the modified key, investigate the associated executable, and determine whether it is authorized software or malicious activity.",
+                "index": [
+                    "apm-*-transaction*",
+                    "auditbeat-*",
+                    "endgame-*",
+                    "filebeat-*",
+                    "logs-*",
+                    "packetbeat-*",
+                    "traces-apm*",
+                    "winlogbeat-*",
+                    "-*elastic-cloud-logs-*"
+                ],
+                "language": "kuery",
+                "type": "query",
+                "version": 1,
+                "rule_id": "97cfa581-0f64-4304-b1c6-72d587c265b1",
+                "license": "",
+                "immutable": false,
+                "meta": {
+                    "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+                },
+                "setup": "",
+                "from": "now-6m",
+                "threat": {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1547/",
+                            "name": "Boot or Logon Autostart Execution",
+                            "subtechnique": [],
+                            "id": "T1547"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0003/",
+                        "name": "Persistence",
+                        "id": "TA0003"
+                    }
+                },
+                "to": "now"
+            }
+        ],
+        "kibana.alert.rule.revision": [
+            0
+        ],
+        "kibana.alert.rule.threat.tactic.id": [
+            "TA0003"
+        ],
+        "signal.rule.version": [
+            "1"
+        ],
+        "signal.original_event.kind": [
+            "event"
+        ],
+        "kibana.alert.rule.threat.technique.name": [
+            "Boot or Logon Autostart Execution"
+        ],
+        "kibana.alert.status": [
+            "active"
+        ],
+        "kibana.alert.last_detected": [
+            "2026-07-27T08:39:50.737Z"
+        ],
+        "kibana.alert.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "signal.depth": [
+            1
+        ],
+        "signal.rule.immutable": [
+            "false"
+        ],
+        "host.os.build": [
+            "19045.3803"
+        ],
+        "winlog.user.type": [
+            "User"
+        ],
+        "kibana.alert.rule.rule_type_id": [
+            "siem.queryRule"
+        ],
+        "signal.rule.name": [
+            "Registry Run Key Persistence"
+        ],
+        "event.module": [
+            "windows"
+        ],
+        "kibana.alert.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "signal.rule.rule_id": [
+            "97cfa581-0f64-4304-b1c6-72d587c265b1"
+        ],
+        "host.os.kernel": [
+            "10.0.19041.3803 (WinBuild.160101.0800)"
+        ],
+        "signal.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0003/"
+        ],
+        "kibana.alert.rule.license": [
+            ""
+        ],
+        "kibana.alert.original_event.kind": [
+            "event"
+        ],
+        "process.executable": [
+            "C:\\Windows\\system32\\reg.exe"
+        ],
+        "winlog.user.identifier": [
+            "S-1-5-18"
+        ],
+        "winlog.task": [
+            "Registry value set (rule: RegistryEvent)"
+        ],
+        "winlog.user.domain": [
+            "NT AUTHORITY"
+        ],
+        "signal.rule.threat.tactic.name": [
+            "Persistence"
+        ],
+        "kibana.alert.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "kibana.alert.rule.updated_at": [
+            "2026-04-18T05:19:56.143Z"
+        ],
+        "signal.rule.description": [
+            "Detects potential persistence via modification of Windows Registry Run keys (MITRE ATT&CK T1547.001). Adversaries may add or alter values under HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run or HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run to ensure malicious executables run at system startup. This rule helps identify suspicious registry changes that could indicate persistence mechanisms. Analysts should validate the modified key, investigate the associated executable, and determine whether it is authorized software or malicious activity."
+        ],
+        "data_stream.namespace": [
+            "default"
+        ],
+        "message": [
+            "Registry value set:\nRuleName: T1060,RunKey\nEventType: SetValue\nUtcTime: 2026-07-27 08:36:02.183\nProcessGuid: {bb537b1e-1872-6a67-7b01-000000001e00}\nProcessId: 4164\nImage: C:\\Windows\\system32\\reg.exe\nTargetObject: HKU\\S-1-5-21-3933135484-4220633899-146828341-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Atomic Red Team\nDetails: C:\\Path\\AtomicRedTeam.exe\nUser: DESKTOP-THONLNR\\victim"
+        ],
+        "winlog.event_id": [
+            "13"
+        ],
+        "kibana.alert.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0003/"
+        ],
+        "signal.original_event.action": [
+            "RegistryEvent (Value Set)"
+        ],
+        "kibana.alert.original_data_stream.type": [
+            "logs"
+        ],
+        "kibana.alert.rule.created_at": [
+            "2026-04-18T05:19:20.965Z"
+        ],
+        "signal.rule.to": [
+            "now"
+        ],
+        "event.type": [
+            "change"
+        ],
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.rule.execution.type": [
+            "scheduled"
+        ],
+        "event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "kibana.alert.original_time": [
+            "2026-07-27T08:36:02.183Z"
+        ]
+    }
+}

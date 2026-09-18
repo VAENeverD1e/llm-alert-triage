@@ -1,0 +1,933 @@
+{
+    "_index": ".internal.alerts-security.alerts-default-000003",
+    "_id": "1cbfd3ccd90446ec9e6ed3d11220bb0a58b3df7d960af5192ee51bd7b9174169",
+    "_score": 1,
+    "_source": {
+        "kibana.alert.severity": "medium",
+        "kibana.alert.workflow_status_updated_at": "2026-07-27T09:04:30.024Z",
+        "agent": {
+            "name": "elk-siem",
+            "id": "7aa9e95e-09ab-4ef2-8f57-ddbfe4d95b03",
+            "ephemeral_id": "afde663d-531c-465e-9504-5caaff689389",
+            "type": "filebeat",
+            "version": "8.19.14"
+        },
+        "kibana.alert.rule.references": [],
+        "kibana.alert.rule.updated_by": "siem",
+        "kibana.alert.rule.threat": [
+            {
+                "framework": "MITRE ATT&CK",
+                "technique": [
+                    {
+                        "reference": "https://attack.mitre.org/techniques/T1046/",
+                        "name": "Network Service Discovery",
+                        "subtechnique": [],
+                        "id": "T1046"
+                    }
+                ],
+                "tactic": {
+                    "reference": "https://attack.mitre.org/tactics/TA0007/",
+                    "name": "Discovery",
+                    "id": "TA0007"
+                }
+            }
+        ],
+        "kibana.alert.original_data_stream.namespace": "default",
+        "kibana.alert.rule.description": "This rule detects potential Network Service Discovery (MITRE ATT&CK T1046) activity within the internal subnet 192.168.75.0/24. It leverages Suricata alerts categorized as scan to identify hosts performing active probing of network services. Such behavior is often associated with adversaries mapping available services and ports in preparation for lateral movement or exploitation. Triggering this rule indicates that a system in the monitored subnet may be conducting reconnaissance scans against other hosts, which could represent malicious discovery attempts or unauthorized network scanning.",
+        "source": {
+            "address": "192.168.75.1",
+            "port": 62917,
+            "bytes": 330,
+            "ip": "192.168.75.1",
+            "packets": 5
+        },
+        "kibana.alert.rule.tags": [],
+        "kibana.alert.rule.producer": "siem",
+        "kibana.alert.rule.to": "now",
+        "kibana.alert.rule.created_by": "siem",
+        "observer": {
+            "hostname": "elk-siem",
+            "product": "Suricata",
+            "vendor": "OISF",
+            "ip": [
+                "192.168.31.130",
+                "fe80::20c:29ff:fe34:5005",
+                "192.168.75.11",
+                "fe80::20c:29ff:fe34:500f"
+            ],
+            "type": "ids",
+            "mac": [
+                "00-0C-29-34-50-05",
+                "00-0C-29-34-50-0F"
+            ]
+        },
+        "kibana.alert.original_event.ingested": "2026-07-27T08:57:22Z",
+        "ecs": {
+            "version": "8.17.0"
+        },
+        "kibana.alert.risk_score": 47,
+        "kibana.alert.rule.name": "Network Service Discovery (Suricata)",
+        "event.kind": "signal",
+        "kibana.alert.workflow_status": "acknowledged",
+        "kibana.alert.rule.uuid": "f9d568f5-4f75-4ded-8753-564643d5d760",
+        "kibana.alert.original_event.created": "2026-07-27T08:57:13.804Z",
+        "kibana.alert.original_event.category": [
+            "network",
+            "intrusion_detection"
+        ],
+        "kibana.alert.original_event.module": "suricata",
+        "kibana.alert.rule.risk_score_mapping": [],
+        "kibana.alert.rule.interval": "5m",
+        "kibana.alert.reason": "network, intrusion_detection event with source 192.168.75.1:62917, destination 192.168.75.11:1521, created medium alert Network Service Discovery (Suricata).",
+        "kibana.alert.rule.type": "query",
+        "tags": [
+            "forwarded",
+            "suricata-eve",
+            "_geoip_database_unavailable_GeoLite2-City.mmdb",
+            "_geoip_database_unavailable_GeoLite2-City.mmdb",
+            "_geoip_database_unavailable_GeoLite2-ASN.mmdb",
+            "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+        ],
+        "kibana.alert.workflow_user": "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0",
+        "kibana.alert.start": "2026-07-27T09:00:00.229Z",
+        "input": {
+            "type": "log"
+        },
+        "kibana.alert.rule.immutable": false,
+        "kibana.alert.original_event.type": [
+            "allowed"
+        ],
+        "suricata": {
+            "eve": {
+                "in_iface": "ens34",
+                "event_type": "alert",
+                "alert": {
+                    "signature_id": 2010936,
+                    "rev": 3,
+                    "metadata": {
+                        "confidence": [
+                            "Medium"
+                        ],
+                        "signature_severity": [
+                            "Informational"
+                        ]
+                    },
+                    "gid": 1,
+                    "updated_at": "2019-07-26T00:00:00.000Z",
+                    "signature": "ET SCAN Suspicious inbound to Oracle SQL port 1521",
+                    "created_at": "2010-07-30T00:00:00.000Z",
+                    "category": "Potentially Bad Traffic"
+                },
+                "flow_id": "684443512973489",
+                "pkt_src": "wire/pcap",
+                "flow": {
+                    "src_ip": "192.168.75.1",
+                    "src_port": 62917,
+                    "dest_ip": "192.168.75.11",
+                    "dest_port": 1521
+                },
+                "ip_v": 4,
+                "direction": "to_server"
+            }
+        },
+        "kibana.alert.depth": 1,
+        "kibana.alert.rule.enabled": true,
+        "kibana.alert.rule.version": 1,
+        "kibana.alert.rule.from": "now-6m",
+        "kibana.alert.rule.parameters": {
+            "severity_mapping": [],
+            "references": [],
+            "description": "This rule detects potential Network Service Discovery (MITRE ATT&CK T1046) activity within the internal subnet 192.168.75.0/24. It leverages Suricata alerts categorized as scan to identify hosts performing active probing of network services. Such behavior is often associated with adversaries mapping available services and ports in preparation for lateral movement or exploitation. Triggering this rule indicates that a system in the monitored subnet may be conducting reconnaissance scans against other hosts, which could represent malicious discovery attempts or unauthorized network scanning.",
+            "language": "kuery",
+            "type": "query",
+            "exceptions_list": [],
+            "from": "now-6m",
+            "severity": "medium",
+            "max_signals": 100,
+            "rule_source": {
+                "type": "internal"
+            },
+            "risk_score": 47,
+            "risk_score_mapping": [],
+            "author": [],
+            "query": "event.module: \"suricata\" AND event.kind: \"alert\" AND rule.name: *SCAN*",
+            "index": [
+                "apm-*-transaction*",
+                "auditbeat-*",
+                "endgame-*",
+                "filebeat-*",
+                "logs-*",
+                "packetbeat-*",
+                "traces-apm*",
+                "winlogbeat-*",
+                "-*elastic-cloud-logs-*"
+            ],
+            "filters": [],
+            "version": 1,
+            "rule_id": "e8aefbbb-3db9-4680-a706-862226d26ea4",
+            "license": "",
+            "required_fields": [],
+            "immutable": false,
+            "related_integrations": [],
+            "meta": {
+                "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+            },
+            "setup": "",
+            "false_positives": [],
+            "threat": [
+                {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1046/",
+                            "name": "Network Service Discovery",
+                            "subtechnique": [],
+                            "id": "T1046"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0007/",
+                        "name": "Discovery",
+                        "id": "TA0007"
+                    }
+                }
+            ],
+            "to": "now"
+        },
+        "kibana.alert.rule.revision": 4,
+        "log": {
+            "file": {
+                "path": "/var/log/suricata/eve.json"
+            },
+            "offset": 501261234
+        },
+        "kibana.alert.status": "active",
+        "kibana.alert.last_detected": "2026-07-27T09:00:00.229Z",
+        "elastic_agent": {
+            "id": "7aa9e95e-09ab-4ef2-8f57-ddbfe4d95b03",
+            "version": "8.19.14",
+            "snapshot": false
+        },
+        "destination": {
+            "address": "192.168.75.11",
+            "port": 1521,
+            "bytes": 0,
+            "ip": "192.168.75.11",
+            "packets": 0
+        },
+        "kibana.alert.ancestors": [
+            {
+                "depth": 0,
+                "index": ".ds-logs-suricata.eve-default-2026.07.01-000002",
+                "id": "k7XLop8BEWnoqq1_CJ-T",
+                "type": "event"
+            }
+        ],
+        "rule": {
+            "name": "ET SCAN Suspicious inbound to Oracle SQL port 1521",
+            "id": "2010936",
+            "category": "Potentially Bad Traffic"
+        },
+        "kibana.alert.original_event.dataset": "suricata.eve",
+        "kibana.alert.original_data_stream.dataset": "suricata.eve",
+        "kibana.alert.original_event.start": "2026-07-27T08:56:58.290Z",
+        "kibana.alert.rule.exceptions_list": [],
+        "kibana.alert.rule.actions": [],
+        "network": {
+            "community_id": "1:cNEb6TsPI56HMBrSK2eVMefW/is=",
+            "bytes": 330,
+            "transport": "tcp",
+            "packets": 5
+        },
+        "kibana.alert.rule.rule_type_id": "siem.queryRule",
+        "related": {
+            "ip": [
+                "192.168.75.1",
+                "192.168.75.11"
+            ]
+        },
+        "kibana.alert.rule.license": "",
+        "event": {
+            "severity": 2,
+            "agent_id_status": "verified",
+            "ingested": "2026-07-27T08:57:22Z",
+            "created": "2026-07-27T08:57:13.804Z",
+            "module": "suricata",
+            "start": "2026-07-27T08:56:58.290Z",
+            "category": [
+                "network",
+                "intrusion_detection"
+            ],
+            "type": [
+                "allowed"
+            ],
+            "dataset": "suricata.eve"
+        },
+        "kibana.alert.original_event.kind": "alert",
+        "kibana.alert.workflow_tags": [],
+        "kibana.alert.original_event.severity": 2,
+        "kibana.alert.workflow_assignee_ids": [],
+        "kibana.alert.rule.severity_mapping": [],
+        "kibana.alert.rule.max_signals": 100,
+        "kibana.alert.rule.updated_at": "2026-04-25T04:15:34.083Z",
+        "kibana.alert.rule.risk_score": 47,
+        "kibana.alert.rule.author": [],
+        "kibana.alert.rule.false_positives": [],
+        "message": "Potentially Bad Traffic",
+        "kibana.alert.rule.consumer": "siem",
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "kibana.alert.rule.category": "Custom Query Rule",
+        "@timestamp": "2026-07-27T09:00:00.122Z",
+        "kibana.alert.original_data_stream.type": "logs",
+        "kibana.alert.rule.created_at": "2026-04-25T04:02:16.342Z",
+        "kibana.alert.rule.severity": "medium",
+        "kibana.alert.intended_timestamp": "2026-07-27T09:00:00.122Z",
+        "data_stream": {
+            "namespace": "default",
+            "type": "logs",
+            "dataset": "suricata.eve"
+        },
+        "kibana.alert.original_event.agent_id_status": "verified",
+        "kibana.alert.rule.execution.timestamp": "2026-07-27T09:00:00.229Z",
+        "kibana.alert.rule.execution.uuid": "27a73f95-3ce7-4fc1-9342-6d446562954a",
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.uuid": "1cbfd3ccd90446ec9e6ed3d11220bb0a58b3df7d960af5192ee51bd7b9174169",
+        "kibana.alert.rule.meta.kibana_siem_app_url": "http://192.168.31.130:5601/app/security",
+        "kibana.version": "8.19.13",
+        "kibana.alert.rule.execution.type": "scheduled",
+        "kibana.alert.original_time": "2026-07-27T08:57:13.315Z",
+        "kibana.alert.rule.rule_id": "e8aefbbb-3db9-4680-a706-862226d26ea4"
+    },
+    "fields": {
+        "kibana.alert.severity": [
+            "medium"
+        ],
+        "rule.id": [
+            "2010936"
+        ],
+        "kibana.alert.workflow_status_updated_at": [
+            "2026-07-27T09:04:30.024Z"
+        ],
+        "kibana.alert.rule.updated_by": [
+            "siem"
+        ],
+        "suricata.eve.alert.updated_at": [
+            "2019-07-26T00:00:00.000Z"
+        ],
+        "signal.ancestors.depth": [
+            0
+        ],
+        "event.category": [
+            "network",
+            "intrusion_detection"
+        ],
+        "elastic_agent.version": [
+            "8.19.14"
+        ],
+        "suricata.eve.flow.dest_ip": [
+            "192.168.75.11"
+        ],
+        "signal.original_event.created": [
+            "2026-07-27T08:57:13.804Z"
+        ],
+        "kibana.alert.reason.text": [
+            "network, intrusion_detection event with source 192.168.75.1:62917, destination 192.168.75.11:1521, created medium alert Network Service Discovery (Suricata)."
+        ],
+        "kibana.alert.rule.threat.technique.id": [
+            "T1046"
+        ],
+        "observer.vendor": [
+            "OISF"
+        ],
+        "kibana.alert.ancestors.depth": [
+            0
+        ],
+        "signal.rule.enabled": [
+            "true"
+        ],
+        "signal.rule.max_signals": [
+            100
+        ],
+        "suricata.eve.alert.signature": [
+            "ET SCAN Suspicious inbound to Oracle SQL port 1521"
+        ],
+        "kibana.alert.risk_score": [
+            47
+        ],
+        "signal.rule.updated_at": [
+            "2026-04-25T04:15:34.083Z"
+        ],
+        "source.ip": [
+            "192.168.75.1"
+        ],
+        "agent.name": [
+            "elk-siem"
+        ],
+        "destination.address": [
+            "192.168.75.11"
+        ],
+        "suricata.eve.event_type": [
+            "alert"
+        ],
+        "network.community_id": [
+            "1:cNEb6TsPI56HMBrSK2eVMefW/is="
+        ],
+        "event.agent_id_status": [
+            "verified"
+        ],
+        "suricata.eve.flow_id": [
+            "684443512973489"
+        ],
+        "event.severity": [
+            2
+        ],
+        "source.packets": [
+            5
+        ],
+        "kibana.alert.original_event.module": [
+            "suricata"
+        ],
+        "kibana.alert.rule.interval": [
+            "5m"
+        ],
+        "input.type": [
+            "log"
+        ],
+        "kibana.alert.rule.type": [
+            "query"
+        ],
+        "suricata.eve.in_iface": [
+            "ens34"
+        ],
+        "kibana.alert.workflow_user": [
+            "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0"
+        ],
+        "tags": [
+            "forwarded",
+            "suricata-eve",
+            "_geoip_database_unavailable_GeoLite2-City.mmdb",
+            "_geoip_database_unavailable_GeoLite2-City.mmdb",
+            "_geoip_database_unavailable_GeoLite2-ASN.mmdb",
+            "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+        ],
+        "kibana.alert.start": [
+            "2026-07-27T09:00:00.229Z"
+        ],
+        "kibana.alert.rule.immutable": [
+            "false"
+        ],
+        "kibana.alert.original_event.type": [
+            "allowed"
+        ],
+        "agent.id": [
+            "7aa9e95e-09ab-4ef2-8f57-ddbfe4d95b03"
+        ],
+        "signal.original_event.module": [
+            "suricata"
+        ],
+        "source.port": [
+            62917
+        ],
+        "signal.rule.from": [
+            "now-6m"
+        ],
+        "suricata.eve.direction": [
+            "to_server"
+        ],
+        "kibana.alert.rule.enabled": [
+            "true"
+        ],
+        "signal.original_event.start": [
+            "2026-07-27T08:56:58.290Z"
+        ],
+        "destination.bytes": [
+            0
+        ],
+        "event.start": [
+            "2026-07-27T08:56:58.290Z"
+        ],
+        "kibana.alert.rule.version": [
+            "1"
+        ],
+        "suricata.eve.alert.metadata.signature_severity": [
+            "Informational"
+        ],
+        "kibana.alert.ancestors.type": [
+            "event"
+        ],
+        "destination.port": [
+            1521
+        ],
+        "signal.ancestors.index": [
+            ".ds-logs-suricata.eve-default-2026.07.01-000002"
+        ],
+        "kibana.alert.original_data_stream.dataset": [
+            "suricata.eve"
+        ],
+        "destination.packets": [
+            0
+        ],
+        "suricata.eve.alert.category": [
+            "Potentially Bad Traffic"
+        ],
+        "agent.type": [
+            "filebeat"
+        ],
+        "signal.original_event.category": [
+            "network",
+            "intrusion_detection"
+        ],
+        "related.ip": [
+            "192.168.75.1",
+            "192.168.75.11"
+        ],
+        "suricata.eve.alert.metadata.confidence": [
+            "Medium"
+        ],
+        "signal.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "observer.product": [
+            "Suricata"
+        ],
+        "elastic_agent.snapshot": [
+            false
+        ],
+        "signal.original_event.type": [
+            "allowed"
+        ],
+        "suricata.eve.pkt_src": [
+            "wire/pcap"
+        ],
+        "kibana.alert.rule.max_signals": [
+            100
+        ],
+        "suricata.eve.flow.src_port": [
+            62917
+        ],
+        "elastic_agent.id": [
+            "7aa9e95e-09ab-4ef2-8f57-ddbfe4d95b03"
+        ],
+        "kibana.alert.rule.risk_score": [
+            47
+        ],
+        "suricata.eve.ip_v": [
+            4
+        ],
+        "signal.original_event.dataset": [
+            "suricata.eve"
+        ],
+        "signal.rule.threat.technique.id": [
+            "T1046"
+        ],
+        "destination.ip": [
+            "192.168.75.11"
+        ],
+        "kibana.alert.rule.consumer": [
+            "siem"
+        ],
+        "observer.hostname": [
+            "elk-siem"
+        ],
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "kibana.alert.rule.category": [
+            "Custom Query Rule"
+        ],
+        "event.ingested": [
+            "2026-07-27T08:57:22.000Z"
+        ],
+        "@timestamp": [
+            "2026-07-27T09:00:00.122Z"
+        ],
+        "signal.rule.updated_by": [
+            "siem"
+        ],
+        "kibana.alert.intended_timestamp": [
+            "2026-07-27T09:00:00.122Z"
+        ],
+        "kibana.alert.rule.severity": [
+            "medium"
+        ],
+        "kibana.alert.original_event.agent_id_status": [
+            "verified"
+        ],
+        "log.file.path": [
+            "/var/log/suricata/eve.json"
+        ],
+        "data_stream.dataset": [
+            "suricata.eve"
+        ],
+        "agent.ephemeral_id": [
+            "afde663d-531c-465e-9504-5caaff689389"
+        ],
+        "kibana.alert.rule.execution.timestamp": [
+            "2026-07-27T09:00:00.229Z"
+        ],
+        "signal.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1046/"
+        ],
+        "kibana.alert.rule.execution.uuid": [
+            "27a73f95-3ce7-4fc1-9342-6d446562954a"
+        ],
+        "kibana.alert.uuid": [
+            "1cbfd3ccd90446ec9e6ed3d11220bb0a58b3df7d960af5192ee51bd7b9174169"
+        ],
+        "kibana.alert.rule.meta.kibana_siem_app_url": [
+            "http://192.168.31.130:5601/app/security"
+        ],
+        "kibana.version": [
+            "8.19.13"
+        ],
+        "signal.rule.threat.technique.name": [
+            "Network Service Discovery"
+        ],
+        "signal.rule.license": [
+            ""
+        ],
+        "suricata.eve.alert.rev": [
+            3
+        ],
+        "signal.ancestors.type": [
+            "event"
+        ],
+        "kibana.alert.rule.rule_id": [
+            "e8aefbbb-3db9-4680-a706-862226d26ea4"
+        ],
+        "signal.rule.type": [
+            "query"
+        ],
+        "kibana.alert.ancestors.id": [
+            "k7XLop8BEWnoqq1_CJ-T"
+        ],
+        "kibana.alert.original_data_stream.namespace": [
+            "default"
+        ],
+        "kibana.alert.rule.description": [
+            "This rule detects potential Network Service Discovery (MITRE ATT&CK T1046) activity within the internal subnet 192.168.75.0/24. It leverages Suricata alerts categorized as scan to identify hosts performing active probing of network services. Such behavior is often associated with adversaries mapping available services and ports in preparation for lateral movement or exploitation. Triggering this rule indicates that a system in the monitored subnet may be conducting reconnaissance scans against other hosts, which could represent malicious discovery attempts or unauthorized network scanning."
+        ],
+        "kibana.alert.rule.producer": [
+            "siem"
+        ],
+        "kibana.alert.rule.to": [
+            "now"
+        ],
+        "signal.rule.created_by": [
+            "siem"
+        ],
+        "signal.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.created_by": [
+            "siem"
+        ],
+        "suricata.eve.alert.created_at": [
+            "2010-07-30T00:00:00.000Z"
+        ],
+        "kibana.alert.original_event.ingested": [
+            "2026-07-27T08:57:22.000Z"
+        ],
+        "signal.rule.id": [
+            "f9d568f5-4f75-4ded-8753-564643d5d760"
+        ],
+        "signal.reason": [
+            "network, intrusion_detection event with source 192.168.75.1:62917, destination 192.168.75.11:1521, created medium alert Network Service Discovery (Suricata)."
+        ],
+        "signal.rule.risk_score": [
+            47
+        ],
+        "kibana.alert.rule.name": [
+            "Network Service Discovery (Suricata)"
+        ],
+        "suricata.eve.flow.src_ip": [
+            "192.168.75.1"
+        ],
+        "kibana.alert.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1046/"
+        ],
+        "observer.mac": [
+            "00-0C-29-34-50-05",
+            "00-0C-29-34-50-0F"
+        ],
+        "signal.status": [
+            "acknowledged"
+        ],
+        "suricata.eve.alert.gid": [
+            1
+        ],
+        "event.kind": [
+            "signal"
+        ],
+        "signal.rule.created_at": [
+            "2026-04-25T04:02:16.342Z"
+        ],
+        "kibana.alert.workflow_status": [
+            "acknowledged"
+        ],
+        "rule.name": [
+            "ET SCAN Suspicious inbound to Oracle SQL port 1521"
+        ],
+        "kibana.alert.original_event.created": [
+            "2026-07-27T08:57:13.804Z"
+        ],
+        "kibana.alert.rule.threat.tactic.name": [
+            "Discovery"
+        ],
+        "kibana.alert.rule.uuid": [
+            "f9d568f5-4f75-4ded-8753-564643d5d760"
+        ],
+        "network.packets": [
+            5
+        ],
+        "kibana.alert.original_event.category": [
+            "network",
+            "intrusion_detection"
+        ],
+        "kibana.alert.reason": [
+            "network, intrusion_detection event with source 192.168.75.1:62917, destination 192.168.75.11:1521, created medium alert Network Service Discovery (Suricata)."
+        ],
+        "log.offset": [
+            501261234
+        ],
+        "signal.rule.threat.tactic.id": [
+            "TA0007"
+        ],
+        "data_stream.type": [
+            "logs"
+        ],
+        "signal.ancestors.id": [
+            "k7XLop8BEWnoqq1_CJ-T"
+        ],
+        "signal.original_time": [
+            "2026-07-27T08:57:13.315Z"
+        ],
+        "ecs.version": [
+            "8.17.0"
+        ],
+        "observer.type": [
+            "ids"
+        ],
+        "signal.rule.severity": [
+            "medium"
+        ],
+        "kibana.alert.ancestors.index": [
+            ".ds-logs-suricata.eve-default-2026.07.01-000002"
+        ],
+        "event.created": [
+            "2026-07-27T08:57:13.804Z"
+        ],
+        "agent.version": [
+            "8.19.14"
+        ],
+        "kibana.alert.depth": [
+            1
+        ],
+        "signal.original_event.severity": [
+            2
+        ],
+        "kibana.alert.rule.from": [
+            "now-6m"
+        ],
+        "observer.ip": [
+            "192.168.31.130",
+            "fe80::20c:29ff:fe34:5005",
+            "192.168.75.11",
+            "fe80::20c:29ff:fe34:500f"
+        ],
+        "kibana.alert.rule.parameters": [
+            {
+                "severity": "medium",
+                "max_signals": 100,
+                "rule_source": {
+                    "type": "internal"
+                },
+                "risk_score": 47,
+                "query": "event.module: \"suricata\" AND event.kind: \"alert\" AND rule.name: *SCAN*",
+                "description": "This rule detects potential Network Service Discovery (MITRE ATT&CK T1046) activity within the internal subnet 192.168.75.0/24. It leverages Suricata alerts categorized as scan to identify hosts performing active probing of network services. Such behavior is often associated with adversaries mapping available services and ports in preparation for lateral movement or exploitation. Triggering this rule indicates that a system in the monitored subnet may be conducting reconnaissance scans against other hosts, which could represent malicious discovery attempts or unauthorized network scanning.",
+                "index": [
+                    "apm-*-transaction*",
+                    "auditbeat-*",
+                    "endgame-*",
+                    "filebeat-*",
+                    "logs-*",
+                    "packetbeat-*",
+                    "traces-apm*",
+                    "winlogbeat-*",
+                    "-*elastic-cloud-logs-*"
+                ],
+                "language": "kuery",
+                "type": "query",
+                "version": 1,
+                "rule_id": "e8aefbbb-3db9-4680-a706-862226d26ea4",
+                "license": "",
+                "immutable": false,
+                "meta": {
+                    "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+                },
+                "setup": "",
+                "from": "now-6m",
+                "threat": {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1046/",
+                            "name": "Network Service Discovery",
+                            "subtechnique": [],
+                            "id": "T1046"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0007/",
+                        "name": "Discovery",
+                        "id": "TA0007"
+                    }
+                },
+                "to": "now"
+            }
+        ],
+        "kibana.alert.rule.revision": [
+            4
+        ],
+        "suricata.eve.flow.dest_port": [
+            1521
+        ],
+        "kibana.alert.rule.threat.tactic.id": [
+            "TA0007"
+        ],
+        "signal.rule.version": [
+            "1"
+        ],
+        "signal.original_event.kind": [
+            "alert"
+        ],
+        "kibana.alert.rule.threat.technique.name": [
+            "Network Service Discovery"
+        ],
+        "kibana.alert.status": [
+            "active"
+        ],
+        "kibana.alert.last_detected": [
+            "2026-07-27T09:00:00.229Z"
+        ],
+        "kibana.alert.original_event.dataset": [
+            "suricata.eve"
+        ],
+        "signal.depth": [
+            1
+        ],
+        "source.address": [
+            "192.168.75.1"
+        ],
+        "kibana.alert.original_event.start": [
+            "2026-07-27T08:56:58.290Z"
+        ],
+        "signal.rule.immutable": [
+            "false"
+        ],
+        "suricata.eve.alert.signature_id": [
+            2010936
+        ],
+        "kibana.alert.rule.rule_type_id": [
+            "siem.queryRule"
+        ],
+        "signal.rule.name": [
+            "Network Service Discovery (Suricata)"
+        ],
+        "event.module": [
+            "suricata"
+        ],
+        "signal.rule.rule_id": [
+            "e8aefbbb-3db9-4680-a706-862226d26ea4"
+        ],
+        "signal.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0007/"
+        ],
+        "kibana.alert.rule.license": [
+            ""
+        ],
+        "network.bytes": [
+            330
+        ],
+        "kibana.alert.original_event.kind": [
+            "alert"
+        ],
+        "kibana.alert.original_event.severity": [
+            2
+        ],
+        "source.bytes": [
+            330
+        ],
+        "signal.rule.threat.tactic.name": [
+            "Discovery"
+        ],
+        "kibana.alert.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "kibana.alert.rule.updated_at": [
+            "2026-04-25T04:15:34.083Z"
+        ],
+        "signal.rule.description": [
+            "This rule detects potential Network Service Discovery (MITRE ATT&CK T1046) activity within the internal subnet 192.168.75.0/24. It leverages Suricata alerts categorized as scan to identify hosts performing active probing of network services. Such behavior is often associated with adversaries mapping available services and ports in preparation for lateral movement or exploitation. Triggering this rule indicates that a system in the monitored subnet may be conducting reconnaissance scans against other hosts, which could represent malicious discovery attempts or unauthorized network scanning."
+        ],
+        "data_stream.namespace": [
+            "default"
+        ],
+        "message": [
+            "Potentially Bad Traffic"
+        ],
+        "network.transport": [
+            "tcp"
+        ],
+        "kibana.alert.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0007/"
+        ],
+        "kibana.alert.original_data_stream.type": [
+            "logs"
+        ],
+        "kibana.alert.rule.created_at": [
+            "2026-04-25T04:02:16.342Z"
+        ],
+        "signal.rule.to": [
+            "now"
+        ],
+        "event.type": [
+            "allowed"
+        ],
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.rule.execution.type": [
+            "scheduled"
+        ],
+        "rule.category": [
+            "Potentially Bad Traffic"
+        ],
+        "event.dataset": [
+            "suricata.eve"
+        ],
+        "kibana.alert.original_time": [
+            "2026-07-27T08:57:13.315Z"
+        ]
+    }
+}
