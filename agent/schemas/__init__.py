@@ -2,7 +2,12 @@
 Data schemas for agent communications and pipeline validation.
 """
 from .triage_schema import (
+    NormalizedAlert,
     SecurityAlert,
+    ProcessInfo,
+    ProcessContext,
+    RegistryContext,
+    NetworkContext,
     FactFindingOutput,
     VerdictOutput,
     TriageDecision,
@@ -10,7 +15,12 @@ from .triage_schema import (
 )
 
 __all__ = [
+    "NormalizedAlert",
     "SecurityAlert",
+    "ProcessInfo",
+    "ProcessContext",
+    "RegistryContext",
+    "NetworkContext",
     "FactFindingOutput",
     "VerdictOutput",
     "TriageDecision",
