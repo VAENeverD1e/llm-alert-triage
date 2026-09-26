@@ -8,6 +8,7 @@ import logging
 from typing import Optional, Dict, Any
 
 from agent.schemas.triage_schema import (
+    NormalizedAlert,
     SecurityAlert,
     FactFindingOutput,
     VerdictOutput,
@@ -45,7 +46,10 @@ class TriageOrchestrator:
         logger.info(f"--- Starting Triage Pipeline for Alert {alert_data.get('alert_id')} ---")
 
         # Parse alert
-        alert = SecurityAlert(**alert_data)
+        if "_source" in alert_data or "kibana.alert.uuid" in alert_data:
+            alert = NormalizedAlert.from_raw_alert(alert_data)
+        else:
+            alert = SecurityAlert(**alert_data)
 
         try:
             # Stage 1: Fact-Finding
