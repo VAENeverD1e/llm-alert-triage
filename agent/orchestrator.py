@@ -34,9 +34,30 @@ class TriageOrchestrator:
         ollama_client: Optional[Any] = None,
         discord_forwarder: Optional[Any] = None
     ):
+        self.elastic_client = elastic_client
+        self.playbook_retriever = playbook_retriever
+        self.ollama_client = ollama_client
         self.fact_finder = FactFindingAgent(elastic_client=elastic_client, ollama_client=ollama_client)
         self.verdict_agent = VerdictAgent(playbook_retriever=playbook_retriever, ollama_client=ollama_client)
         self.discord_forwarder = discord_forwarder
+
+    @classmethod
+    def create_default(
+        cls,
+        use_ollama: bool = True,
+        use_rag: bool = True,
+        model_name: str = "llama3:8b",
+        playbooks_dir: str = "./playbooks"
+    ) -> "TriageOrchestrator":
+        """
+        Factory method to instantiate a fully configured orchestrator with local RAG and Ollama client.
+        """
+        from integrations.playbook_retriever import PlaybookRetriever
+        from integrations.ollama_client import OllamaClient
+
+        retriever = PlaybookRetriever(playbooks_dir=playbooks_dir) if use_rag else None
+        llm = OllamaClient(model_name=model_name) if use_ollama else None
+        return cls(playbook_retriever=retriever, ollama_client=llm)
 
     def run_pipeline(self, alert_data: Dict[str, Any]) -> TriagePipelineResult:
         """
