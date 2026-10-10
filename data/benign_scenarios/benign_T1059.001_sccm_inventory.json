@@ -1,0 +1,40 @@
+{
+  "alert_id": "BNG-T1059.001",
+  "rule_uuid": "bng-uuid-1059",
+  "rule_id": "T1059.001",
+  "rule_name": "PowerShell Script Execution",
+  "severity": "low",
+  "risk_score": 20,
+  "timestamp": "2026-10-10T08:20:00Z",
+  "host_name": "desktop-thonlnr",
+  "user_name": "NT AUTHORITY\\SYSTEM",
+  "reason": "Routine IT hardware asset inventory collection",
+  "telemetry_source": "sysmon",
+  "event_code": "1",
+  "process_context": {
+    "process": {
+      "name": "powershell.exe",
+      "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "command_line": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"C:\\Windows\\CCM\\ScriptLib\\HardwareInventory.ps1\"",
+      "pid": 6230,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "parent_process": {
+      "name": "CcmExec.exe",
+      "executable": "C:\\Windows\\CCM\\CcmExec.exe",
+      "command_line": "C:\\Windows\\CCM\\CcmExec.exe",
+      "pid": 1420,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "target_process_name": null,
+    "granted_access": null,
+    "call_trace": null
+  },
+  "registry_context": null,
+  "network_context": null,
+  "raw_event": {}
+}

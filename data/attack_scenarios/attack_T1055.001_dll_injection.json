@@ -1,0 +1,1102 @@
+{
+    "_index": ".internal.alerts-security.alerts-default-000003",
+    "_id": "4384a8ca0f2a313f4970438ddd35599e3ebee89b4463ec0f80e0ad553dd54aac",
+    "_score": 1,
+    "_source": {
+        "kibana.alert.severity": "high",
+        "kibana.alert.workflow_status_updated_at": "2026-07-27T09:03:13.595Z",
+        "agent": {
+            "name": "DESKTOP-THONLNR",
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "type": "filebeat",
+            "ephemeral_id": "64addb2f-5b7b-434f-8391-8206263963f2",
+            "version": "8.19.14"
+        },
+        "kibana.alert.rule.references": [],
+        "kibana.alert.rule.updated_by": "siem",
+        "kibana.alert.rule.threat": [
+            {
+                "framework": "MITRE ATT&CK",
+                "technique": [
+                    {
+                        "reference": "https://attack.mitre.org/techniques/T1055/",
+                        "name": "Process Injection",
+                        "subtechnique": [
+                            {
+                                "reference": "https://attack.mitre.org/techniques/T1055/001/",
+                                "name": "Dynamic-link Library Injection",
+                                "id": "T1055.001"
+                            }
+                        ],
+                        "id": "T1055"
+                    }
+                ],
+                "tactic": {
+                    "reference": "https://attack.mitre.org/tactics/TA0004/",
+                    "name": "Privilege Escalation",
+                    "id": "TA0004"
+                }
+            }
+        ],
+        "kibana.alert.original_data_stream.namespace": "default",
+        "kibana.alert.original_event.code": "1",
+        "kibana.alert.rule.description": "This rule detects potential DLL injection activity using the Windows utility mavinject.exe. Attackers can abuse mavinject with the /INJECTRUNNING flag to load a DLL into the memory space of another running process via CreateRemoteThread. The query looks for Event ID 1 (process creation) where the process name is mavinject.exe and the command line includes /INJECTRUNNING. This behavior is commonly associated with adversary simulation tools (e.g., Atomic Red Team) but may also indicate malicious injection attempts. Detection of this activity helps identify process injection techniques used to gain code execution within trusted processes.",
+        "kibana.alert.rule.tags": [],
+        "kibana.alert.rule.producer": "siem",
+        "kibana.alert.rule.to": "now",
+        "kibana.alert.rule.created_by": "siem",
+        "kibana.alert.original_event.ingested": "2026-07-27T08:50:35Z",
+        "ecs": {
+            "version": "8.17.0"
+        },
+        "kibana.alert.risk_score": 73,
+        "host": {
+            "hostname": "DESKTOP-THONLNR",
+            "os": {
+                "build": "19045.3803",
+                "kernel": "10.0.19041.3803 (WinBuild.160101.0800)",
+                "name": "Windows 10 Pro",
+                "type": "windows",
+                "family": "windows",
+                "version": "10.0",
+                "platform": "windows"
+            },
+            "ip": [
+                "fe80::8ac2:9f81:1d7e:a0aa",
+                "192.168.31.132"
+            ],
+            "name": "desktop-thonlnr",
+            "id": "bb537b1e-2db1-4ede-8b49-f3e63a57eff1",
+            "mac": [
+                "00-0C-29-77-18-E4"
+            ],
+            "architecture": "x86_64"
+        },
+        "kibana.alert.rule.name": "DLL Injection via CreateRemoteThread",
+        "event.kind": "signal",
+        "kibana.alert.workflow_status": "acknowledged",
+        "kibana.alert.rule.uuid": "f06537d8-aeb0-40e3-a7e5-3d2ac6f5b46a",
+        "kibana.alert.original_event.created": "2026-07-27T08:50:26.184Z",
+        "kibana.alert.original_event.category": [
+            "process"
+        ],
+        "kibana.alert.original_event.module": "windows",
+        "kibana.alert.rule.risk_score_mapping": [],
+        "kibana.alert.rule.interval": "5m",
+        "kibana.alert.reason": "process event with process mavinject.exe, parent process powershell.exe, by victim on desktop-thonlnr created high alert DLL Injection via CreateRemoteThread.",
+        "kibana.alert.rule.type": "query",
+        "kibana.alert.workflow_user": "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0",
+        "kibana.alert.start": "2026-07-27T08:55:00.042Z",
+        "input": {
+            "type": "winlog"
+        },
+        "kibana.alert.rule.immutable": false,
+        "kibana.alert.original_event.type": [
+            "start"
+        ],
+        "kibana.alert.depth": 1,
+        "kibana.alert.rule.enabled": true,
+        "kibana.alert.rule.version": 1,
+        "kibana.alert.rule.from": "now-6m",
+        "kibana.alert.rule.parameters": {
+            "severity_mapping": [],
+            "references": [],
+            "description": "This rule detects potential DLL injection activity using the Windows utility mavinject.exe. Attackers can abuse mavinject with the /INJECTRUNNING flag to load a DLL into the memory space of another running process via CreateRemoteThread. The query looks for Event ID 1 (process creation) where the process name is mavinject.exe and the command line includes /INJECTRUNNING. This behavior is commonly associated with adversary simulation tools (e.g., Atomic Red Team) but may also indicate malicious injection attempts. Detection of this activity helps identify process injection techniques used to gain code execution within trusted processes.",
+            "language": "kuery",
+            "type": "query",
+            "exceptions_list": [],
+            "from": "now-6m",
+            "severity": "high",
+            "max_signals": 100,
+            "rule_source": {
+                "type": "internal"
+            },
+            "risk_score": 73,
+            "risk_score_mapping": [],
+            "author": [],
+            "query": "event.code: \"1\" AND\nprocess.name: \"mavinject.exe\" AND\nprocess.command_line: *INJECTRUNNING* AND\n\nNOT process.parent.executable: (\n    \"C:\\\\Windows\\\\System32\\\\msiexec.exe\" OR\n    \"C:\\\\Windows\\\\System32\\\\AppVClient.exe\" OR\n    \"C:\\\\Program Files\\\\Microsoft Application Virtualization\\\\*\"\n)\n",
+            "index": [
+                "apm-*-transaction*",
+                "auditbeat-*",
+                "endgame-*",
+                "filebeat-*",
+                "logs-*",
+                "packetbeat-*",
+                "traces-apm*",
+                "winlogbeat-*",
+                "-*elastic-cloud-logs-*"
+            ],
+            "filters": [],
+            "version": 1,
+            "rule_id": "0013e73c-7d6a-4878-aa59-a9d055528e5f",
+            "license": "",
+            "required_fields": [],
+            "immutable": false,
+            "related_integrations": [],
+            "meta": {
+                "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+            },
+            "setup": "",
+            "false_positives": [],
+            "threat": [
+                {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1055/",
+                            "name": "Process Injection",
+                            "subtechnique": [
+                                {
+                                    "reference": "https://attack.mitre.org/techniques/T1055/001/",
+                                    "name": "Dynamic-link Library Injection",
+                                    "id": "T1055.001"
+                                }
+                            ],
+                            "id": "T1055"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0004/",
+                        "name": "Privilege Escalation",
+                        "id": "TA0004"
+                    }
+                }
+            ],
+            "to": "now"
+        },
+        "kibana.alert.rule.revision": 1,
+        "log": {
+            "level": "information"
+        },
+        "kibana.alert.status": "active",
+        "kibana.alert.last_detected": "2026-07-27T08:55:00.042Z",
+        "elastic_agent": {
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "version": "8.19.14",
+            "snapshot": false
+        },
+        "kibana.alert.ancestors": [
+            {
+                "depth": 0,
+                "index": ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003",
+                "id": "0rXEop8BEWnoqq1_z4Pl",
+                "type": "event"
+            }
+        ],
+        "kibana.alert.original_event.dataset": "windows.sysmon_operational",
+        "kibana.alert.original_data_stream.dataset": "windows.sysmon_operational",
+        "kibana.alert.rule.exceptions_list": [],
+        "kibana.alert.rule.actions": [],
+        "kibana.alert.rule.rule_type_id": "siem.queryRule",
+        "related": {
+            "user": [
+                "victim"
+            ],
+            "hash": [
+                "46a9c5234b3cc5352b5cc562b240aed83040cf993a4625c69174cf746cb1fa8d",
+                "d9a4f566a8ad07702a9b212efe922d25",
+                "429058796b83bc005db1f177f77554bc"
+            ]
+        },
+        "kibana.alert.original_event.provider": "Microsoft-Windows-Sysmon",
+        "kibana.alert.rule.license": "",
+        "event": {
+            "agent_id_status": "verified",
+            "ingested": "2026-07-27T08:50:35Z",
+            "code": "1",
+            "provider": "Microsoft-Windows-Sysmon",
+            "created": "2026-07-27T08:50:26.184Z",
+            "module": "windows",
+            "action": "Process creation",
+            "category": [
+                "process"
+            ],
+            "type": [
+                "start"
+            ],
+            "dataset": "windows.sysmon_operational"
+        },
+        "kibana.alert.original_event.kind": "event",
+        "kibana.alert.workflow_tags": [],
+        "kibana.alert.workflow_assignee_ids": [],
+        "kibana.alert.rule.severity_mapping": [],
+        "process": {
+            "args": [
+                "C:\\Windows\\system32\\mavinject.exe",
+                "4512",
+                "/INJECTRUNNING",
+                "C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll"
+            ],
+            "parent": {
+                "args": [
+                    "powershell.exe",
+                    "&",
+                    "{$mypid",
+                    "=",
+                    "(Start-Process",
+                    "notepad",
+                    "-PassThru).id\nmavinject",
+                    "$mypid",
+                    "/INJECTRUNNING",
+                    "\"C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\"\nStop-Process",
+                    "-processname",
+                    "notepad}"
+                ],
+                "name": "powershell.exe",
+                "pid": 9004,
+                "args_count": 12,
+                "entity_id": "{bb537b1e-1bd0-6a67-b101-000000001e00}",
+                "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "command_line": "\"powershell.exe\" & {$mypid = (Start-Process notepad -PassThru).id\nmavinject $mypid /INJECTRUNNING \\\"\"C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\\\"\"\nStop-Process -processname notepad}"
+            },
+            "pe": {
+                "file_version": "10.0.19041.3636 (WinBuild.160101.0800)",
+                "product": "Microsoft® Windows® Operating System",
+                "imphash": "429058796b83bc005db1f177f77554bc",
+                "description": "Microsoft Application Virtualization Injector",
+                "original_file_name": "mavinject64.exe",
+                "company": "Microsoft Corporation"
+            },
+            "name": "mavinject.exe",
+            "pid": 7072,
+            "working_directory": "C:\\Users\\victim\\AppData\\Local\\Temp\\",
+            "args_count": 4,
+            "entity_id": "{bb537b1e-1bd1-6a67-b601-000000001e00}",
+            "hash": {
+                "sha256": "46a9c5234b3cc5352b5cc562b240aed83040cf993a4625c69174cf746cb1fa8d",
+                "md5": "d9a4f566a8ad07702a9b212efe922d25"
+            },
+            "executable": "C:\\Windows\\System32\\mavinject.exe",
+            "command_line": "\"C:\\Windows\\system32\\mavinject.exe\" 4512 /INJECTRUNNING C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll"
+        },
+        "winlog": {
+            "computer_name": "DESKTOP-THONLNR",
+            "process": {
+                "pid": 3088,
+                "thread": {
+                    "id": 4392
+                }
+            },
+            "channel": "Microsoft-Windows-Sysmon/Operational",
+            "event_data": {
+                "Company": "Microsoft Corporation",
+                "LogonGuid": "{bb537b1e-131e-6a67-4a6a-070000000000}",
+                "Description": "Microsoft Application Virtualization Injector",
+                "TerminalSessionId": "1",
+                "IntegrityLevel": "High",
+                "FileVersion": "10.0.19041.3636 (WinBuild.160101.0800)",
+                "ParentUser": "DESKTOP-THONLNR\\victim",
+                "Product": "Microsoft® Windows® Operating System",
+                "LogonId": "0x76a4a"
+            },
+            "opcode": "Info",
+            "version": 5,
+            "record_id": "11775",
+            "event_id": "1",
+            "task": "Process Create (rule: ProcessCreate)",
+            "provider_guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "api": "wineventlog",
+            "provider_name": "Microsoft-Windows-Sysmon",
+            "user": {
+                "identifier": "S-1-5-18",
+                "domain": "NT AUTHORITY",
+                "name": "SYSTEM",
+                "type": "User"
+            }
+        },
+        "kibana.alert.rule.max_signals": 100,
+        "kibana.alert.rule.updated_at": "2026-04-20T09:22:08.773Z",
+        "kibana.alert.rule.risk_score": 73,
+        "kibana.alert.rule.author": [],
+        "kibana.alert.rule.false_positives": [],
+        "message": "Process Create:\nRuleName: -\nUtcTime: 2026-07-27 08:50:25.118\nProcessGuid: {bb537b1e-1bd1-6a67-b601-000000001e00}\nProcessId: 7072\nImage: C:\\Windows\\System32\\mavinject.exe\nFileVersion: 10.0.19041.3636 (WinBuild.160101.0800)\nDescription: Microsoft Application Virtualization Injector\nProduct: Microsoft® Windows® Operating System\nCompany: Microsoft Corporation\nOriginalFileName: mavinject64.exe\nCommandLine: \"C:\\Windows\\system32\\mavinject.exe\" 4512 /INJECTRUNNING C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\nCurrentDirectory: C:\\Users\\victim\\AppData\\Local\\Temp\\\nUser: DESKTOP-THONLNR\\victim\nLogonGuid: {bb537b1e-131e-6a67-4a6a-070000000000}\nLogonId: 0x76A4A\nTerminalSessionId: 1\nIntegrityLevel: High\nHashes: MD5=D9A4F566A8AD07702A9B212EFE922D25,SHA256=46A9C5234B3CC5352B5CC562B240AED83040CF993A4625C69174CF746CB1FA8D,IMPHASH=429058796B83BC005DB1F177F77554BC\nParentProcessGuid: {bb537b1e-1bd0-6a67-b101-000000001e00}\nParentProcessId: 9004\nParentImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nParentCommandLine: \"powershell.exe\" & {$mypid = (Start-Process notepad -PassThru).id\nmavinject $mypid /INJECTRUNNING \\\"\"C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\\\"\"\nStop-Process -processname notepad}\nParentUser: DESKTOP-THONLNR\\victim",
+        "kibana.alert.rule.consumer": "siem",
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "kibana.alert.rule.category": "Custom Query Rule",
+        "@timestamp": "2026-07-27T08:54:59.986Z",
+        "kibana.alert.original_data_stream.type": "logs",
+        "kibana.alert.original_event.action": "Process creation",
+        "kibana.alert.rule.created_at": "2026-04-20T09:21:01.154Z",
+        "kibana.alert.rule.severity": "high",
+        "kibana.alert.intended_timestamp": "2026-07-27T08:54:59.986Z",
+        "data_stream": {
+            "namespace": "default",
+            "type": "logs",
+            "dataset": "windows.sysmon_operational"
+        },
+        "kibana.alert.original_event.agent_id_status": "verified",
+        "kibana.alert.rule.execution.timestamp": "2026-07-27T08:55:00.042Z",
+        "kibana.alert.rule.execution.uuid": "213f6ced-7c1b-413c-92b8-b68815bc258f",
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.uuid": "4384a8ca0f2a313f4970438ddd35599e3ebee89b4463ec0f80e0ad553dd54aac",
+        "kibana.alert.rule.meta.kibana_siem_app_url": "http://192.168.31.130:5601/app/security",
+        "kibana.version": "8.19.13",
+        "kibana.alert.rule.execution.type": "scheduled",
+        "user": {
+            "domain": "DESKTOP-THONLNR",
+            "name": "victim",
+            "id": "S-1-5-18"
+        },
+        "kibana.alert.original_time": "2026-07-27T08:50:25.118Z",
+        "kibana.alert.rule.rule_id": "0013e73c-7d6a-4878-aa59-a9d055528e5f"
+    },
+    "fields": {
+        "kibana.alert.workflow_status_updated_at": [
+            "2026-07-27T09:03:13.595Z"
+        ],
+        "process.hash.md5": [
+            "d9a4f566a8ad07702a9b212efe922d25"
+        ],
+        "kibana.alert.rule.updated_by": [
+            "siem"
+        ],
+        "elastic_agent.version": [
+            "8.19.14"
+        ],
+        "host.os.name.text": [
+            "Windows 10 Pro"
+        ],
+        "process.hash.sha256": [
+            "46a9c5234b3cc5352b5cc562b240aed83040cf993a4625c69174cf746cb1fa8d"
+        ],
+        "host.hostname": [
+            "DESKTOP-THONLNR"
+        ],
+        "signal.original_event.created": [
+            "2026-07-27T08:50:26.184Z"
+        ],
+        "host.mac": [
+            "00-0C-29-77-18-E4"
+        ],
+        "signal.rule.threat.technique.subtechnique.id": [
+            "T1055.001"
+        ],
+        "winlog.process.pid": [
+            3088
+        ],
+        "kibana.alert.rule.threat.technique.id": [
+            "T1055"
+        ],
+        "signal.rule.enabled": [
+            "true"
+        ],
+        "host.os.version": [
+            "10.0"
+        ],
+        "signal.rule.max_signals": [
+            100
+        ],
+        "kibana.alert.risk_score": [
+            73
+        ],
+        "signal.rule.updated_at": [
+            "2026-04-20T09:22:08.773Z"
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.reference": [
+            "https://attack.mitre.org/techniques/T1055/001/"
+        ],
+        "winlog.event_data.Company": [
+            "Microsoft Corporation"
+        ],
+        "host.os.type": [
+            "windows"
+        ],
+        "signal.original_event.code": [
+            "1"
+        ],
+        "kibana.alert.original_event.module": [
+            "windows"
+        ],
+        "kibana.alert.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.type": [
+            "query"
+        ],
+        "event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.rule.immutable": [
+            "false"
+        ],
+        "kibana.alert.rule.version": [
+            "1"
+        ],
+        "process.command_line.text": [
+            "\"C:\\Windows\\system32\\mavinject.exe\" 4512 /INJECTRUNNING C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll"
+        ],
+        "winlog.event_data.Description": [
+            "Microsoft Application Virtualization Injector"
+        ],
+        "process.working_directory": [
+            "C:\\Users\\victim\\AppData\\Local\\Temp\\"
+        ],
+        "process.entity_id": [
+            "{bb537b1e-1bd1-6a67-b601-000000001e00}"
+        ],
+        "host.ip": [
+            "fe80::8ac2:9f81:1d7e:a0aa",
+            "192.168.31.132"
+        ],
+        "agent.type": [
+            "filebeat"
+        ],
+        "process.pe.original_file_name": [
+            "mavinject64.exe"
+        ],
+        "process.executable.text": [
+            "C:\\Windows\\System32\\mavinject.exe"
+        ],
+        "signal.original_event.category": [
+            "process"
+        ],
+        "winlog.api": [
+            "wineventlog"
+        ],
+        "signal.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "host.id": [
+            "bb537b1e-2db1-4ede-8b49-f3e63a57eff1"
+        ],
+        "elastic_agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "process.working_directory.text": [
+            "C:\\Users\\victim\\AppData\\Local\\Temp\\"
+        ],
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "signal.rule.threat.technique.subtechnique.reference": [
+            "https://attack.mitre.org/techniques/T1055/001/"
+        ],
+        "signal.rule.updated_by": [
+            "siem"
+        ],
+        "winlog.channel": [
+            "Microsoft-Windows-Sysmon/Operational"
+        ],
+        "host.os.platform": [
+            "windows"
+        ],
+        "kibana.alert.intended_timestamp": [
+            "2026-07-27T08:54:59.986Z"
+        ],
+        "kibana.alert.rule.severity": [
+            "high"
+        ],
+        "winlog.opcode": [
+            "Info"
+        ],
+        "kibana.alert.rule.execution.timestamp": [
+            "2026-07-27T08:55:00.042Z"
+        ],
+        "signal.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1055/"
+        ],
+        "kibana.version": [
+            "8.19.13"
+        ],
+        "winlog.event_data.TerminalSessionId": [
+            "1"
+        ],
+        "signal.ancestors.type": [
+            "event"
+        ],
+        "user.name.text": [
+            "victim"
+        ],
+        "winlog.event_data.LogonId": [
+            "0x76a4a"
+        ],
+        "kibana.alert.ancestors.id": [
+            "0rXEop8BEWnoqq1_z4Pl"
+        ],
+        "process.name.text": [
+            "mavinject.exe"
+        ],
+        "kibana.alert.original_data_stream.namespace": [
+            "default"
+        ],
+        "kibana.alert.original_event.code": [
+            "1"
+        ],
+        "kibana.alert.rule.description": [
+            "This rule detects potential DLL injection activity using the Windows utility mavinject.exe. Attackers can abuse mavinject with the /INJECTRUNNING flag to load a DLL into the memory space of another running process via CreateRemoteThread. The query looks for Event ID 1 (process creation) where the process name is mavinject.exe and the command line includes /INJECTRUNNING. This behavior is commonly associated with adversary simulation tools (e.g., Atomic Red Team) but may also indicate malicious injection attempts. Detection of this activity helps identify process injection techniques used to gain code execution within trusted processes."
+        ],
+        "related.hash": [
+            "46a9c5234b3cc5352b5cc562b240aed83040cf993a4625c69174cf746cb1fa8d",
+            "d9a4f566a8ad07702a9b212efe922d25",
+            "429058796b83bc005db1f177f77554bc"
+        ],
+        "winlog.computer_name": [
+            "DESKTOP-THONLNR"
+        ],
+        "kibana.alert.rule.producer": [
+            "siem"
+        ],
+        "kibana.alert.rule.to": [
+            "now"
+        ],
+        "kibana.alert.original_event.ingested": [
+            "2026-07-27T08:50:35.000Z"
+        ],
+        "signal.rule.id": [
+            "f06537d8-aeb0-40e3-a7e5-3d2ac6f5b46a"
+        ],
+        "signal.reason": [
+            "process event with process mavinject.exe, parent process powershell.exe, by victim on desktop-thonlnr created high alert DLL Injection via CreateRemoteThread."
+        ],
+        "signal.rule.risk_score": [
+            73
+        ],
+        "host.os.name": [
+            "Windows 10 Pro"
+        ],
+        "log.level": [
+            "information"
+        ],
+        "signal.status": [
+            "acknowledged"
+        ],
+        "kibana.alert.rule.threat.tactic.name": [
+            "Privilege Escalation"
+        ],
+        "kibana.alert.rule.uuid": [
+            "f06537d8-aeb0-40e3-a7e5-3d2ac6f5b46a"
+        ],
+        "kibana.alert.original_event.category": [
+            "process"
+        ],
+        "signal.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "process.name": [
+            "mavinject.exe"
+        ],
+        "process.parent.executable.text": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "kibana.alert.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003"
+        ],
+        "process.pe.description": [
+            "Microsoft Application Virtualization Injector"
+        ],
+        "agent.version": [
+            "8.19.14"
+        ],
+        "host.os.family": [
+            "windows"
+        ],
+        "kibana.alert.rule.from": [
+            "now-6m"
+        ],
+        "kibana.alert.rule.parameters": [
+            {
+                "severity": "high",
+                "max_signals": 100,
+                "rule_source": {
+                    "type": "internal"
+                },
+                "risk_score": 73,
+                "query": "event.code: \"1\" AND\nprocess.name: \"mavinject.exe\" AND\nprocess.command_line: *INJECTRUNNING* AND\n\nNOT process.parent.executable: (\n    \"C:\\\\Windows\\\\System32\\\\msiexec.exe\" OR\n    \"C:\\\\Windows\\\\System32\\\\AppVClient.exe\" OR\n    \"C:\\\\Program Files\\\\Microsoft Application Virtualization\\\\*\"\n)\n",
+                "description": "This rule detects potential DLL injection activity using the Windows utility mavinject.exe. Attackers can abuse mavinject with the /INJECTRUNNING flag to load a DLL into the memory space of another running process via CreateRemoteThread. The query looks for Event ID 1 (process creation) where the process name is mavinject.exe and the command line includes /INJECTRUNNING. This behavior is commonly associated with adversary simulation tools (e.g., Atomic Red Team) but may also indicate malicious injection attempts. Detection of this activity helps identify process injection techniques used to gain code execution within trusted processes.",
+                "index": [
+                    "apm-*-transaction*",
+                    "auditbeat-*",
+                    "endgame-*",
+                    "filebeat-*",
+                    "logs-*",
+                    "packetbeat-*",
+                    "traces-apm*",
+                    "winlogbeat-*",
+                    "-*elastic-cloud-logs-*"
+                ],
+                "language": "kuery",
+                "type": "query",
+                "version": 1,
+                "rule_id": "0013e73c-7d6a-4878-aa59-a9d055528e5f",
+                "license": "",
+                "immutable": false,
+                "meta": {
+                    "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+                },
+                "setup": "",
+                "from": "now-6m",
+                "threat": {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1055/",
+                            "name": "Process Injection",
+                            "subtechnique": [
+                                {
+                                    "reference": "https://attack.mitre.org/techniques/T1055/001/",
+                                    "name": "Dynamic-link Library Injection",
+                                    "id": "T1055.001"
+                                }
+                            ],
+                            "id": "T1055"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0004/",
+                        "name": "Privilege Escalation",
+                        "id": "TA0004"
+                    }
+                },
+                "to": "now"
+            }
+        ],
+        "kibana.alert.rule.threat.tactic.id": [
+            "TA0004"
+        ],
+        "signal.original_event.kind": [
+            "event"
+        ],
+        "kibana.alert.rule.threat.technique.name": [
+            "Process Injection"
+        ],
+        "winlog.event_data.ParentUser": [
+            "DESKTOP-THONLNR\\victim"
+        ],
+        "signal.depth": [
+            1
+        ],
+        "signal.rule.immutable": [
+            "false"
+        ],
+        "process.parent.name.text": [
+            "powershell.exe"
+        ],
+        "host.os.build": [
+            "19045.3803"
+        ],
+        "signal.rule.name": [
+            "DLL Injection via CreateRemoteThread"
+        ],
+        "event.module": [
+            "windows"
+        ],
+        "host.os.kernel": [
+            "10.0.19041.3803 (WinBuild.160101.0800)"
+        ],
+        "kibana.alert.rule.license": [
+            ""
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.id": [
+            "T1055.001"
+        ],
+        "kibana.alert.original_event.kind": [
+            "event"
+        ],
+        "winlog.task": [
+            "Process Create (rule: ProcessCreate)"
+        ],
+        "winlog.user.domain": [
+            "NT AUTHORITY"
+        ],
+        "process.parent.command_line.text": [
+            "\"powershell.exe\" & {$mypid = (Start-Process notepad -PassThru).id\nmavinject $mypid /INJECTRUNNING \\\"\"C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\\\"\"\nStop-Process -processname notepad}"
+        ],
+        "signal.rule.description": [
+            "This rule detects potential DLL injection activity using the Windows utility mavinject.exe. Attackers can abuse mavinject with the /INJECTRUNNING flag to load a DLL into the memory space of another running process via CreateRemoteThread. The query looks for Event ID 1 (process creation) where the process name is mavinject.exe and the command line includes /INJECTRUNNING. This behavior is commonly associated with adversary simulation tools (e.g., Atomic Red Team) but may also indicate malicious injection attempts. Detection of this activity helps identify process injection techniques used to gain code execution within trusted processes."
+        ],
+        "process.args": [
+            "C:\\Windows\\system32\\mavinject.exe",
+            "4512",
+            "/INJECTRUNNING",
+            "C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll"
+        ],
+        "message": [
+            "Process Create:\nRuleName: -\nUtcTime: 2026-07-27 08:50:25.118\nProcessGuid: {bb537b1e-1bd1-6a67-b601-000000001e00}\nProcessId: 7072\nImage: C:\\Windows\\System32\\mavinject.exe\nFileVersion: 10.0.19041.3636 (WinBuild.160101.0800)\nDescription: Microsoft Application Virtualization Injector\nProduct: Microsoft® Windows® Operating System\nCompany: Microsoft Corporation\nOriginalFileName: mavinject64.exe\nCommandLine: \"C:\\Windows\\system32\\mavinject.exe\" 4512 /INJECTRUNNING C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\nCurrentDirectory: C:\\Users\\victim\\AppData\\Local\\Temp\\\nUser: DESKTOP-THONLNR\\victim\nLogonGuid: {bb537b1e-131e-6a67-4a6a-070000000000}\nLogonId: 0x76A4A\nTerminalSessionId: 1\nIntegrityLevel: High\nHashes: MD5=D9A4F566A8AD07702A9B212EFE922D25,SHA256=46A9C5234B3CC5352B5CC562B240AED83040CF993A4625C69174CF746CB1FA8D,IMPHASH=429058796B83BC005DB1F177F77554BC\nParentProcessGuid: {bb537b1e-1bd0-6a67-b101-000000001e00}\nParentProcessId: 9004\nParentImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nParentCommandLine: \"powershell.exe\" & {$mypid = (Start-Process notepad -PassThru).id\nmavinject $mypid /INJECTRUNNING \\\"\"C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\\\"\"\nStop-Process -processname notepad}\nParentUser: DESKTOP-THONLNR\\victim"
+        ],
+        "kibana.alert.original_data_stream.type": [
+            "logs"
+        ],
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.severity": [
+            "high"
+        ],
+        "signal.ancestors.depth": [
+            0
+        ],
+        "event.category": [
+            "process"
+        ],
+        "process.parent.command_line": [
+            "\"powershell.exe\" & {$mypid = (Start-Process notepad -PassThru).id\nmavinject $mypid /INJECTRUNNING \\\"\"C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\\\"\"\nStop-Process -processname notepad}"
+        ],
+        "process.parent.name": [
+            "powershell.exe"
+        ],
+        "process.parent.pid": [
+            9004
+        ],
+        "kibana.alert.reason.text": [
+            "process event with process mavinject.exe, parent process powershell.exe, by victim on desktop-thonlnr created high alert DLL Injection via CreateRemoteThread."
+        ],
+        "kibana.alert.ancestors.depth": [
+            0
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.name": [
+            "Dynamic-link Library Injection"
+        ],
+        "agent.name": [
+            "DESKTOP-THONLNR"
+        ],
+        "event.agent_id_status": [
+            "verified"
+        ],
+        "user.id": [
+            "S-1-5-18"
+        ],
+        "input.type": [
+            "winlog"
+        ],
+        "process.pe.product": [
+            "Microsoft® Windows® Operating System"
+        ],
+        "signal.rule.threat.technique.subtechnique.name": [
+            "Dynamic-link Library Injection"
+        ],
+        "kibana.alert.workflow_user": [
+            "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0"
+        ],
+        "related.user": [
+            "victim"
+        ],
+        "host.architecture": [
+            "x86_64"
+        ],
+        "kibana.alert.start": [
+            "2026-07-27T08:55:00.042Z"
+        ],
+        "event.code": [
+            "1"
+        ],
+        "kibana.alert.original_event.type": [
+            "start"
+        ],
+        "winlog.event_data.FileVersion": [
+            "10.0.19041.3636 (WinBuild.160101.0800)"
+        ],
+        "agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "signal.original_event.module": [
+            "windows"
+        ],
+        "signal.rule.from": [
+            "now-6m"
+        ],
+        "winlog.event_data.LogonGuid": [
+            "{bb537b1e-131e-6a67-4a6a-070000000000}"
+        ],
+        "kibana.alert.rule.enabled": [
+            "true"
+        ],
+        "kibana.alert.ancestors.type": [
+            "event"
+        ],
+        "winlog.process.thread.id": [
+            4392
+        ],
+        "signal.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003"
+        ],
+        "user.name": [
+            "victim"
+        ],
+        "kibana.alert.original_data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "elastic_agent.snapshot": [
+            false
+        ],
+        "user.domain": [
+            "DESKTOP-THONLNR"
+        ],
+        "signal.original_event.type": [
+            "start"
+        ],
+        "process.pe.file_version": [
+            "10.0.19041.3636 (WinBuild.160101.0800)"
+        ],
+        "kibana.alert.rule.max_signals": [
+            100
+        ],
+        "kibana.alert.rule.risk_score": [
+            73
+        ],
+        "signal.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "signal.rule.threat.technique.id": [
+            "T1055"
+        ],
+        "winlog.user.name": [
+            "SYSTEM"
+        ],
+        "kibana.alert.rule.consumer": [
+            "siem"
+        ],
+        "kibana.alert.rule.category": [
+            "Custom Query Rule"
+        ],
+        "event.action": [
+            "Process creation"
+        ],
+        "event.ingested": [
+            "2026-07-27T08:50:35.000Z"
+        ],
+        "process.pe.company": [
+            "Microsoft Corporation"
+        ],
+        "@timestamp": [
+            "2026-07-27T08:54:59.986Z"
+        ],
+        "kibana.alert.original_event.action": [
+            "Process creation"
+        ],
+        "kibana.alert.original_event.agent_id_status": [
+            "verified"
+        ],
+        "data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "agent.ephemeral_id": [
+            "64addb2f-5b7b-434f-8391-8206263963f2"
+        ],
+        "kibana.alert.rule.execution.uuid": [
+            "213f6ced-7c1b-413c-92b8-b68815bc258f"
+        ],
+        "kibana.alert.uuid": [
+            "4384a8ca0f2a313f4970438ddd35599e3ebee89b4463ec0f80e0ad553dd54aac"
+        ],
+        "kibana.alert.rule.meta.kibana_siem_app_url": [
+            "http://192.168.31.130:5601/app/security"
+        ],
+        "signal.rule.threat.technique.name": [
+            "Process Injection"
+        ],
+        "signal.rule.license": [
+            ""
+        ],
+        "kibana.alert.rule.rule_id": [
+            "0013e73c-7d6a-4878-aa59-a9d055528e5f"
+        ],
+        "signal.rule.type": [
+            "query"
+        ],
+        "winlog.provider_guid": [
+            "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+        ],
+        "winlog.provider_name": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "process.pid": [
+            7072
+        ],
+        "signal.rule.created_by": [
+            "siem"
+        ],
+        "signal.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.created_by": [
+            "siem"
+        ],
+        "process.parent.entity_id": [
+            "{bb537b1e-1bd0-6a67-b101-000000001e00}"
+        ],
+        "winlog.record_id": [
+            "11775"
+        ],
+        "kibana.alert.rule.name": [
+            "DLL Injection via CreateRemoteThread"
+        ],
+        "host.name": [
+            "desktop-thonlnr"
+        ],
+        "kibana.alert.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1055/"
+        ],
+        "event.kind": [
+            "signal"
+        ],
+        "winlog.version": [
+            5
+        ],
+        "signal.rule.created_at": [
+            "2026-04-20T09:21:01.154Z"
+        ],
+        "kibana.alert.workflow_status": [
+            "acknowledged"
+        ],
+        "kibana.alert.original_event.created": [
+            "2026-07-27T08:50:26.184Z"
+        ],
+        "kibana.alert.reason": [
+            "process event with process mavinject.exe, parent process powershell.exe, by victim on desktop-thonlnr created high alert DLL Injection via CreateRemoteThread."
+        ],
+        "signal.rule.threat.tactic.id": [
+            "TA0004"
+        ],
+        "process.parent.args_count": [
+            12
+        ],
+        "data_stream.type": [
+            "logs"
+        ],
+        "signal.ancestors.id": [
+            "0rXEop8BEWnoqq1_z4Pl"
+        ],
+        "signal.original_time": [
+            "2026-07-27T08:50:25.118Z"
+        ],
+        "ecs.version": [
+            "8.17.0"
+        ],
+        "signal.rule.severity": [
+            "high"
+        ],
+        "event.created": [
+            "2026-07-27T08:50:26.184Z"
+        ],
+        "kibana.alert.depth": [
+            1
+        ],
+        "kibana.alert.rule.revision": [
+            1
+        ],
+        "signal.rule.version": [
+            "1"
+        ],
+        "kibana.alert.status": [
+            "active"
+        ],
+        "kibana.alert.last_detected": [
+            "2026-07-27T08:55:00.042Z"
+        ],
+        "kibana.alert.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "winlog.user.type": [
+            "User"
+        ],
+        "kibana.alert.rule.rule_type_id": [
+            "siem.queryRule"
+        ],
+        "kibana.alert.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "signal.rule.rule_id": [
+            "0013e73c-7d6a-4878-aa59-a9d055528e5f"
+        ],
+        "signal.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0004/"
+        ],
+        "process.executable": [
+            "C:\\Windows\\System32\\mavinject.exe"
+        ],
+        "winlog.user.identifier": [
+            "S-1-5-18"
+        ],
+        "process.parent.executable": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "signal.rule.threat.tactic.name": [
+            "Privilege Escalation"
+        ],
+        "kibana.alert.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "process.args_count": [
+            4
+        ],
+        "kibana.alert.rule.updated_at": [
+            "2026-04-20T09:22:08.773Z"
+        ],
+        "data_stream.namespace": [
+            "default"
+        ],
+        "winlog.event_data.IntegrityLevel": [
+            "High"
+        ],
+        "winlog.event_id": [
+            "1"
+        ],
+        "kibana.alert.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0004/"
+        ],
+        "process.parent.args": [
+            "powershell.exe",
+            "&",
+            "{$mypid",
+            "=",
+            "(Start-Process",
+            "notepad",
+            "-PassThru).id\nmavinject",
+            "$mypid",
+            "/INJECTRUNNING",
+            "\"C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll\"\nStop-Process",
+            "-processname",
+            "notepad}"
+        ],
+        "signal.original_event.action": [
+            "Process creation"
+        ],
+        "kibana.alert.rule.created_at": [
+            "2026-04-20T09:21:01.154Z"
+        ],
+        "process.pe.imphash": [
+            "429058796b83bc005db1f177f77554bc"
+        ],
+        "signal.rule.to": [
+            "now"
+        ],
+        "event.type": [
+            "start"
+        ],
+        "process.command_line": [
+            "\"C:\\Windows\\system32\\mavinject.exe\" 4512 /INJECTRUNNING C:\\AtomicRedTeam\\atomics\\T1055.001\\src\\x64\\T1055.001.dll"
+        ],
+        "kibana.alert.rule.execution.type": [
+            "scheduled"
+        ],
+        "winlog.event_data.Product": [
+            "Microsoft® Windows® Operating System"
+        ],
+        "event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "kibana.alert.original_time": [
+            "2026-07-27T08:50:25.118Z"
+        ]
+    }
+}

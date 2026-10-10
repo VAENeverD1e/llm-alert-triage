@@ -1,0 +1,40 @@
+{
+  "alert_id": "BNG-T1055.001",
+  "rule_uuid": "bng-uuid-1055",
+  "rule_id": "T1055.001",
+  "rule_name": "Process Injection: Dynamic-link Library Injection",
+  "severity": "low",
+  "risk_score": 25,
+  "timestamp": "2026-10-10T08:15:00Z",
+  "host_name": "desktop-thonlnr",
+  "user_name": "victim",
+  "reason": "Application virtualization subsystem hook injection",
+  "telemetry_source": "sysmon",
+  "event_code": "1",
+  "process_context": {
+    "process": {
+      "name": "mavinject.exe",
+      "executable": "C:\\Windows\\System32\\mavinject.exe",
+      "command_line": "C:\\Windows\\system32\\mavinject.exe 2480 /INJECTRUNNING \"C:\\Program Files\\Microsoft Office\\root\\Office16\\AppvIsvSubsystems64.dll\"",
+      "pid": 5112,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "parent_process": {
+      "name": "AppVClient.exe",
+      "executable": "C:\\Program Files\\Microsoft Application Virtualization\\Client\\AppVClient.exe",
+      "command_line": "\"C:\\Program Files\\Microsoft Application Virtualization\\Client\\AppVClient.exe\"",
+      "pid": 1820,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "target_process_name": null,
+    "granted_access": null,
+    "call_trace": null
+  },
+  "registry_context": null,
+  "network_context": null,
+  "raw_event": {}
+}

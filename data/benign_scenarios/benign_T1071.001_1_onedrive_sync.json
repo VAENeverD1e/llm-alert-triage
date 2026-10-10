@@ -1,0 +1,28 @@
+{
+  "alert_id": "BNG-T1071.001-1",
+  "rule_uuid": "bng-uuid-1071-1",
+  "rule_id": "T1071.001",
+  "rule_name": "Suspicious C2 Web Communication",
+  "severity": "low",
+  "risk_score": 20,
+  "timestamp": "2026-10-10T08:25:00Z",
+  "host_name": "desktop-thonlnr",
+  "user_name": "victim",
+  "reason": "Routine enterprise cloud storage sync heartbeat",
+  "telemetry_source": "suricata",
+  "event_code": null,
+  "process_context": null,
+  "registry_context": null,
+  "network_context": {
+    "source_ip": "192.168.1.105",
+    "source_port": 52410,
+    "destination_ip": "13.107.136.9",
+    "destination_port": 443,
+    "protocol": "tls",
+    "direction": "egress",
+    "user_agent": "Microsoft OneDrive Sync 24.086.0428.0001",
+    "suricata_signature": "ET INFO Microsoft OneDrive Cloud Sync Heartbeat",
+    "suricata_category": "Corporate Cloud Storage Traffic"
+  },
+  "raw_event": {}
+}

@@ -1,0 +1,40 @@
+{
+  "alert_id": "BNG-T1053.005",
+  "rule_uuid": "bng-uuid-1053",
+  "rule_id": "T1053.005",
+  "rule_name": "Scheduled Task Creation",
+  "severity": "low",
+  "risk_score": 20,
+  "timestamp": "2026-10-10T08:10:00Z",
+  "host_name": "desktop-thonlnr",
+  "user_name": "NT AUTHORITY\\SYSTEM",
+  "reason": "Routine software auto-update task registration",
+  "telemetry_source": "sysmon",
+  "event_code": "1",
+  "process_context": {
+    "process": {
+      "name": "schtasks.exe",
+      "executable": "C:\\Windows\\System32\\schtasks.exe",
+      "command_line": "schtasks.exe /create /tn \"GoogleUpdateTaskMachineUA\" /tr \"\\\"C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe\\\" /ua /installsource scheduler\" /sc daily /st 02:00 /ru \"NT AUTHORITY\\SYSTEM\"",
+      "pid": 4208,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "parent_process": {
+      "name": "GoogleUpdate.exe",
+      "executable": "C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe",
+      "command_line": "\"C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe\" /c",
+      "pid": 3104,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "target_process_name": null,
+    "granted_access": null,
+    "call_trace": null
+  },
+  "registry_context": null,
+  "network_context": null,
+  "raw_event": {}
+}

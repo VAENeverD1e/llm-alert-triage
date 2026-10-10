@@ -1,0 +1,50 @@
+{
+  "alert_id": "BNG-T1071.001-2",
+  "rule_uuid": "bng-uuid-1071-2",
+  "rule_id": "T1071.001",
+  "rule_name": "Outbound Script Network Connection",
+  "severity": "low",
+  "risk_score": 20,
+  "timestamp": "2026-10-10T08:30:00Z",
+  "host_name": "desktop-thonlnr",
+  "user_name": "NT AUTHORITY\\SYSTEM",
+  "reason": "System Windows Update check connection",
+  "telemetry_source": "sysmon",
+  "event_code": "3",
+  "process_context": {
+    "process": {
+      "name": "powershell.exe",
+      "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "command_line": "powershell.exe -ExecutionPolicy Restricted -Command \"Get-WindowsUpdate -AcceptAll\"",
+      "pid": 7120,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "parent_process": {
+      "name": "svchost.exe",
+      "executable": "C:\\Windows\\System32\\svchost.exe",
+      "command_line": "C:\\Windows\\system32\\svchost.exe -k netsvcs -p -s wuauserv",
+      "pid": 1080,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "target_process_name": null,
+    "granted_access": null,
+    "call_trace": null
+  },
+  "registry_context": null,
+  "network_context": {
+    "source_ip": "192.168.1.105",
+    "source_port": 49820,
+    "destination_ip": "20.189.173.1",
+    "destination_port": 443,
+    "protocol": "tcp",
+    "direction": "egress",
+    "user_agent": null,
+    "suricata_signature": null,
+    "suricata_category": null
+  },
+  "raw_event": {}
+}

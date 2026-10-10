@@ -1,0 +1,32 @@
+{
+  "alert_id": "BNG-T1003.001",
+  "rule_uuid": "bng-uuid-1003",
+  "rule_id": "T1003.001",
+  "rule_name": "LSASS Memory Access",
+  "severity": "low",
+  "risk_score": 21,
+  "timestamp": "2026-10-10T08:00:00Z",
+  "host_name": "desktop-thonlnr",
+  "user_name": "NT AUTHORITY\\SYSTEM",
+  "reason": "Routine WMI host query accessing LSASS process space",
+  "telemetry_source": "sysmon",
+  "event_code": "10",
+  "process_context": {
+    "process": {
+      "name": "svchost.exe",
+      "executable": "C:\\Windows\\System32\\svchost.exe",
+      "command_line": "C:\\Windows\\system32\\svchost.exe -k DcomLaunch -p",
+      "pid": 944,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "parent_process": null,
+    "target_process_name": "C:\\Windows\\System32\\lsass.exe",
+    "granted_access": "0x1410",
+    "call_trace": "C:\\Windows\\System32\\cimwin32.dll+1a2b3|C:\\Windows\\System32\\wbem\\fastprox.dll+45c8"
+  },
+  "registry_context": null,
+  "network_context": null,
+  "raw_event": {}
+}

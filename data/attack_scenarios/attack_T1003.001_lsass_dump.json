@@ -1,0 +1,898 @@
+{
+    "_index": ".internal.alerts-security.alerts-default-000001",
+    "_id": "172e5b339f4fca65e8670c7b814ae4e4ec46644c4b0a41d4e168556f30e0e661",
+    "_score": 1,
+    "_source": {
+        "kibana.alert.rule.execution.timestamp": "2026-04-21T08:54:08.264Z",
+        "kibana.alert.start": "2026-04-21T08:54:08.264Z",
+        "kibana.alert.last_detected": "2026-04-21T08:54:08.264Z",
+        "kibana.version": "8.19.13",
+        "kibana.alert.rule.parameters": {
+            "description": "Detects attempts to access the LSASS (Local Security Authority Subsystem Service) process memory using suspicious access masks or dumping techniques. Attackers often target LSASS to extract cached credentials, enabling lateral movement and privilege escalation. This rule should be investigated promptly, as legitimate software rarely requires direct LSASS memory access.",
+            "risk_score": 73,
+            "severity": "high",
+            "license": "",
+            "meta": {
+                "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+            },
+            "author": [],
+            "false_positives": [],
+            "from": "now-6m",
+            "rule_id": "052efc44-f956-48cb-971a-25963b66fe86",
+            "max_signals": 100,
+            "risk_score_mapping": [],
+            "severity_mapping": [],
+            "threat": [
+                {
+                    "framework": "MITRE ATT&CK",
+                    "tactic": {
+                        "id": "TA0006",
+                        "name": "Credential Access",
+                        "reference": "https://attack.mitre.org/tactics/TA0006/"
+                    },
+                    "technique": [
+                        {
+                            "id": "T1003",
+                            "name": "OS Credential Dumping",
+                            "reference": "https://attack.mitre.org/techniques/T1003/",
+                            "subtechnique": []
+                        }
+                    ]
+                }
+            ],
+            "to": "now",
+            "references": [],
+            "version": 1,
+            "exceptions_list": [],
+            "immutable": false,
+            "rule_source": {
+                "type": "internal"
+            },
+            "related_integrations": [],
+            "required_fields": [],
+            "setup": "",
+            "type": "query",
+            "language": "kuery",
+            "index": [
+                "apm-*-transaction*",
+                "auditbeat-*",
+                "endgame-*",
+                "filebeat-*",
+                "logs-*",
+                "packetbeat-*",
+                "traces-apm*",
+                "winlogbeat-*",
+                "-*elastic-cloud-logs-*"
+            ],
+            "query": "event.code: \"10\" AND\nwinlog.event_data.TargetImage: *lsass.exe AND\nwinlog.event_data.GrantedAccess: (\"0x1fffff\" OR \"0x1010\" OR \"0x1410\" OR \"0x1418\" OR \"0x143a\" OR \"0x1438\") AND\n\nNOT winlog.event_data.SourceImage: (\n    *MsMpEng.exe OR\n    *MsSense.exe OR\n    *SenseCncProxy.exe OR\n    *elastic-agent.exe OR\n    *agentbeat.exe OR\n    *csrss.exe OR\n    *wininit.exe OR\n    *lsass.exe\n) AND\n\nNOT (\n    winlog.event_data.SourceImage: *wmiprvse.exe AND\n    winlog.event_data.CallTrace: (*cimwin32* OR *framedynos*)\n) AND\n\nNOT (\n    winlog.event_data.SourceImage: *svchost.exe AND\n    winlog.event_data.GrantedAccess: \"0x1410\"\n) AND\n\nNOT (\n    winlog.event_data.SourceImage: *taskmgr.exe AND\n    winlog.event_data.GrantedAccess: (\"0x1010\" OR \"0x1410\")\n)",
+            "filters": []
+        },
+        "kibana.alert.rule.category": "Custom Query Rule",
+        "kibana.alert.rule.consumer": "siem",
+        "kibana.alert.rule.execution.uuid": "4437a200-52ca-429d-bf3a-f40b65b31b3f",
+        "kibana.alert.rule.name": "LSASS Memory Access",
+        "kibana.alert.rule.producer": "siem",
+        "kibana.alert.rule.revision": 13,
+        "kibana.alert.rule.rule_type_id": "siem.queryRule",
+        "kibana.alert.rule.uuid": "4547c554-2c13-40bc-8846-f02279905e69",
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.rule.tags": [],
+        "@timestamp": "2026-04-21T08:54:08.208Z",
+        "agent": {
+            "name": "DESKTOP-THONLNR",
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "ephemeral_id": "b14fe5df-d3e2-447a-bfdd-feb71f199e99",
+            "type": "filebeat",
+            "version": "8.19.14"
+        },
+        "process": {
+            "name": "rundll32.exe",
+            "pid": 4548,
+            "thread": {
+                "id": 2388
+            },
+            "entity_id": "{bb537b1e-3ad7-69e7-6101-000000001600}",
+            "executable": "C:\\Windows\\System32\\rundll32.exe"
+        },
+        "winlog": {
+            "computer_name": "DESKTOP-THONLNR",
+            "process": {
+                "pid": 2472,
+                "thread": {
+                    "id": 4956
+                }
+            },
+            "channel": "Microsoft-Windows-Sysmon/Operational",
+            "event_data": {
+                "GrantedAccess": "0x1fffff",
+                "TargetUser": "NT AUTHORITY\\SYSTEM",
+                "TargetProcessId": "700",
+                "SourceUser": "DESKTOP-THONLNR\\victim",
+                "TargetImage": "C:\\Windows\\system32\\lsass.exe",
+                "CallTrace": "C:\\Windows\\SYSTEM32\\ntdll.dll+9d4a4|C:\\Windows\\SYSTEM32\\ntdll.dll+d780a|C:\\Windows\\System32\\KERNEL32.DLL+1e1dc|C:\\Windows\\System32\\KERNEL32.DLL+26bfe|C:\\Windows\\SYSTEM32\\dbgcore.DLL+e5b1|C:\\Windows\\SYSTEM32\\dbgcore.DLL+1d2f5|C:\\Windows\\SYSTEM32\\dbgcore.DLL+16d65|C:\\Windows\\SYSTEM32\\dbgcore.DLL+63ce|C:\\Windows\\SYSTEM32\\dbgcore.DLL+6e9b|C:\\windows\\System32\\comsvcs.dll+22782|C:\\Windows\\System32\\rundll32.exe+42eb|C:\\Windows\\System32\\rundll32.exe+67e9|C:\\Windows\\System32\\KERNEL32.DLL+17344|C:\\Windows\\SYSTEM32\\ntdll.dll+526b1",
+                "TargetProcessGUID": "{bb537b1e-f954-69e5-0c00-000000001600}"
+            },
+            "opcode": "Info",
+            "version": 3,
+            "record_id": "24101",
+            "task": "Process accessed (rule: ProcessAccess)",
+            "event_id": "10",
+            "provider_guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "api": "wineventlog",
+            "provider_name": "Microsoft-Windows-Sysmon",
+            "user": {
+                "identifier": "S-1-5-18",
+                "domain": "NT AUTHORITY",
+                "name": "SYSTEM",
+                "type": "User"
+            }
+        },
+        "log": {
+            "level": "information"
+        },
+        "elastic_agent": {
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "version": "8.19.14",
+            "snapshot": false
+        },
+        "message": "Process accessed:\nRuleName: -\nUtcTime: 2026-04-21 08:52:39.679\nSourceProcessGUID: {bb537b1e-3ad7-69e7-6101-000000001600}\nSourceProcessId: 4548\nSourceThreadId: 2388\nSourceImage: C:\\Windows\\System32\\rundll32.exe\nTargetProcessGUID: {bb537b1e-f954-69e5-0c00-000000001600}\nTargetProcessId: 700\nTargetImage: C:\\Windows\\system32\\lsass.exe\nGrantedAccess: 0x1FFFFF\nCallTrace: C:\\Windows\\SYSTEM32\\ntdll.dll+9d4a4|C:\\Windows\\SYSTEM32\\ntdll.dll+d780a|C:\\Windows\\System32\\KERNEL32.DLL+1e1dc|C:\\Windows\\System32\\KERNEL32.DLL+26bfe|C:\\Windows\\SYSTEM32\\dbgcore.DLL+e5b1|C:\\Windows\\SYSTEM32\\dbgcore.DLL+1d2f5|C:\\Windows\\SYSTEM32\\dbgcore.DLL+16d65|C:\\Windows\\SYSTEM32\\dbgcore.DLL+63ce|C:\\Windows\\SYSTEM32\\dbgcore.DLL+6e9b|C:\\windows\\System32\\comsvcs.dll+22782|C:\\Windows\\System32\\rundll32.exe+42eb|C:\\Windows\\System32\\rundll32.exe+67e9|C:\\Windows\\System32\\KERNEL32.DLL+17344|C:\\Windows\\SYSTEM32\\ntdll.dll+526b1\nSourceUser: DESKTOP-THONLNR\\victim\nTargetUser: NT AUTHORITY\\SYSTEM",
+        "input": {
+            "type": "winlog"
+        },
+        "ecs": {
+            "version": "8.17.0"
+        },
+        "data_stream": {
+            "namespace": "default",
+            "type": "logs",
+            "dataset": "windows.sysmon_operational"
+        },
+        "host": {
+            "hostname": "DESKTOP-THONLNR",
+            "os": {
+                "build": "19045.3803",
+                "kernel": "10.0.19041.3803 (WinBuild.160101.0800)",
+                "name": "Windows 10 Pro",
+                "family": "windows",
+                "type": "windows",
+                "version": "10.0",
+                "platform": "windows"
+            },
+            "ip": [
+                "fe80::8ac2:9f81:1d7e:a0aa",
+                "192.168.75.12"
+            ],
+            "name": "desktop-thonlnr",
+            "id": "bb537b1e-2db1-4ede-8b49-f3e63a57eff1",
+            "mac": [
+                "00-0C-29-77-18-E4"
+            ],
+            "architecture": "x86_64"
+        },
+        "event": {
+            "agent_id_status": "verified",
+            "ingested": "2026-04-21T08:52:46Z",
+            "code": "10",
+            "provider": "Microsoft-Windows-Sysmon",
+            "created": "2026-04-21T08:52:40.294Z",
+            "action": "ProcessAccess",
+            "category": [
+                "process"
+            ],
+            "type": [
+                "access"
+            ],
+            "dataset": "windows.sysmon_operational",
+            "module": "windows"
+        },
+        "user": {
+            "id": "S-1-5-18"
+        },
+        "kibana.alert.original_data_stream.namespace": "default",
+        "kibana.alert.original_data_stream.type": "logs",
+        "kibana.alert.original_data_stream.dataset": "windows.sysmon_operational",
+        "kibana.alert.original_event.agent_id_status": "verified",
+        "kibana.alert.original_event.ingested": "2026-04-21T08:52:46Z",
+        "kibana.alert.original_event.code": "10",
+        "kibana.alert.original_event.provider": "Microsoft-Windows-Sysmon",
+        "kibana.alert.original_event.created": "2026-04-21T08:52:40.294Z",
+        "kibana.alert.original_event.kind": "event",
+        "kibana.alert.original_event.action": "ProcessAccess",
+        "kibana.alert.original_event.category": [
+            "process"
+        ],
+        "kibana.alert.original_event.type": [
+            "access"
+        ],
+        "kibana.alert.original_event.dataset": "windows.sysmon_operational",
+        "kibana.alert.original_event.module": "windows",
+        "event.kind": "signal",
+        "kibana.alert.original_time": "2026-04-21T08:52:39.679Z",
+        "kibana.alert.ancestors": [
+            {
+                "id": "Wyc9r50B0i_d64Em9lkP",
+                "type": "event",
+                "index": ".ds-logs-windows.sysmon_operational-default-2026.03.31-000001",
+                "depth": 0
+            }
+        ],
+        "kibana.alert.status": "active",
+        "kibana.alert.workflow_status": "open",
+        "kibana.alert.depth": 1,
+        "kibana.alert.reason": "process event with process rundll32.exe, on desktop-thonlnr created high alert LSASS Memory Access.",
+        "kibana.alert.severity": "high",
+        "kibana.alert.risk_score": 73,
+        "kibana.alert.rule.actions": [],
+        "kibana.alert.rule.author": [],
+        "kibana.alert.rule.created_at": "2026-04-17T09:12:54.292Z",
+        "kibana.alert.rule.created_by": "siem",
+        "kibana.alert.rule.description": "Detects attempts to access the LSASS (Local Security Authority Subsystem Service) process memory using suspicious access masks or dumping techniques. Attackers often target LSASS to extract cached credentials, enabling lateral movement and privilege escalation. This rule should be investigated promptly, as legitimate software rarely requires direct LSASS memory access.",
+        "kibana.alert.rule.enabled": true,
+        "kibana.alert.rule.exceptions_list": [],
+        "kibana.alert.rule.false_positives": [],
+        "kibana.alert.rule.from": "now-6m",
+        "kibana.alert.rule.immutable": false,
+        "kibana.alert.rule.interval": "5m",
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "kibana.alert.rule.license": "",
+        "kibana.alert.rule.max_signals": 100,
+        "kibana.alert.rule.references": [],
+        "kibana.alert.rule.risk_score_mapping": [],
+        "kibana.alert.rule.rule_id": "052efc44-f956-48cb-971a-25963b66fe86",
+        "kibana.alert.rule.severity_mapping": [],
+        "kibana.alert.rule.threat": [
+            {
+                "framework": "MITRE ATT&CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": []
+                    }
+                ]
+            }
+        ],
+        "kibana.alert.rule.to": "now",
+        "kibana.alert.rule.type": "query",
+        "kibana.alert.rule.updated_at": "2026-04-20T09:13:32.104Z",
+        "kibana.alert.rule.updated_by": "siem",
+        "kibana.alert.rule.version": 1,
+        "kibana.alert.uuid": "172e5b339f4fca65e8670c7b814ae4e4ec46644c4b0a41d4e168556f30e0e661",
+        "kibana.alert.workflow_tags": [],
+        "kibana.alert.workflow_assignee_ids": [],
+        "kibana.alert.rule.meta.kibana_siem_app_url": "http://192.168.31.130:5601/app/security",
+        "kibana.alert.rule.risk_score": 73,
+        "kibana.alert.rule.severity": "high",
+        "kibana.alert.intended_timestamp": "2026-04-21T08:54:08.208Z",
+        "kibana.alert.rule.execution.type": "scheduled"
+    },
+    "fields": {
+        "kibana.alert.severity": [
+            "high"
+        ],
+        "kibana.alert.rule.updated_by": [
+            "siem"
+        ],
+        "signal.ancestors.depth": [
+            0
+        ],
+        "event.category": [
+            "process"
+        ],
+        "elastic_agent.version": [
+            "8.19.14"
+        ],
+        "host.os.name.text": [
+            "Windows 10 Pro"
+        ],
+        "host.hostname": [
+            "DESKTOP-THONLNR"
+        ],
+        "signal.original_event.created": [
+            "2026-04-21T08:52:40.294Z"
+        ],
+        "host.mac": [
+            "00-0C-29-77-18-E4"
+        ],
+        "winlog.process.pid": [
+            2472
+        ],
+        "kibana.alert.reason.text": [
+            "process event with process rundll32.exe, on desktop-thonlnr created high alert LSASS Memory Access."
+        ],
+        "kibana.alert.rule.threat.technique.id": [
+            "T1003"
+        ],
+        "kibana.alert.ancestors.depth": [
+            0
+        ],
+        "signal.rule.enabled": [
+            "true"
+        ],
+        "host.os.version": [
+            "10.0"
+        ],
+        "signal.rule.max_signals": [
+            100
+        ],
+        "kibana.alert.risk_score": [
+            73
+        ],
+        "signal.rule.updated_at": [
+            "2026-04-20T09:13:32.104Z"
+        ],
+        "agent.name": [
+            "DESKTOP-THONLNR"
+        ],
+        "event.agent_id_status": [
+            "verified"
+        ],
+        "host.os.type": [
+            "windows"
+        ],
+        "user.id": [
+            "S-1-5-18"
+        ],
+        "signal.original_event.code": [
+            "10"
+        ],
+        "kibana.alert.original_event.module": [
+            "windows"
+        ],
+        "kibana.alert.rule.interval": [
+            "5m"
+        ],
+        "input.type": [
+            "winlog"
+        ],
+        "kibana.alert.rule.type": [
+            "query"
+        ],
+        "host.architecture": [
+            "x86_64"
+        ],
+        "kibana.alert.start": [
+            "2026-04-21T08:54:08.264Z"
+        ],
+        "event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.rule.immutable": [
+            "false"
+        ],
+        "event.code": [
+            "10"
+        ],
+        "kibana.alert.original_event.type": [
+            "access"
+        ],
+        "agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "signal.original_event.module": [
+            "windows"
+        ],
+        "signal.rule.from": [
+            "now-6m"
+        ],
+        "winlog.event_data.CallTrace": [
+            "C:\\Windows\\SYSTEM32\\ntdll.dll+9d4a4|C:\\Windows\\SYSTEM32\\ntdll.dll+d780a|C:\\Windows\\System32\\KERNEL32.DLL+1e1dc|C:\\Windows\\System32\\KERNEL32.DLL+26bfe|C:\\Windows\\SYSTEM32\\dbgcore.DLL+e5b1|C:\\Windows\\SYSTEM32\\dbgcore.DLL+1d2f5|C:\\Windows\\SYSTEM32\\dbgcore.DLL+16d65|C:\\Windows\\SYSTEM32\\dbgcore.DLL+63ce|C:\\Windows\\SYSTEM32\\dbgcore.DLL+6e9b|C:\\windows\\System32\\comsvcs.dll+22782|C:\\Windows\\System32\\rundll32.exe+42eb|C:\\Windows\\System32\\rundll32.exe+67e9|C:\\Windows\\System32\\KERNEL32.DLL+17344|C:\\Windows\\SYSTEM32\\ntdll.dll+526b1"
+        ],
+        "kibana.alert.rule.enabled": [
+            "true"
+        ],
+        "kibana.alert.rule.version": [
+            "1"
+        ],
+        "kibana.alert.ancestors.type": [
+            "event"
+        ],
+        "winlog.process.thread.id": [
+            4956
+        ],
+        "signal.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.03.31-000001"
+        ],
+        "kibana.alert.original_data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "process.entity_id": [
+            "{bb537b1e-3ad7-69e7-6101-000000001600}"
+        ],
+        "host.ip": [
+            "fe80::8ac2:9f81:1d7e:a0aa",
+            "192.168.75.12"
+        ],
+        "agent.type": [
+            "filebeat"
+        ],
+        "process.executable.text": [
+            "C:\\Windows\\System32\\rundll32.exe"
+        ],
+        "signal.original_event.category": [
+            "process"
+        ],
+        "winlog.api": [
+            "wineventlog"
+        ],
+        "signal.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "elastic_agent.snapshot": [
+            false
+        ],
+        "host.id": [
+            "bb537b1e-2db1-4ede-8b49-f3e63a57eff1"
+        ],
+        "signal.original_event.type": [
+            "access"
+        ],
+        "kibana.alert.rule.max_signals": [
+            100
+        ],
+        "elastic_agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "winlog.event_data.GrantedAccess": [
+            "0x1fffff"
+        ],
+        "kibana.alert.rule.risk_score": [
+            73
+        ],
+        "signal.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "signal.rule.threat.technique.id": [
+            "T1003"
+        ],
+        "winlog.user.name": [
+            "SYSTEM"
+        ],
+        "kibana.alert.rule.consumer": [
+            "siem"
+        ],
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "kibana.alert.rule.category": [
+            "Custom Query Rule"
+        ],
+        "event.action": [
+            "ProcessAccess"
+        ],
+        "event.ingested": [
+            "2026-04-21T08:52:46.000Z"
+        ],
+        "@timestamp": [
+            "2026-04-21T08:54:08.208Z"
+        ],
+        "kibana.alert.original_event.action": [
+            "ProcessAccess"
+        ],
+        "signal.rule.updated_by": [
+            "siem"
+        ],
+        "winlog.channel": [
+            "Microsoft-Windows-Sysmon/Operational"
+        ],
+        "host.os.platform": [
+            "windows"
+        ],
+        "kibana.alert.intended_timestamp": [
+            "2026-04-21T08:54:08.208Z"
+        ],
+        "kibana.alert.rule.severity": [
+            "high"
+        ],
+        "kibana.alert.original_event.agent_id_status": [
+            "verified"
+        ],
+        "data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "winlog.opcode": [
+            "Info"
+        ],
+        "agent.ephemeral_id": [
+            "b14fe5df-d3e2-447a-bfdd-feb71f199e99"
+        ],
+        "kibana.alert.rule.execution.timestamp": [
+            "2026-04-21T08:54:08.264Z"
+        ],
+        "signal.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1003/"
+        ],
+        "kibana.alert.rule.execution.uuid": [
+            "4437a200-52ca-429d-bf3a-f40b65b31b3f"
+        ],
+        "kibana.alert.uuid": [
+            "172e5b339f4fca65e8670c7b814ae4e4ec46644c4b0a41d4e168556f30e0e661"
+        ],
+        "kibana.alert.rule.meta.kibana_siem_app_url": [
+            "http://192.168.31.130:5601/app/security"
+        ],
+        "kibana.version": [
+            "8.19.13"
+        ],
+        "signal.rule.threat.technique.name": [
+            "OS Credential Dumping"
+        ],
+        "signal.rule.license": [
+            ""
+        ],
+        "signal.ancestors.type": [
+            "event"
+        ],
+        "kibana.alert.rule.rule_id": [
+            "052efc44-f956-48cb-971a-25963b66fe86"
+        ],
+        "signal.rule.type": [
+            "query"
+        ],
+        "kibana.alert.ancestors.id": [
+            "Wyc9r50B0i_d64Em9lkP"
+        ],
+        "process.name.text": [
+            "rundll32.exe"
+        ],
+        "kibana.alert.original_data_stream.namespace": [
+            "default"
+        ],
+        "kibana.alert.original_event.code": [
+            "10"
+        ],
+        "winlog.provider_guid": [
+            "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+        ],
+        "winlog.provider_name": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.rule.description": [
+            "Detects attempts to access the LSASS (Local Security Authority Subsystem Service) process memory using suspicious access masks or dumping techniques. Attackers often target LSASS to extract cached credentials, enabling lateral movement and privilege escalation. This rule should be investigated promptly, as legitimate software rarely requires direct LSASS memory access."
+        ],
+        "process.pid": [
+            4548
+        ],
+        "winlog.computer_name": [
+            "DESKTOP-THONLNR"
+        ],
+        "kibana.alert.rule.producer": [
+            "siem"
+        ],
+        "kibana.alert.rule.to": [
+            "now"
+        ],
+        "signal.rule.created_by": [
+            "siem"
+        ],
+        "signal.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.created_by": [
+            "siem"
+        ],
+        "kibana.alert.original_event.ingested": [
+            "2026-04-21T08:52:46.000Z"
+        ],
+        "signal.rule.id": [
+            "4547c554-2c13-40bc-8846-f02279905e69"
+        ],
+        "signal.reason": [
+            "process event with process rundll32.exe, on desktop-thonlnr created high alert LSASS Memory Access."
+        ],
+        "signal.rule.risk_score": [
+            73
+        ],
+        "winlog.record_id": [
+            "24101"
+        ],
+        "winlog.event_data.TargetUser": [
+            "NT AUTHORITY\\SYSTEM"
+        ],
+        "host.os.name": [
+            "Windows 10 Pro"
+        ],
+        "kibana.alert.rule.name": [
+            "LSASS Memory Access"
+        ],
+        "log.level": [
+            "information"
+        ],
+        "host.name": [
+            "desktop-thonlnr"
+        ],
+        "kibana.alert.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1003/"
+        ],
+        "signal.status": [
+            "open"
+        ],
+        "event.kind": [
+            "signal"
+        ],
+        "winlog.version": [
+            3
+        ],
+        "signal.rule.created_at": [
+            "2026-04-17T09:12:54.292Z"
+        ],
+        "kibana.alert.workflow_status": [
+            "open"
+        ],
+        "kibana.alert.original_event.created": [
+            "2026-04-21T08:52:40.294Z"
+        ],
+        "kibana.alert.rule.threat.tactic.name": [
+            "Credential Access"
+        ],
+        "kibana.alert.rule.uuid": [
+            "4547c554-2c13-40bc-8846-f02279905e69"
+        ],
+        "kibana.alert.original_event.category": [
+            "process"
+        ],
+        "signal.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.reason": [
+            "process event with process rundll32.exe, on desktop-thonlnr created high alert LSASS Memory Access."
+        ],
+        "signal.rule.threat.tactic.id": [
+            "TA0006"
+        ],
+        "data_stream.type": [
+            "logs"
+        ],
+        "signal.ancestors.id": [
+            "Wyc9r50B0i_d64Em9lkP"
+        ],
+        "signal.original_time": [
+            "2026-04-21T08:52:39.679Z"
+        ],
+        "process.name": [
+            "rundll32.exe"
+        ],
+        "ecs.version": [
+            "8.17.0"
+        ],
+        "signal.rule.severity": [
+            "high"
+        ],
+        "kibana.alert.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.03.31-000001"
+        ],
+        "event.created": [
+            "2026-04-21T08:52:40.294Z"
+        ],
+        "agent.version": [
+            "8.19.14"
+        ],
+        "kibana.alert.depth": [
+            1
+        ],
+        "host.os.family": [
+            "windows"
+        ],
+        "process.thread.id": [
+            2388
+        ],
+        "kibana.alert.rule.from": [
+            "now-6m"
+        ],
+        "winlog.event_data.TargetProcessGUID": [
+            "{bb537b1e-f954-69e5-0c00-000000001600}"
+        ],
+        "kibana.alert.rule.parameters": [
+            {
+                "severity": "high",
+                "max_signals": 100,
+                "rule_source": {
+                    "type": "internal"
+                },
+                "risk_score": 73,
+                "query": "event.code: \"10\" AND\nwinlog.event_data.TargetImage: *lsass.exe AND\nwinlog.event_data.GrantedAccess: (\"0x1fffff\" OR \"0x1010\" OR \"0x1410\" OR \"0x1418\" OR \"0x143a\" OR \"0x1438\") AND\n\nNOT winlog.event_data.SourceImage: (\n    *MsMpEng.exe OR\n    *MsSense.exe OR\n    *SenseCncProxy.exe OR\n    *elastic-agent.exe OR\n    *agentbeat.exe OR\n    *csrss.exe OR\n    *wininit.exe OR\n    *lsass.exe\n) AND\n\nNOT (\n    winlog.event_data.SourceImage: *wmiprvse.exe AND\n    winlog.event_data.CallTrace: (*cimwin32* OR *framedynos*)\n) AND\n\nNOT (\n    winlog.event_data.SourceImage: *svchost.exe AND\n    winlog.event_data.GrantedAccess: \"0x1410\"\n) AND\n\nNOT (\n    winlog.event_data.SourceImage: *taskmgr.exe AND\n    winlog.event_data.GrantedAccess: (\"0x1010\" OR \"0x1410\")\n)",
+                "description": "Detects attempts to access the LSASS (Local Security Authority Subsystem Service) process memory using suspicious access masks or dumping techniques. Attackers often target LSASS to extract cached credentials, enabling lateral movement and privilege escalation. This rule should be investigated promptly, as legitimate software rarely requires direct LSASS memory access.",
+                "index": [
+                    "apm-*-transaction*",
+                    "auditbeat-*",
+                    "endgame-*",
+                    "filebeat-*",
+                    "logs-*",
+                    "packetbeat-*",
+                    "traces-apm*",
+                    "winlogbeat-*",
+                    "-*elastic-cloud-logs-*"
+                ],
+                "language": "kuery",
+                "type": "query",
+                "version": 1,
+                "rule_id": "052efc44-f956-48cb-971a-25963b66fe86",
+                "license": "",
+                "immutable": false,
+                "meta": {
+                    "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+                },
+                "setup": "",
+                "from": "now-6m",
+                "threat": {
+                    "framework": "MITRE ATT&CK",
+                    "tactic": {
+                        "id": "TA0006",
+                        "name": "Credential Access",
+                        "reference": "https://attack.mitre.org/tactics/TA0006/"
+                    },
+                    "technique": [
+                        {
+                            "id": "T1003",
+                            "name": "OS Credential Dumping",
+                            "reference": "https://attack.mitre.org/techniques/T1003/",
+                            "subtechnique": []
+                        }
+                    ]
+                },
+                "to": "now"
+            }
+        ],
+        "kibana.alert.rule.revision": [
+            13
+        ],
+        "kibana.alert.rule.threat.tactic.id": [
+            "TA0006"
+        ],
+        "signal.rule.version": [
+            "1"
+        ],
+        "signal.original_event.kind": [
+            "event"
+        ],
+        "kibana.alert.rule.threat.technique.name": [
+            "OS Credential Dumping"
+        ],
+        "kibana.alert.status": [
+            "active"
+        ],
+        "winlog.event_data.TargetImage": [
+            "C:\\Windows\\system32\\lsass.exe"
+        ],
+        "kibana.alert.last_detected": [
+            "2026-04-21T08:54:08.264Z"
+        ],
+        "kibana.alert.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "signal.depth": [
+            1
+        ],
+        "winlog.event_data.TargetProcessId": [
+            "700"
+        ],
+        "signal.rule.immutable": [
+            "false"
+        ],
+        "winlog.user.type": [
+            "User"
+        ],
+        "host.os.build": [
+            "19045.3803"
+        ],
+        "kibana.alert.rule.rule_type_id": [
+            "siem.queryRule"
+        ],
+        "signal.rule.name": [
+            "LSASS Memory Access"
+        ],
+        "event.module": [
+            "windows"
+        ],
+        "kibana.alert.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "signal.rule.rule_id": [
+            "052efc44-f956-48cb-971a-25963b66fe86"
+        ],
+        "host.os.kernel": [
+            "10.0.19041.3803 (WinBuild.160101.0800)"
+        ],
+        "signal.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0006/"
+        ],
+        "kibana.alert.rule.license": [
+            ""
+        ],
+        "kibana.alert.original_event.kind": [
+            "event"
+        ],
+        "process.executable": [
+            "C:\\Windows\\System32\\rundll32.exe"
+        ],
+        "winlog.event_data.SourceUser": [
+            "DESKTOP-THONLNR\\victim"
+        ],
+        "winlog.user.identifier": [
+            "S-1-5-18"
+        ],
+        "winlog.task": [
+            "Process accessed (rule: ProcessAccess)"
+        ],
+        "winlog.user.domain": [
+            "NT AUTHORITY"
+        ],
+        "signal.rule.threat.tactic.name": [
+            "Credential Access"
+        ],
+        "kibana.alert.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "kibana.alert.rule.updated_at": [
+            "2026-04-20T09:13:32.104Z"
+        ],
+        "signal.rule.description": [
+            "Detects attempts to access the LSASS (Local Security Authority Subsystem Service) process memory using suspicious access masks or dumping techniques. Attackers often target LSASS to extract cached credentials, enabling lateral movement and privilege escalation. This rule should be investigated promptly, as legitimate software rarely requires direct LSASS memory access."
+        ],
+        "data_stream.namespace": [
+            "default"
+        ],
+        "message": [
+            "Process accessed:\nRuleName: -\nUtcTime: 2026-04-21 08:52:39.679\nSourceProcessGUID: {bb537b1e-3ad7-69e7-6101-000000001600}\nSourceProcessId: 4548\nSourceThreadId: 2388\nSourceImage: C:\\Windows\\System32\\rundll32.exe\nTargetProcessGUID: {bb537b1e-f954-69e5-0c00-000000001600}\nTargetProcessId: 700\nTargetImage: C:\\Windows\\system32\\lsass.exe\nGrantedAccess: 0x1FFFFF\nCallTrace: C:\\Windows\\SYSTEM32\\ntdll.dll+9d4a4|C:\\Windows\\SYSTEM32\\ntdll.dll+d780a|C:\\Windows\\System32\\KERNEL32.DLL+1e1dc|C:\\Windows\\System32\\KERNEL32.DLL+26bfe|C:\\Windows\\SYSTEM32\\dbgcore.DLL+e5b1|C:\\Windows\\SYSTEM32\\dbgcore.DLL+1d2f5|C:\\Windows\\SYSTEM32\\dbgcore.DLL+16d65|C:\\Windows\\SYSTEM32\\dbgcore.DLL+63ce|C:\\Windows\\SYSTEM32\\dbgcore.DLL+6e9b|C:\\windows\\System32\\comsvcs.dll+22782|C:\\Windows\\System32\\rundll32.exe+42eb|C:\\Windows\\System32\\rundll32.exe+67e9|C:\\Windows\\System32\\KERNEL32.DLL+17344|C:\\Windows\\SYSTEM32\\ntdll.dll+526b1\nSourceUser: DESKTOP-THONLNR\\victim\nTargetUser: NT AUTHORITY\\SYSTEM"
+        ],
+        "winlog.event_id": [
+            "10"
+        ],
+        "kibana.alert.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0006/"
+        ],
+        "signal.original_event.action": [
+            "ProcessAccess"
+        ],
+        "kibana.alert.original_data_stream.type": [
+            "logs"
+        ],
+        "kibana.alert.rule.created_at": [
+            "2026-04-17T09:12:54.292Z"
+        ],
+        "signal.rule.to": [
+            "now"
+        ],
+        "event.type": [
+            "access"
+        ],
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.rule.execution.type": [
+            "scheduled"
+        ],
+        "event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "kibana.alert.original_time": [
+            "2026-04-21T08:52:39.679Z"
+        ]
+    }
+}

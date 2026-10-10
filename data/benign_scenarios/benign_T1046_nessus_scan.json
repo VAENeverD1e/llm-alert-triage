@@ -1,0 +1,28 @@
+{
+  "alert_id": "BNG-T1046",
+  "rule_uuid": "bng-uuid-1046",
+  "rule_id": "T1046",
+  "rule_name": "Network Service Scanning",
+  "severity": "low",
+  "risk_score": 25,
+  "timestamp": "2026-10-10T08:05:00Z",
+  "host_name": "sec-scanner-01",
+  "user_name": "svc-security",
+  "reason": "Authorized monthly internal vulnerability assessment scan",
+  "telemetry_source": "suricata",
+  "event_code": null,
+  "process_context": null,
+  "registry_context": null,
+  "network_context": {
+    "source_ip": "10.0.0.50",
+    "source_port": 49152,
+    "destination_ip": "10.0.0.10",
+    "destination_port": 80,
+    "protocol": "tcp",
+    "direction": "ingress",
+    "user_agent": "Mozilla/5.0 (compatible; Nessus Vulnerability Scanner)",
+    "suricata_signature": "ET INFO Authorized Security Vulnerability Scan in progress",
+    "suricata_category": "Potential Corporate Scanner"
+  },
+  "raw_event": {}
+}

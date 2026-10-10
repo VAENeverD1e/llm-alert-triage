@@ -1,0 +1,985 @@
+{
+    "_index": ".internal.alerts-security.alerts-default-000003",
+    "_id": "4b1822bde25a7261014118713e556803c9142832dadaf204db315dc113bf99cc",
+    "_score": 1,
+    "_source": {
+        "kibana.alert.severity": "high",
+        "kibana.alert.workflow_status_updated_at": "2026-07-27T09:14:02.638Z",
+        "agent": {
+            "name": "DESKTOP-THONLNR",
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "type": "filebeat",
+            "ephemeral_id": "64addb2f-5b7b-434f-8391-8206263963f2",
+            "version": "8.19.14"
+        },
+        "kibana.alert.rule.references": [],
+        "kibana.alert.rule.updated_by": "siem",
+        "kibana.alert.rule.threat": [
+            {
+                "framework": "MITRE ATT&CK",
+                "technique": [
+                    {
+                        "reference": "https://attack.mitre.org/techniques/T1071/",
+                        "name": "Application Layer Protocol",
+                        "subtechnique": [
+                            {
+                                "reference": "https://attack.mitre.org/techniques/T1071/001/",
+                                "name": "Web Protocols",
+                                "id": "T1071.001"
+                            }
+                        ],
+                        "id": "T1071"
+                    }
+                ],
+                "tactic": {
+                    "reference": "https://attack.mitre.org/tactics/TA0011/",
+                    "name": "Command and Control",
+                    "id": "TA0011"
+                }
+            }
+        ],
+        "kibana.alert.original_data_stream.namespace": "default",
+        "kibana.alert.original_event.code": "3",
+        "kibana.alert.rule.description": "Detects outbound network connections initiated by scripting or command-line\nprocesses (PowerShell, cmd, wscript) to commonly abused ports.\n\nThis behavior may indicate command-and-control (C2) activity, script-based\ndownloaders, or post-exploitation techniques where attackers use native\nWindows tools to communicate with external infrastructure.\n\nThis rule complements network-based detections by providing process-level\nvisibility and attribution.",
+        "source": {
+            "port": 51725,
+            "ip": "192.168.31.132",
+            "domain": "DESKTOP-THONLNR.localdomain"
+        },
+        "kibana.alert.rule.tags": [],
+        "kibana.alert.rule.producer": "siem",
+        "kibana.alert.rule.to": "now",
+        "kibana.alert.rule.created_by": "siem",
+        "kibana.alert.original_event.ingested": "2026-07-27T09:08:56Z",
+        "ecs": {
+            "version": "8.17.0"
+        },
+        "kibana.alert.risk_score": 73,
+        "host": {
+            "hostname": "DESKTOP-THONLNR",
+            "os": {
+                "build": "19045.3803",
+                "kernel": "10.0.19041.3803 (WinBuild.160101.0800)",
+                "name": "Windows 10 Pro",
+                "type": "windows",
+                "family": "windows",
+                "version": "10.0",
+                "platform": "windows"
+            },
+            "ip": [
+                "fe80::8ac2:9f81:1d7e:a0aa",
+                "192.168.31.132"
+            ],
+            "name": "desktop-thonlnr",
+            "id": "bb537b1e-2db1-4ede-8b49-f3e63a57eff1",
+            "mac": [
+                "00-0C-29-77-18-E4"
+            ],
+            "architecture": "x86_64"
+        },
+        "kibana.alert.rule.name": "Suspicious Script-Based Outbound Network Connection",
+        "event.kind": "signal",
+        "kibana.alert.workflow_status": "open",
+        "kibana.alert.rule.uuid": "108e4d58-bcb7-4a58-9ea0-b856ac36ff52",
+        "kibana.alert.original_event.created": "2026-07-27T09:08:49.799Z",
+        "kibana.alert.original_event.category": [
+            "network"
+        ],
+        "kibana.alert.original_event.module": "windows",
+        "kibana.alert.rule.risk_score_mapping": [],
+        "kibana.alert.rule.interval": "5m",
+        "kibana.alert.reason": "network event with process powershell.exe, source 192.168.31.132:51725, destination 192.168.75.11:8080, by victim on desktop-thonlnr created high alert Suspicious Script-Based Outbound Network Connection.",
+        "kibana.alert.rule.type": "query",
+        "kibana.alert.workflow_user": "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0",
+        "kibana.alert.start": "2026-07-27T09:10:00.242Z",
+        "input": {
+            "type": "winlog"
+        },
+        "kibana.alert.rule.immutable": false,
+        "kibana.alert.original_event.type": [
+            "start",
+            "connection",
+            "protocol"
+        ],
+        "kibana.alert.depth": 1,
+        "kibana.alert.rule.enabled": true,
+        "kibana.alert.rule.version": 1,
+        "kibana.alert.rule.from": "now-6m",
+        "kibana.alert.rule.parameters": {
+            "severity_mapping": [],
+            "references": [],
+            "description": "Detects outbound network connections initiated by scripting or command-line\nprocesses (PowerShell, cmd, wscript) to commonly abused ports.\n\nThis behavior may indicate command-and-control (C2) activity, script-based\ndownloaders, or post-exploitation techniques where attackers use native\nWindows tools to communicate with external infrastructure.\n\nThis rule complements network-based detections by providing process-level\nvisibility and attribution.",
+            "language": "kuery",
+            "type": "query",
+            "exceptions_list": [],
+            "from": "now-6m",
+            "severity": "high",
+            "max_signals": 100,
+            "rule_source": {
+                "type": "internal"
+            },
+            "risk_score": 73,
+            "risk_score_mapping": [],
+            "author": [],
+            "query": "event.code: 3 AND\nprocess.name: (\"powershell.exe\" OR \"cmd.exe\" OR \"wscript.exe\") AND\nnetwork.direction: \"egress\" AND\ndestination.port: (8080 OR 4444 OR 8888 OR 1337)",
+            "index": [
+                "apm-*-transaction*",
+                "auditbeat-*",
+                "endgame-*",
+                "filebeat-*",
+                "logs-*",
+                "packetbeat-*",
+                "traces-apm*",
+                "winlogbeat-*",
+                "-*elastic-cloud-logs-*"
+            ],
+            "filters": [],
+            "version": 1,
+            "rule_id": "de4d8208-e501-4f36-b206-7868c9b7a39c",
+            "license": "",
+            "required_fields": [],
+            "immutable": false,
+            "related_integrations": [],
+            "meta": {
+                "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+            },
+            "setup": "",
+            "false_positives": [],
+            "threat": [
+                {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1071/",
+                            "name": "Application Layer Protocol",
+                            "subtechnique": [
+                                {
+                                    "reference": "https://attack.mitre.org/techniques/T1071/001/",
+                                    "name": "Web Protocols",
+                                    "id": "T1071.001"
+                                }
+                            ],
+                            "id": "T1071"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0011/",
+                        "name": "Command and Control",
+                        "id": "TA0011"
+                    }
+                }
+            ],
+            "to": "now"
+        },
+        "kibana.alert.rule.revision": 0,
+        "log": {
+            "level": "information"
+        },
+        "kibana.alert.status": "active",
+        "kibana.alert.last_detected": "2026-07-27T09:10:00.242Z",
+        "elastic_agent": {
+            "id": "7080d354-b49c-406a-b477-bb84c244d31a",
+            "version": "8.19.14",
+            "snapshot": false
+        },
+        "destination": {
+            "port": 8080,
+            "ip": "192.168.75.11"
+        },
+        "kibana.alert.ancestors": [
+            {
+                "depth": 0,
+                "index": ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003",
+                "id": "o7bVop8BEWnoqq1_nxlW",
+                "type": "event"
+            }
+        ],
+        "kibana.alert.original_event.dataset": "windows.sysmon_operational",
+        "kibana.alert.original_data_stream.dataset": "windows.sysmon_operational",
+        "kibana.alert.rule.exceptions_list": [],
+        "kibana.alert.rule.actions": [],
+        "network": {
+            "community_id": "1:4eTlteZALaOoxuHxLmHynZ2nU5A=",
+            "transport": "tcp",
+            "type": "ipv4",
+            "direction": "egress"
+        },
+        "kibana.alert.rule.rule_type_id": "siem.queryRule",
+        "related": {
+            "ip": [
+                "192.168.31.132",
+                "192.168.75.11"
+            ],
+            "user": [
+                "victim"
+            ]
+        },
+        "kibana.alert.original_event.provider": "Microsoft-Windows-Sysmon",
+        "kibana.alert.rule.license": "",
+        "event": {
+            "agent_id_status": "verified",
+            "ingested": "2026-07-27T09:08:56Z",
+            "code": "3",
+            "provider": "Microsoft-Windows-Sysmon",
+            "created": "2026-07-27T09:08:49.799Z",
+            "module": "windows",
+            "action": "Network connection",
+            "category": [
+                "network"
+            ],
+            "type": [
+                "start",
+                "connection",
+                "protocol"
+            ],
+            "dataset": "windows.sysmon_operational"
+        },
+        "kibana.alert.original_event.kind": "event",
+        "kibana.alert.workflow_tags": [],
+        "kibana.alert.workflow_assignee_ids": [],
+        "kibana.alert.rule.severity_mapping": [],
+        "process": {
+            "name": "powershell.exe",
+            "pid": 63656,
+            "entity_id": "{bb537b1e-201d-6a67-3404-000000001e00}",
+            "executable": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        },
+        "winlog": {
+            "computer_name": "DESKTOP-THONLNR",
+            "record_id": "11907",
+            "process": {
+                "pid": 3088,
+                "thread": {
+                    "id": 4364
+                }
+            },
+            "task": "Network connection detected (rule: NetworkConnect)",
+            "event_id": "3",
+            "provider_guid": "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}",
+            "channel": "Microsoft-Windows-Sysmon/Operational",
+            "api": "wineventlog",
+            "opcode": "Info",
+            "provider_name": "Microsoft-Windows-Sysmon",
+            "version": 5,
+            "user": {
+                "identifier": "S-1-5-18",
+                "domain": "NT AUTHORITY",
+                "name": "SYSTEM",
+                "type": "User"
+            }
+        },
+        "kibana.alert.rule.max_signals": 100,
+        "kibana.alert.rule.updated_at": "2026-05-01T04:44:09.235Z",
+        "kibana.alert.rule.risk_score": 73,
+        "kibana.alert.rule.author": [],
+        "kibana.alert.rule.false_positives": [],
+        "message": "Network connection detected:\nRuleName: -\nUtcTime: 2026-07-27 09:08:47.307\nProcessGuid: {bb537b1e-201d-6a67-3404-000000001e00}\nProcessId: 63656\nImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nUser: DESKTOP-THONLNR\\victim\nProtocol: tcp\nInitiated: true\nSourceIsIpv6: false\nSourceIp: 192.168.31.132\nSourceHostname: DESKTOP-THONLNR.localdomain\nSourcePort: 51725\nSourcePortName: -\nDestinationIsIpv6: false\nDestinationIp: 192.168.75.11\nDestinationHostname: -\nDestinationPort: 8080\nDestinationPortName: -",
+        "kibana.alert.rule.consumer": "siem",
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "kibana.alert.rule.category": "Custom Query Rule",
+        "@timestamp": "2026-07-27T09:10:00.128Z",
+        "kibana.alert.original_data_stream.type": "logs",
+        "kibana.alert.original_event.action": "Network connection",
+        "kibana.alert.rule.created_at": "2026-05-01T04:44:07.289Z",
+        "kibana.alert.rule.severity": "high",
+        "kibana.alert.intended_timestamp": "2026-07-27T09:10:00.128Z",
+        "data_stream": {
+            "namespace": "default",
+            "type": "logs",
+            "dataset": "windows.sysmon_operational"
+        },
+        "kibana.alert.original_event.agent_id_status": "verified",
+        "kibana.alert.rule.execution.timestamp": "2026-07-27T09:10:00.242Z",
+        "kibana.alert.rule.execution.uuid": "bee3e94b-2d7c-4033-96e7-6142bc97c572",
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.uuid": "4b1822bde25a7261014118713e556803c9142832dadaf204db315dc113bf99cc",
+        "kibana.alert.rule.meta.kibana_siem_app_url": "http://192.168.31.130:5601/app/security",
+        "kibana.version": "8.19.13",
+        "kibana.alert.rule.execution.type": "scheduled",
+        "user": {
+            "domain": "DESKTOP-THONLNR",
+            "name": "victim",
+            "id": "S-1-5-18"
+        },
+        "kibana.alert.original_time": "2026-07-27T09:08:47.307Z",
+        "kibana.alert.rule.rule_id": "de4d8208-e501-4f36-b206-7868c9b7a39c"
+    },
+    "fields": {
+        "kibana.alert.workflow_status_updated_at": [
+            "2026-07-27T09:14:02.638Z"
+        ],
+        "kibana.alert.rule.updated_by": [
+            "siem"
+        ],
+        "elastic_agent.version": [
+            "8.19.14"
+        ],
+        "host.os.name.text": [
+            "Windows 10 Pro"
+        ],
+        "host.hostname": [
+            "DESKTOP-THONLNR"
+        ],
+        "signal.original_event.created": [
+            "2026-07-27T09:08:49.799Z"
+        ],
+        "host.mac": [
+            "00-0C-29-77-18-E4"
+        ],
+        "signal.rule.threat.technique.subtechnique.id": [
+            "T1071.001"
+        ],
+        "winlog.process.pid": [
+            3088
+        ],
+        "kibana.alert.rule.threat.technique.id": [
+            "T1071"
+        ],
+        "signal.rule.enabled": [
+            "true"
+        ],
+        "host.os.version": [
+            "10.0"
+        ],
+        "signal.rule.max_signals": [
+            100
+        ],
+        "kibana.alert.risk_score": [
+            73
+        ],
+        "signal.rule.updated_at": [
+            "2026-05-01T04:44:09.235Z"
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.reference": [
+            "https://attack.mitre.org/techniques/T1071/001/"
+        ],
+        "host.os.type": [
+            "windows"
+        ],
+        "signal.original_event.code": [
+            "3"
+        ],
+        "kibana.alert.original_event.module": [
+            "windows"
+        ],
+        "kibana.alert.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.type": [
+            "query"
+        ],
+        "event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "kibana.alert.rule.immutable": [
+            "false"
+        ],
+        "source.port": [
+            51725
+        ],
+        "kibana.alert.rule.version": [
+            "1"
+        ],
+        "process.entity_id": [
+            "{bb537b1e-201d-6a67-3404-000000001e00}"
+        ],
+        "host.ip": [
+            "fe80::8ac2:9f81:1d7e:a0aa",
+            "192.168.31.132"
+        ],
+        "agent.type": [
+            "filebeat"
+        ],
+        "process.executable.text": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "signal.original_event.category": [
+            "network"
+        ],
+        "related.ip": [
+            "192.168.31.132",
+            "192.168.75.11"
+        ],
+        "winlog.api": [
+            "wineventlog"
+        ],
+        "signal.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "host.id": [
+            "bb537b1e-2db1-4ede-8b49-f3e63a57eff1"
+        ],
+        "elastic_agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "kibana.alert.rule.indices": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "traces-apm*",
+            "winlogbeat-*",
+            "-*elastic-cloud-logs-*"
+        ],
+        "signal.rule.threat.technique.subtechnique.reference": [
+            "https://attack.mitre.org/techniques/T1071/001/"
+        ],
+        "signal.rule.updated_by": [
+            "siem"
+        ],
+        "winlog.channel": [
+            "Microsoft-Windows-Sysmon/Operational"
+        ],
+        "host.os.platform": [
+            "windows"
+        ],
+        "kibana.alert.intended_timestamp": [
+            "2026-07-27T09:10:00.128Z"
+        ],
+        "kibana.alert.rule.severity": [
+            "high"
+        ],
+        "winlog.opcode": [
+            "Info"
+        ],
+        "kibana.alert.rule.execution.timestamp": [
+            "2026-07-27T09:10:00.242Z"
+        ],
+        "signal.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1071/"
+        ],
+        "kibana.version": [
+            "8.19.13"
+        ],
+        "signal.ancestors.type": [
+            "event"
+        ],
+        "user.name.text": [
+            "victim"
+        ],
+        "kibana.alert.ancestors.id": [
+            "o7bVop8BEWnoqq1_nxlW"
+        ],
+        "process.name.text": [
+            "powershell.exe"
+        ],
+        "kibana.alert.original_data_stream.namespace": [
+            "default"
+        ],
+        "kibana.alert.original_event.code": [
+            "3"
+        ],
+        "kibana.alert.rule.description": [
+            "Detects outbound network connections initiated by scripting or command-line\nprocesses (PowerShell, cmd, wscript) to commonly abused ports.\n\nThis behavior may indicate command-and-control (C2) activity, script-based\ndownloaders, or post-exploitation techniques where attackers use native\nWindows tools to communicate with external infrastructure.\n\nThis rule complements network-based detections by providing process-level\nvisibility and attribution."
+        ],
+        "winlog.computer_name": [
+            "DESKTOP-THONLNR"
+        ],
+        "kibana.alert.rule.producer": [
+            "siem"
+        ],
+        "kibana.alert.rule.to": [
+            "now"
+        ],
+        "kibana.alert.original_event.ingested": [
+            "2026-07-27T09:08:56.000Z"
+        ],
+        "signal.rule.id": [
+            "108e4d58-bcb7-4a58-9ea0-b856ac36ff52"
+        ],
+        "signal.reason": [
+            "network event with process powershell.exe, source 192.168.31.132:51725, destination 192.168.75.11:8080, by victim on desktop-thonlnr created high alert Suspicious Script-Based Outbound Network Connection."
+        ],
+        "signal.rule.risk_score": [
+            73
+        ],
+        "host.os.name": [
+            "Windows 10 Pro"
+        ],
+        "log.level": [
+            "information"
+        ],
+        "signal.status": [
+            "open"
+        ],
+        "kibana.alert.rule.threat.tactic.name": [
+            "Command and Control"
+        ],
+        "kibana.alert.rule.uuid": [
+            "108e4d58-bcb7-4a58-9ea0-b856ac36ff52"
+        ],
+        "kibana.alert.original_event.category": [
+            "network"
+        ],
+        "signal.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "process.name": [
+            "powershell.exe"
+        ],
+        "kibana.alert.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003"
+        ],
+        "agent.version": [
+            "8.19.14"
+        ],
+        "host.os.family": [
+            "windows"
+        ],
+        "kibana.alert.rule.from": [
+            "now-6m"
+        ],
+        "kibana.alert.rule.parameters": [
+            {
+                "severity": "high",
+                "max_signals": 100,
+                "rule_source": {
+                    "type": "internal"
+                },
+                "risk_score": 73,
+                "query": "event.code: 3 AND\nprocess.name: (\"powershell.exe\" OR \"cmd.exe\" OR \"wscript.exe\") AND\nnetwork.direction: \"egress\" AND\ndestination.port: (8080 OR 4444 OR 8888 OR 1337)",
+                "description": "Detects outbound network connections initiated by scripting or command-line\nprocesses (PowerShell, cmd, wscript) to commonly abused ports.\n\nThis behavior may indicate command-and-control (C2) activity, script-based\ndownloaders, or post-exploitation techniques where attackers use native\nWindows tools to communicate with external infrastructure.\n\nThis rule complements network-based detections by providing process-level\nvisibility and attribution.",
+                "index": [
+                    "apm-*-transaction*",
+                    "auditbeat-*",
+                    "endgame-*",
+                    "filebeat-*",
+                    "logs-*",
+                    "packetbeat-*",
+                    "traces-apm*",
+                    "winlogbeat-*",
+                    "-*elastic-cloud-logs-*"
+                ],
+                "language": "kuery",
+                "type": "query",
+                "version": 1,
+                "rule_id": "de4d8208-e501-4f36-b206-7868c9b7a39c",
+                "license": "",
+                "immutable": false,
+                "meta": {
+                    "kibana_siem_app_url": "http://192.168.31.130:5601/app/security"
+                },
+                "setup": "",
+                "from": "now-6m",
+                "threat": {
+                    "framework": "MITRE ATT&CK",
+                    "technique": [
+                        {
+                            "reference": "https://attack.mitre.org/techniques/T1071/",
+                            "name": "Application Layer Protocol",
+                            "subtechnique": [
+                                {
+                                    "reference": "https://attack.mitre.org/techniques/T1071/001/",
+                                    "name": "Web Protocols",
+                                    "id": "T1071.001"
+                                }
+                            ],
+                            "id": "T1071"
+                        }
+                    ],
+                    "tactic": {
+                        "reference": "https://attack.mitre.org/tactics/TA0011/",
+                        "name": "Command and Control",
+                        "id": "TA0011"
+                    }
+                },
+                "to": "now"
+            }
+        ],
+        "kibana.alert.rule.threat.tactic.id": [
+            "TA0011"
+        ],
+        "signal.original_event.kind": [
+            "event"
+        ],
+        "kibana.alert.rule.threat.technique.name": [
+            "Application Layer Protocol"
+        ],
+        "signal.depth": [
+            1
+        ],
+        "signal.rule.immutable": [
+            "false"
+        ],
+        "host.os.build": [
+            "19045.3803"
+        ],
+        "signal.rule.name": [
+            "Suspicious Script-Based Outbound Network Connection"
+        ],
+        "event.module": [
+            "windows"
+        ],
+        "host.os.kernel": [
+            "10.0.19041.3803 (WinBuild.160101.0800)"
+        ],
+        "kibana.alert.rule.license": [
+            ""
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.id": [
+            "T1071.001"
+        ],
+        "kibana.alert.original_event.kind": [
+            "event"
+        ],
+        "network.type": [
+            "ipv4"
+        ],
+        "winlog.task": [
+            "Network connection detected (rule: NetworkConnect)"
+        ],
+        "winlog.user.domain": [
+            "NT AUTHORITY"
+        ],
+        "signal.rule.description": [
+            "Detects outbound network connections initiated by scripting or command-line\nprocesses (PowerShell, cmd, wscript) to commonly abused ports.\n\nThis behavior may indicate command-and-control (C2) activity, script-based\ndownloaders, or post-exploitation techniques where attackers use native\nWindows tools to communicate with external infrastructure.\n\nThis rule complements network-based detections by providing process-level\nvisibility and attribution."
+        ],
+        "message": [
+            "Network connection detected:\nRuleName: -\nUtcTime: 2026-07-27 09:08:47.307\nProcessGuid: {bb537b1e-201d-6a67-3404-000000001e00}\nProcessId: 63656\nImage: C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\nUser: DESKTOP-THONLNR\\victim\nProtocol: tcp\nInitiated: true\nSourceIsIpv6: false\nSourceIp: 192.168.31.132\nSourceHostname: DESKTOP-THONLNR.localdomain\nSourcePort: 51725\nSourcePortName: -\nDestinationIsIpv6: false\nDestinationIp: 192.168.75.11\nDestinationHostname: -\nDestinationPort: 8080\nDestinationPortName: -"
+        ],
+        "kibana.alert.original_data_stream.type": [
+            "logs"
+        ],
+        "kibana.space_ids": [
+            "default"
+        ],
+        "kibana.alert.severity": [
+            "high"
+        ],
+        "signal.ancestors.depth": [
+            0
+        ],
+        "event.category": [
+            "network"
+        ],
+        "kibana.alert.reason.text": [
+            "network event with process powershell.exe, source 192.168.31.132:51725, destination 192.168.75.11:8080, by victim on desktop-thonlnr created high alert Suspicious Script-Based Outbound Network Connection."
+        ],
+        "kibana.alert.ancestors.depth": [
+            0
+        ],
+        "kibana.alert.rule.threat.technique.subtechnique.name": [
+            "Web Protocols"
+        ],
+        "source.ip": [
+            "192.168.31.132"
+        ],
+        "agent.name": [
+            "DESKTOP-THONLNR"
+        ],
+        "network.community_id": [
+            "1:4eTlteZALaOoxuHxLmHynZ2nU5A="
+        ],
+        "event.agent_id_status": [
+            "verified"
+        ],
+        "user.id": [
+            "S-1-5-18"
+        ],
+        "input.type": [
+            "winlog"
+        ],
+        "signal.rule.threat.technique.subtechnique.name": [
+            "Web Protocols"
+        ],
+        "kibana.alert.workflow_user": [
+            "u_Xqvgb_4ZQqMc-6Sx92PnZ3WoHZVzaenlpDdSxbifyZY_0"
+        ],
+        "related.user": [
+            "victim"
+        ],
+        "host.architecture": [
+            "x86_64"
+        ],
+        "kibana.alert.start": [
+            "2026-07-27T09:10:00.242Z"
+        ],
+        "event.code": [
+            "3"
+        ],
+        "kibana.alert.original_event.type": [
+            "start",
+            "connection",
+            "protocol"
+        ],
+        "agent.id": [
+            "7080d354-b49c-406a-b477-bb84c244d31a"
+        ],
+        "signal.original_event.module": [
+            "windows"
+        ],
+        "signal.rule.from": [
+            "now-6m"
+        ],
+        "kibana.alert.rule.enabled": [
+            "true"
+        ],
+        "kibana.alert.ancestors.type": [
+            "event"
+        ],
+        "winlog.process.thread.id": [
+            4364
+        ],
+        "destination.port": [
+            8080
+        ],
+        "signal.ancestors.index": [
+            ".ds-logs-windows.sysmon_operational-default-2026.07.07-000003"
+        ],
+        "user.name": [
+            "victim"
+        ],
+        "source.domain": [
+            "DESKTOP-THONLNR.localdomain"
+        ],
+        "kibana.alert.original_data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "elastic_agent.snapshot": [
+            false
+        ],
+        "user.domain": [
+            "DESKTOP-THONLNR"
+        ],
+        "signal.original_event.type": [
+            "start",
+            "connection",
+            "protocol"
+        ],
+        "kibana.alert.rule.max_signals": [
+            100
+        ],
+        "kibana.alert.rule.risk_score": [
+            73
+        ],
+        "signal.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "signal.rule.threat.technique.id": [
+            "T1071"
+        ],
+        "winlog.user.name": [
+            "SYSTEM"
+        ],
+        "destination.ip": [
+            "192.168.75.11"
+        ],
+        "kibana.alert.rule.consumer": [
+            "siem"
+        ],
+        "kibana.alert.rule.category": [
+            "Custom Query Rule"
+        ],
+        "event.action": [
+            "Network connection"
+        ],
+        "event.ingested": [
+            "2026-07-27T09:08:56.000Z"
+        ],
+        "@timestamp": [
+            "2026-07-27T09:10:00.128Z"
+        ],
+        "kibana.alert.original_event.action": [
+            "Network connection"
+        ],
+        "kibana.alert.original_event.agent_id_status": [
+            "verified"
+        ],
+        "data_stream.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "agent.ephemeral_id": [
+            "64addb2f-5b7b-434f-8391-8206263963f2"
+        ],
+        "kibana.alert.rule.execution.uuid": [
+            "bee3e94b-2d7c-4033-96e7-6142bc97c572"
+        ],
+        "kibana.alert.uuid": [
+            "4b1822bde25a7261014118713e556803c9142832dadaf204db315dc113bf99cc"
+        ],
+        "kibana.alert.rule.meta.kibana_siem_app_url": [
+            "http://192.168.31.130:5601/app/security"
+        ],
+        "signal.rule.threat.technique.name": [
+            "Application Layer Protocol"
+        ],
+        "signal.rule.license": [
+            ""
+        ],
+        "kibana.alert.rule.rule_id": [
+            "de4d8208-e501-4f36-b206-7868c9b7a39c"
+        ],
+        "signal.rule.type": [
+            "query"
+        ],
+        "winlog.provider_guid": [
+            "{5770385f-c22a-43e0-bf4c-06f5698ffbd9}"
+        ],
+        "winlog.provider_name": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "process.pid": [
+            63656
+        ],
+        "signal.rule.created_by": [
+            "siem"
+        ],
+        "signal.rule.interval": [
+            "5m"
+        ],
+        "kibana.alert.rule.created_by": [
+            "siem"
+        ],
+        "winlog.record_id": [
+            "11907"
+        ],
+        "kibana.alert.rule.name": [
+            "Suspicious Script-Based Outbound Network Connection"
+        ],
+        "host.name": [
+            "desktop-thonlnr"
+        ],
+        "kibana.alert.rule.threat.technique.reference": [
+            "https://attack.mitre.org/techniques/T1071/"
+        ],
+        "event.kind": [
+            "signal"
+        ],
+        "winlog.version": [
+            5
+        ],
+        "signal.rule.created_at": [
+            "2026-05-01T04:44:07.289Z"
+        ],
+        "kibana.alert.workflow_status": [
+            "open"
+        ],
+        "kibana.alert.original_event.created": [
+            "2026-07-27T09:08:49.799Z"
+        ],
+        "kibana.alert.reason": [
+            "network event with process powershell.exe, source 192.168.31.132:51725, destination 192.168.75.11:8080, by victim on desktop-thonlnr created high alert Suspicious Script-Based Outbound Network Connection."
+        ],
+        "signal.rule.threat.tactic.id": [
+            "TA0011"
+        ],
+        "data_stream.type": [
+            "logs"
+        ],
+        "signal.ancestors.id": [
+            "o7bVop8BEWnoqq1_nxlW"
+        ],
+        "signal.original_time": [
+            "2026-07-27T09:08:47.307Z"
+        ],
+        "ecs.version": [
+            "8.17.0"
+        ],
+        "signal.rule.severity": [
+            "high"
+        ],
+        "event.created": [
+            "2026-07-27T09:08:49.799Z"
+        ],
+        "kibana.alert.depth": [
+            1
+        ],
+        "kibana.alert.rule.revision": [
+            0
+        ],
+        "signal.rule.version": [
+            "1"
+        ],
+        "kibana.alert.status": [
+            "active"
+        ],
+        "kibana.alert.last_detected": [
+            "2026-07-27T09:10:00.242Z"
+        ],
+        "kibana.alert.original_event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "winlog.user.type": [
+            "User"
+        ],
+        "kibana.alert.rule.rule_type_id": [
+            "siem.queryRule"
+        ],
+        "kibana.alert.original_event.provider": [
+            "Microsoft-Windows-Sysmon"
+        ],
+        "signal.rule.rule_id": [
+            "de4d8208-e501-4f36-b206-7868c9b7a39c"
+        ],
+        "signal.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0011/"
+        ],
+        "network.direction": [
+            "egress"
+        ],
+        "process.executable": [
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        ],
+        "winlog.user.identifier": [
+            "S-1-5-18"
+        ],
+        "signal.rule.threat.tactic.name": [
+            "Command and Control"
+        ],
+        "kibana.alert.rule.threat.framework": [
+            "MITRE ATT&CK"
+        ],
+        "kibana.alert.rule.updated_at": [
+            "2026-05-01T04:44:09.235Z"
+        ],
+        "data_stream.namespace": [
+            "default"
+        ],
+        "winlog.event_id": [
+            "3"
+        ],
+        "network.transport": [
+            "tcp"
+        ],
+        "kibana.alert.rule.threat.tactic.reference": [
+            "https://attack.mitre.org/tactics/TA0011/"
+        ],
+        "signal.original_event.action": [
+            "Network connection"
+        ],
+        "kibana.alert.rule.created_at": [
+            "2026-05-01T04:44:07.289Z"
+        ],
+        "signal.rule.to": [
+            "now"
+        ],
+        "event.type": [
+            "start",
+            "connection",
+            "protocol"
+        ],
+        "kibana.alert.rule.execution.type": [
+            "scheduled"
+        ],
+        "event.dataset": [
+            "windows.sysmon_operational"
+        ],
+        "kibana.alert.original_time": [
+            "2026-07-27T09:08:47.307Z"
+        ]
+    }
+}

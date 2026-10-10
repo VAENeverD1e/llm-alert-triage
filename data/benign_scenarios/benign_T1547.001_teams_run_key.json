@@ -1,0 +1,45 @@
+{
+  "alert_id": "BNG-T1547.001",
+  "rule_uuid": "bng-uuid-1547",
+  "rule_id": "T1547.001",
+  "rule_name": "Registry Run Key Persistence",
+  "severity": "low",
+  "risk_score": 20,
+  "timestamp": "2026-10-10T08:35:00Z",
+  "host_name": "desktop-thonlnr",
+  "user_name": "victim",
+  "reason": "User desktop application auto-launch setting registration",
+  "telemetry_source": "sysmon",
+  "event_code": "13",
+  "process_context": {
+    "process": {
+      "name": "ms-teams.exe",
+      "executable": "C:\\Program Files\\WindowsApps\\MicrosoftTeams_24102.2212.2829.7425_x64__8wekyb3d8bbwe\\ms-teams.exe",
+      "command_line": "\"C:\\Program Files\\WindowsApps\\MicrosoftTeams_24102.2212.2829.7425_x64__8wekyb3d8bbwe\\ms-teams.exe\" /autostart",
+      "pid": 8412,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "parent_process": {
+      "name": "explorer.exe",
+      "executable": "C:\\Windows\\explorer.exe",
+      "command_line": "C:\\Windows\\explorer.exe",
+      "pid": 2040,
+      "args": [],
+      "md5": null,
+      "sha256": null
+    },
+    "target_process_name": null,
+    "granted_access": null,
+    "call_trace": null
+  },
+  "registry_context": {
+    "path": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\com.squirrel.Teams.Teams",
+    "value_name": "com.squirrel.Teams.Teams",
+    "data": "C:\\Program Files\\WindowsApps\\MicrosoftTeams_24102.2212.2829.7425_x64__8wekyb3d8bbwe\\ms-teams.exe --autostart",
+    "hive": "HKCU"
+  },
+  "network_context": null,
+  "raw_event": {}
+}

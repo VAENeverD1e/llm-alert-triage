@@ -37,12 +37,7 @@ dist/
 *.egg-info/
 
 # Logs & Temporary Archives
-*.log
-*.zip
-
-
-
-
-
+# Evaluation timestamped runs
+evaluation/results/*_[0-9]*.json
 
 worklog.md
