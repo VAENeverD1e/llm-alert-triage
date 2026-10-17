@@ -1,0 +1,17 @@
+alert_id,technique_id,scenario_type,expected,actual,match,confidence,processing_time_ms
+ATK-T1003.001,T1003.001,attack,Escalate,Escalate,True,0.95,58162.82
+ATK-T1046,T1046,attack,Escalate,Escalate,True,0.95,41649.22
+ATK-T1053.005,T1053.005,attack,Escalate,Escalate,True,0.95,44417.39
+ATK-T1055.001,T1055.001,attack,Escalate,Escalate,True,0.95,48308.73
+ATK-T1059.001,T1059.001,attack,Escalate,Escalate,True,0.95,51660.76
+ATK-T1071.001-1,T1071.001,attack,Escalate,Escalate,True,0.95,41136.37
+ATK-T1071.001-2,T1071.001,attack,Escalate,Escalate,True,0.95,44776.54
+ATK-T1547.001,T1547.001,attack,Escalate,Escalate,True,0.95,35020.19
+BNG-T1003.001,T1003.001,benign,Close,Close,True,0.9,36301.19
+BNG-T1046,T1046,benign,Close,Close,True,0.9,30240.25
+BNG-T1053.005,T1053.005,benign,Close,Close,True,0.9,35781.52
+BNG-T1055.001,T1055.001,benign,Close,Escalate,False,0.95,36362.07
+BNG-T1059.001,T1059.001,benign,Close,Close,True,0.9,32961.34
+BNG-T1071.001-1,T1071.001,benign,Close,Close,True,0.9,32181.34
+BNG-T1071.001-2,T1071.001,benign,Close,Escalate,False,0.95,39240.69
+BNG-T1547.001,T1547.001,benign,Close,Close,True,0.9,38557.40

@@ -1,0 +1,300 @@
+{
+  "mode": "llm_rag",
+  "model_name": "llama3:8b",
+  "timestamp": "2026-10-17T10:00:26.467999+00:00",
+  "total_alerts": 16,
+  "matches": 14,
+  "mismatches": 2,
+  "metrics": {
+    "precision": 0.8,
+    "recall": 1.0,
+    "f1_score": 0.8889,
+    "mttr_ms": 40422.36,
+    "cohens_kappa": 0.75
+  },
+  "results": [
+    {
+      "alert_id": "ATK-T1003.001",
+      "file_path": "data/attack_scenarios/attack_T1003.001_lsass_dump.json",
+      "technique_id": "T1003.001",
+      "technique_name": "OS Credential Dumping: LSASS Memory",
+      "scenario_type": "attack",
+      "expected": "Escalate",
+      "actual": "Escalate",
+      "match": true,
+      "confidence": 0.95,
+      "processing_time_ms": 58162.822246551514,
+      "reasoning": "The alert telemetry indicates a high-severity LSASS Memory Access event with a risk score of 73, which is above the threshold for escalation. The process name `rundll32.exe` is not a known security product, and the granted access mask `0x1fffff` is not a standard access mask. Additionally, the Call Trace shows `comsvcs.dll` and `dbghelp.dll` which are not typical WMI stack calls. These indicators, combined with the playbook's TP vs FP criteria, strongly suggest a true positive.",
+      "recommended_playbook": "PB-T1003.001",
+      "risk_factors": [
+        "Potential pass-the-hash attempt",
+        "Risk of credential theft"
+      ]
+    },
+    {
+      "alert_id": "ATK-T1046",
+      "file_path": "data/attack_scenarios/attack_T1046_port_scan.json",
+      "technique_id": "T1046",
+      "technique_name": "Network Service Discovery",
+      "scenario_type": "attack",
+      "expected": "Escalate",
+      "actual": "Escalate",
+      "match": true,
+      "confidence": 0.95,
+      "processing_time_ms": 41649.22118186951,
+      "reasoning": "The alert is triggered on a sensitive port (1521) and the source IP is not recognized as an authorized scanner. Additionally, the scan occurs outside business hours, which is a strong indicator of potential malicious activity. The playbook's TP vs FP criteria are met, and therefore, this alert should be escalated.",
+      "recommended_playbook": "PB-T1046",
+      "risk_factors": [
+        "Risk of lateral movement",
+        "Potential exploitation of Oracle SQL vulnerability"
+      ]
+    },
+    {
+      "alert_id": "ATK-T1053.005",
+      "file_path": "data/attack_scenarios/attack_T1053.005_scheduled_task.json",
+      "technique_id": "T1053.005",
+      "technique_name": "Scheduled Task/Job: Scheduled Task",
+      "scenario_type": "attack",
+      "expected": "Escalate",
+      "actual": "Escalate",
+      "match": true,
+      "confidence": 0.95,
+      "processing_time_ms": 44417.386531829834,
+      "reasoning": "The alert meets the escalation criteria as the task action points to a user-writable directory (`/c calc.exe`), and the creating process is not a recognized software installer. Additionally, the task was created by a non-administrative user account (`victim`). These indicators suggest a potential threat and warrant further investigation.",
+      "recommended_playbook": "PB-T1053.005",
+      "risk_factors": [
+        "Potential threat from unknown software installer",
+        "Non-administrative user account creation"
+      ]
+    },
+    {
+      "alert_id": "ATK-T1055.001",
+      "file_path": "data/attack_scenarios/attack_T1055.001_dll_injection.json",
+      "technique_id": "T1055.001",
+      "technique_name": "Process Injection: Dynamic-link Library Injection",
+      "scenario_type": "attack",
+      "expected": "Escalate",
+      "actual": "Escalate",
+      "match": true,
+      "confidence": 0.95,
+      "processing_time_ms": 48308.72845649719,
+      "reasoning": "The alert telemetry indicates DLL injection via CreateRemoteThread (T1055.001) with a high severity score. The parent process is powershell.exe, which is a user process. The DLL path is not in a recognized App-V directory, and the environment does not use Microsoft App-V. Additionally, the alert has an anomalous parent process, which is a strong indicator of a true positive. The playbook's TP vs FP criteria are met, and the alert should be escalated.",
+      "recommended_playbook": "PB-T1055.001",
+      "risk_factors": [
+        "risk factor 1",
+        "risk factor 2"
+      ]
+    },
+    {
+      "alert_id": "ATK-T1059.001",
+      "file_path": "data/attack_scenarios/attack_T1059.001_powershell.json",
+      "technique_id": "T1059.001",
+      "technique_name": "Command and Scripting Interpreter: PowerShell",
+      "scenario_type": "attack",
+      "expected": "Escalate",
+      "actual": "Escalate",
+      "match": true,
+      "confidence": 0.95,
+      "processing_time_ms": 51660.764932632446,
+      "reasoning": "The alert telemetry indicates encoded PowerShell execution, which is a high-severity indicator. The parent process is also present inline on the alert, which is a strong indicator of malicious activity. Additionally, the decoded payload contains a registry write to `HKEY_CURRENT_USER/software/classes\the atomic red team`, which is a known tactic used by the Atomic Red Team. Given these indicators, it is likely that this alert is a true positive and should be escalated.",
+      "recommended_playbook": "PB-T1059.001",
+      "risk_factors": [
+        "risk factor 1",
+        "risk factor 2"
+      ]
+    },
+    {
+      "alert_id": "ATK-T1071.001-1",
+      "file_path": "data/attack_scenarios/attack_T1071.001_1_c2_beacon.json",
+      "technique_id": "T1071.001",
+      "technique_name": "Application Layer Protocol: Web Protocols (C2)",
+      "scenario_type": "attack",
+      "expected": "Escalate",
+      "actual": "Escalate",
+      "match": true,
+      "confidence": 0.95,
+      "processing_time_ms": 41136.37042045593,
+      "reasoning": "The alert's user agent matches a known APT malware string (*<|>*), which is a clear indication of a true positive. Additionally, the destination IP is not flagged in threat intel, but the beaconing process is spawned from an unknown host, which raises concerns about potential lateral movement.",
+      "recommended_playbook": "PB-T1071.001",
+      "risk_factors": [
+        "unknown host",
+        "potential lateral movement"
+      ]
+    },
+    {
+      "alert_id": "ATK-T1071.001-2",
+      "file_path": "data/attack_scenarios/attack_T1071.001_2_script_outbound.json",
+      "technique_id": "T1071.001",
+      "technique_name": "Suspicious Script Outbound Network Connection",
+      "scenario_type": "attack",
+      "expected": "Escalate",
+      "actual": "Escalate",
+      "match": true,
+      "confidence": 0.95,
+      "processing_time_ms": 44776.53694152832,
+      "reasoning": "The alert telemetry indicates a high-severity event with a risk score of 73, and the investigation findings show a suspicious outbound network connection from powershell.exe. The playbook's TP vs FP criteria are not met for a false positive, as the destination IP is not an internal IP, and the user agent does not match a legitimate automation tool. The beaconing process is not spawned from a browser, email client, or document application, but it is spawned from a process (powershell.exe). The Suricata signature and category are not available, but the alert's severity and risk score suggest a potential true positive.",
+      "recommended_playbook": "PB-T1071.001",
+      "risk_factors": [
+        "risk factor 1",
+        "risk factor 2"
+      ]
+    },
+    {
+      "alert_id": "ATK-T1547.001",
+      "file_path": "data/attack_scenarios/attack_T1547.001_run_key.json",
+      "technique_id": "T1547.001",
+      "technique_name": "Registry Run Keys / Startup Folder",
+      "scenario_type": "attack",
+      "expected": "Escalate",
+      "actual": "Escalate",
+      "match": true,
+      "confidence": 0.95,
+      "processing_time_ms": 35020.187854766846,
+      "reasoning": "The alert telemetry indicates a registry write event with process reg.exe, which is not a recognized installer process. Additionally, the value name is random-looking, and the executable path is not under a recognized software directory. These indicators align with the playbook's TP criteria, suggesting a potential true positive.",
+      "recommended_playbook": "PB-T1547.001",
+      "risk_factors": [
+        "Potential persistence mechanism",
+        "Unrecognized executable"
+      ]
+    },
+    {
+      "alert_id": "BNG-T1003.001",
+      "file_path": "data/benign_scenarios/benign_T1003.001_lsass_wmi.json",
+      "technique_id": "T1003.001",
+      "technique_name": "OS Credential Dumping: LSASS Memory",
+      "scenario_type": "benign",
+      "expected": "Close",
+      "actual": "Close",
+      "match": true,
+      "confidence": 0.9,
+      "processing_time_ms": 36301.19228363037,
+      "reasoning": "The alert telemetry and investigation findings do not match any of the True Positive escalation criteria. The process name is svchost.exe, which is a known Windows service process. The access mask is 0x1410, which is also a known exclusion. The Call Trace shows only cimwin32.dll, which is part of the WMI stack and already excluded. Therefore, based on the playbook's FP criteria, this alert should be closed.",
+      "recommended_playbook": "PB-T1003.001",
+      "risk_factors": [
+        "low risk"
+      ]
+    },
+    {
+      "alert_id": "BNG-T1046",
+      "file_path": "data/benign_scenarios/benign_T1046_nessus_scan.json",
+      "technique_id": "T1046",
+      "technique_name": "Network Service Discovery",
+      "scenario_type": "benign",
+      "expected": "Close",
+      "actual": "Close",
+      "match": true,
+      "confidence": 0.9,
+      "processing_time_ms": 30240.252256393433,
+      "reasoning": "The alert telemetry and investigation findings indicate an authorized monthly internal vulnerability assessment scan, which matches the documented scope for the Nessus Vulnerability Scanner. Additionally, the scan is within an authorized maintenance window, and no exploitation activity follows. These indicators align with the playbook's criteria for treating this as a FALSE POSITIVE.",
+      "recommended_playbook": "FP-T1046",
+      "risk_factors": [
+        "low risk"
+      ]
+    },
+    {
+      "alert_id": "BNG-T1053.005",
+      "file_path": "data/benign_scenarios/benign_T1053.005_updater_task.json",
+      "technique_id": "T1053.005",
+      "technique_name": "Scheduled Task/Job: Scheduled Task",
+      "scenario_type": "benign",
+      "expected": "Close",
+      "actual": "Close",
+      "match": true,
+      "confidence": 0.9,
+      "processing_time_ms": 35781.519174575806,
+      "reasoning": "The alert telemetry and investigation findings do not match the TP vs FP criteria. The task action points to a signed executable in `Program Files`, the creating parent is a recognized installer (`GoogleUpdate.exe`), and the task name matches the installed software product. Additionally, the task is visible and expected in Task Scheduler.",
+      "recommended_playbook": "PB-T1053.005",
+      "risk_factors": [
+        "low risk score (20)",
+        "no anomalous parent process"
+      ]
+    },
+    {
+      "alert_id": "BNG-T1055.001",
+      "file_path": "data/benign_scenarios/benign_T1055.001_appv_virtualization.json",
+      "technique_id": "T1055.001",
+      "technique_name": "Process Injection: Dynamic-link Library Injection",
+      "scenario_type": "benign",
+      "expected": "Close",
+      "actual": "Escalate",
+      "match": false,
+      "confidence": 0.95,
+      "processing_time_ms": 36362.069606781006,
+      "reasoning": "The alert's parent process is AppVClient.exe, which is a known exception in the playbook. However, the injected DLL path is in a user-writable directory, which is a TP criterion. Additionally, the alert's severity is low, but the risk score is 25, indicating a potential threat. The playbook's TP vs FP criteria are not fully met, but the alert's characteristics suggest a potential threat.",
+      "recommended_playbook": "PB-T1055.001",
+      "risk_factors": [
+        "user-writable directory",
+        "low severity but high risk score"
+      ]
+    },
+    {
+      "alert_id": "BNG-T1059.001",
+      "file_path": "data/benign_scenarios/benign_T1059.001_sccm_inventory.json",
+      "technique_id": "T1059.001",
+      "technique_name": "Command and Scripting Interpreter: PowerShell",
+      "scenario_type": "benign",
+      "expected": "Close",
+      "actual": "Close",
+      "match": true,
+      "confidence": 0.9,
+      "processing_time_ms": 32961.339473724365,
+      "reasoning": "The alert telemetry and investigation findings do not match the TP vs FP criteria. The parent process is a known management tool (CcmExec.exe), the user is a system administrator with documented need, and the decoded payload matches known-good software deployment script. Additionally, there is no subsequent suspicious process creation or network activity.",
+      "recommended_playbook": "PB-T1059.001",
+      "risk_factors": [
+        "benign administrative activity"
+      ]
+    },
+    {
+      "alert_id": "BNG-T1071.001-1",
+      "file_path": "data/benign_scenarios/benign_T1071.001_1_onedrive_sync.json",
+      "technique_id": "T1071.001",
+      "technique_name": "Application Layer Protocol: Web Protocols (C2)",
+      "scenario_type": "benign",
+      "expected": "Close",
+      "actual": "Close",
+      "match": true,
+      "confidence": 0.9,
+      "processing_time_ms": 32181.336164474487,
+      "reasoning": "The alert telemetry and investigation findings do not match the TP vs FP criteria. The destination IP is not external, the user agent matches a legitimate automation tool (Microsoft OneDrive Sync), and the traffic is a one-time burst with no recurrence. Additionally, the Suricata signature and category indicate corporate cloud storage traffic, which is a normal and expected activity.",
+      "recommended_playbook": "PB-CloudStorageSync",
+      "risk_factors": [
+        "low risk"
+      ]
+    },
+    {
+      "alert_id": "BNG-T1071.001-2",
+      "file_path": "data/benign_scenarios/benign_T1071.001_2_update_connection.json",
+      "technique_id": "T1071.001",
+      "technique_name": "Suspicious Script Outbound Network Connection",
+      "scenario_type": "benign",
+      "expected": "Close",
+      "actual": "Escalate",
+      "match": false,
+      "confidence": 0.95,
+      "processing_time_ms": 39240.68832397461,
+      "reasoning": "The alert telemetry indicates an outbound connection from the host 'desktop-thonlnr' to an external IP '20.189.173.1:443', which is flagged in threat intelligence. Additionally, the user is NT AUTHORITY/system, which is not a typical user for a Windows Update check. The playbook's TP vs FP criteria are met, and the alert should be escalated.",
+      "recommended_playbook": "PB-T1071.001",
+      "risk_factors": [
+        "Risk of lateral movement",
+        "Potential for data exfiltration"
+      ]
+    },
+    {
+      "alert_id": "BNG-T1547.001",
+      "file_path": "data/benign_scenarios/benign_T1547.001_teams_run_key.json",
+      "technique_id": "T1547.001",
+      "technique_name": "Registry Run Keys / Startup Folder",
+      "scenario_type": "benign",
+      "expected": "Close",
+      "actual": "Close",
+      "match": true,
+      "confidence": 0.9,
+      "processing_time_ms": 38557.40475654602,
+      "reasoning": "The alert telemetry and investigation findings do not meet the TP vs FP criteria. The executable path is under `C:\rogram Files\"` with a valid vendor signature, and the writing process is an installer (`ms-teams.exe`) with a matching software installation event in Add/Remove Programs. Additionally, the value name matches a known software product (Microsoft Teams).",
+      "recommended_playbook": "PB-T1547.001",
+      "risk_factors": [
+        "benign software installation"
+      ]
+    }
+  ]
+}

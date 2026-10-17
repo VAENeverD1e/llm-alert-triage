@@ -110,10 +110,11 @@ class VerdictAgent:
         registry_details = ""
         reg_ctx = getattr(alert, "registry_context", None)
         if reg_ctx:
+            reg_data = getattr(reg_ctx, "data", None) or getattr(reg_ctx, "value_data", None) or "N/A"
             registry_details = (
                 f"- Registry Path: {reg_ctx.path or 'N/A'}\n"
                 f"- Value Name: {reg_ctx.value_name or 'N/A'}\n"
-                f"- Value Data: {reg_ctx.value_data or 'N/A'}\n"
+                f"- Value Data: {reg_data}\n"
             )
 
         # Extract targeted guidance (focus on TP vs FP criteria to maximize speed and reasoning precision)
