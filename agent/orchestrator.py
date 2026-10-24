@@ -47,17 +47,26 @@ class TriageOrchestrator:
         use_ollama: bool = True,
         use_rag: bool = True,
         model_name: str = "llama3:8b",
-        playbooks_dir: str = "./playbooks"
+        playbooks_dir: str = "./playbooks",
+        discord_forwarder: Optional[Any] = None,
+        discord_webhook_url: Optional[str] = None
     ) -> "TriageOrchestrator":
         """
-        Factory method to instantiate a fully configured orchestrator with local RAG and Ollama client.
+        Factory method to instantiate a fully configured orchestrator with local RAG, Ollama client,
+        and optional Discord webhook notification forwarder.
         """
         from integrations.playbook_retriever import PlaybookRetriever
         from integrations.ollama_client import OllamaClient
+        from notification.discord_forwarder import DiscordForwarder
 
         retriever = PlaybookRetriever(playbooks_dir=playbooks_dir) if use_rag else None
         llm = OllamaClient(model_name=model_name) if use_ollama else None
-        return cls(playbook_retriever=retriever, ollama_client=llm)
+        
+        forwarder = discord_forwarder
+        if forwarder is None and discord_webhook_url:
+            forwarder = DiscordForwarder(webhook_url=discord_webhook_url)
+
+        return cls(playbook_retriever=retriever, ollama_client=llm, discord_forwarder=forwarder)
 
     def run_pipeline(self, alert_data: Dict[str, Any]) -> TriagePipelineResult:
         """
