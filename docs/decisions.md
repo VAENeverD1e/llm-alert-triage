@@ -15,6 +15,7 @@ This document logs key architectural choices, trade-offs, descoped items, and de
 | ADR-005 | Schema Architecture & `SecurityAlert` Replacement | Proposed | Modified / Adopted | Replaced flat `SecurityAlert` (with untyped `raw_event: Dict[str, Any]`) with `NormalizedAlert` using an Envelope + 3 Optional Context Blocks (`ProcessContext`, `RegistryContext`, `NetworkContext`). |
 | ADR-006 | Three-Tier Telemetry Field Taxonomy | Proposed | Adopted | Established strict boundaries across Envelope, Technique-Specific, and Enrichment-Only fields, defining exact query obligations for the Fact-Finding Agent. |
 | ADR-007 | SIEM Detection Rule-Drift & Telemetry Ingestion | Discovered | Resolved | Resolved discrepancies between `.ndjson` rule definitions and live Kibana documents (`SourceImage` vs `process.name`, missing `user.name` in Event 10, subtechnique truncation, Suricata host blindspot). |
+| ADR-008 | Sequential Worker Queue vs Concurrent BackgroundTasks | Proposed | Adopted | Fast 202 Accepted return with a sequential FIFO queue worker to prevent local Ollama daemon crashes under concurrent alerts. |
 
 ---
 
@@ -71,3 +72,15 @@ This document logs key architectural choices, trade-offs, descoped items, and de
   2. **Missing `user.name` on LSASS Alerts (`T1003.001`):** In live Event 10 logs, ECS `user` only contains `{"id": "S-1-5-18"}`. The actual human username resides in `winlog.event_data.SourceUser: "DESKTOP-THONLNR\victim"`. `from_raw_alert()` implements an explicit fallback to ensure `user_name` is never lost.
   3. **Subtechnique Truncation (`T1003.001` & `T1547.001`):** In several Kibana alert exports, the threat framework array defined technique IDs (`T1003`, `T1547`) with empty `subtechnique: []` arrays, even though rule names and descriptions explicitly referenced `T1003.001` and `T1547.001`. A regex fallback `(T\d{4}\.\d{3})` was integrated into `from_raw_alert()` to recover subtechniques for accurate playbook retrieval.
   4. **Suricata Host Blindspot:** Suricata alerts omit `host` entirely. The schema makes `host_name: Optional[str]` to prevent validation crashes and flags host resolution as an active enrichment query.
+
+---
+
+### ADR-008: Sequential Worker Queue vs Concurrent BackgroundTasks for Local LLM Triage
+
+* **Context:**
+  A complete two-stage LLM triage cycle with `llama3:8b` takes approximately 25–40 seconds per alert. Standard Elasticsearch/Kibana alert webhook connectors timeout after 10–15 seconds. If the API processes webhooks synchronously, Kibana marks the webhook as failed, aborts the action, and triggers retry storms.
+  Furthermore, standard FastAPI `BackgroundTasks` executes concurrent coroutines/threads for every incoming request. Because local Ollama (`localhost:11434`) utilizes full GPU/CPU hardware acceleration, concurrent LLM inference requests cause severe VRAM thrashing, context allocation errors, and timeout cascades.
+* **Decision:**
+  1. **Immediate HTTP 202 Accepted:** `POST /webhook/alert` validates secret authentication and payload integrity, registers the `alert_id` in an idempotency cache, and returns HTTP 202 Accepted in under 50ms.
+  2. **Single-Worker Sequential FIFO Queue:** A dedicated background daemon thread (`SequentialTriageWorker`) consumes tasks from a thread-safe `queue.Queue()`. Alerts are processed strictly one-by-one, ensuring Ollama's local compute pipeline operates at optimal throughput without memory contention or timeout drops.
+  3. **Idempotency & Deduplication:** Any duplicate alert received while another is pending or recently processed is immediately recognized and acknowledged with `deduplicated: true`, preventing redundant LLM calls and eliminating duplicate Discord notification spam.

@@ -269,3 +269,45 @@ class DiscordForwarder:
                 return False
 
         return False
+
+    def send_test_message(
+        self,
+        message: str = "Test notification from LLM Alert Triage Service.",
+        webhook_url: Optional[str] = None
+    ) -> bool:
+        """
+        Sends a simple verification ping to the Discord webhook channel.
+        Useful for connectivity testing from API endpoints and dashboard UI.
+        """
+        url = webhook_url or self.webhook_url
+        if self.dry_run or not url:
+            logger.info("[DiscordForwarder] Dry-run/No webhook URL configured. Test ping marked successful.")
+            return True
+
+        payload = {
+            "content": f"🔔 **LLM Alert Triage System Test**\n{message}",
+            "embeds": [
+                {
+                    "title": "Webhook Connectivity Check",
+                    "description": "Discord Webhook forwarder successfully connected to the LLM Alert Triage Engine.",
+                    "color": COLOR_UNKNOWN,
+                    "fields": [
+                        {"name": "Status", "value": "🟢 Online & Operational", "inline": True},
+                        {"name": "Environment", "value": "SOC Triage Gateway", "inline": True}
+                    ],
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "footer": {"text": "LLM Alert Triage Engine • Integration Test"}
+                }
+            ]
+        }
+        try:
+            res = requests.post(
+                url,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=self.timeout
+            )
+            return res.status_code in (200, 204)
+        except Exception as e:
+            logger.error(f"[DiscordForwarder] Failed to send test ping to Discord: {e}")
+            return False

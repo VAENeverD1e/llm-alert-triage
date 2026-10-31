@@ -48,25 +48,38 @@ class TriageOrchestrator:
         use_rag: bool = True,
         model_name: str = "llama3:8b",
         playbooks_dir: str = "./playbooks",
+        elastic_client: Optional[Any] = None,
+        elastic_url: Optional[str] = None,
+        elastic_api_key: Optional[str] = None,
         discord_forwarder: Optional[Any] = None,
         discord_webhook_url: Optional[str] = None
     ) -> "TriageOrchestrator":
         """
         Factory method to instantiate a fully configured orchestrator with local RAG, Ollama client,
-        and optional Discord webhook notification forwarder.
+        real Elasticsearch client for enrichment, and optional Discord webhook notification forwarder.
         """
         from integrations.playbook_retriever import PlaybookRetriever
         from integrations.ollama_client import OllamaClient
+        from integrations.elastic_client import ElasticClient
         from notification.discord_forwarder import DiscordForwarder
 
         retriever = PlaybookRetriever(playbooks_dir=playbooks_dir) if use_rag else None
         llm = OllamaClient(model_name=model_name) if use_ollama else None
         
+        es_client = elastic_client
+        if es_client is None and elastic_url:
+            es_client = ElasticClient(host=elastic_url, api_key=elastic_api_key or "")
+
         forwarder = discord_forwarder
         if forwarder is None and discord_webhook_url:
             forwarder = DiscordForwarder(webhook_url=discord_webhook_url)
 
-        return cls(playbook_retriever=retriever, ollama_client=llm, discord_forwarder=forwarder)
+        return cls(
+            elastic_client=es_client,
+            playbook_retriever=retriever,
+            ollama_client=llm,
+            discord_forwarder=forwarder
+        )
 
     def run_pipeline(self, alert_data: Dict[str, Any]) -> TriagePipelineResult:
         """

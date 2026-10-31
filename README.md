@@ -113,3 +113,78 @@ Run the evaluation harness to compute performance metrics across benign and atta
 python -m evaluation.replay_harness
 python -m evaluation.metrics
 ```
+
+---
+
+## 🌐 Running the REST API & Webhook Service
+
+The gateway exposes a production-grade FastAPI service receiving Kibana/Elasticsearch alert webhooks, executing sequential two-stage triage, and dispatching Rich Embed notifications to Discord.
+
+### 1. Configuration (`.env`)
+
+Copy `.env.example` to `.env` and set secret parameters:
+
+```bash
+cp .env.example .env
+```
+
+Key environment variables:
+* `WEBHOOK_SECRET`: Secret token for webhook authentication (`X-Webhook-Secret` or `Authorization: Bearer <secret>`).
+* `DISCORD_WEBHOOK_URL`: Target Discord channel webhook URL.
+* `ELASTIC_URL`: Elasticsearch host URL (e.g. `http://192.168.31.130:9200`).
+* `OLLAMA_HOST`: Local Ollama service endpoint (default: `http://localhost:11434`).
+
+### 2. Start the Server
+
+```bash
+# Using launcher script
+python scripts/run_server.py --host 0.0.0.0 --port 8000 --reload
+
+# Or directly with Uvicorn
+uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+* **Interactive OpenAPI Docs:** `http://localhost:8000/docs`
+* **Live Health Check:** `http://localhost:8000/health`
+* **Audit Results Feed:** `http://localhost:8000/results`
+
+### 3. Curl Examples
+
+#### Ingest Webhook Alert (Immediate HTTP 202 Accepted)
+```bash
+curl -X POST "http://localhost:8000/webhook/alert" \
+     -H "Content-Type: application/json" \
+     -H "X-Webhook-Secret: your_secret_here" \
+     -d '{
+       "alert_id": "ATK-DEMO-001",
+       "rule_id": "T1059.001",
+       "rule_name": "PowerShell Encoded Script Execution",
+       "severity": "high",
+       "host_name": "FINANCE-PC01",
+       "user_name": "jdoe",
+       "process_context": {
+         "process": {
+           "name": "powershell.exe",
+           "command_line": "powershell.exe -Enc SQBFAFgA...",
+           "pid": 5824
+         }
+       }
+     }'
+```
+
+#### Synchronous Test Triage
+```bash
+curl -X POST "http://localhost:8000/triage/test" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "alert_id": "TEST-001",
+       "rule_id": "T1003.001",
+       "rule_name": "LSASS Memory Access",
+       "severity": "critical"
+     }'
+```
+
+#### Inspect Recent Triage Results (Last 20)
+```bash
+curl -X GET "http://localhost:8000/results"
+```

@@ -83,6 +83,49 @@ class ElasticClient:
             logger.warning(f"Elastic enrichment query failed against {url}: {e}")
             return []
 
+    def ping(self) -> bool:
+        """Checks if Elasticsearch instance is reachable."""
+        try:
+            headers = {"Content-Type": "application/json"}
+            if self.api_key:
+                headers["Authorization"] = f"ApiKey {self.api_key}"
+            resp = requests.get(f"{self.host}/", headers=headers, timeout=3)
+            return resp.status_code == 200
+        except Exception:
+            return False
+
+    def get_alert_by_id(
+        self,
+        alert_id: str,
+        index: str = ".alerts-security.alerts-*"
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Fetches the complete raw alert document from Elasticsearch by alert ID or Kibana alert UUID.
+        Solves the Kibana webhook template constraint where only alert_id is transmitted.
+        """
+        if not alert_id:
+            return None
+
+        clean_id = str(alert_id).strip()
+        query = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {"term": {"_id": clean_id}},
+                        {"term": {"kibana.alert.uuid": clean_id}},
+                        {"term": {"kibana.alert.rule.uuid": clean_id}},
+                        {"match": {"kibana.alert.uuid": clean_id}},
+                    ],
+                    "minimum_should_match": 1,
+                }
+            },
+            "size": 1,
+        }
+        hits = self._search(query, index=index)
+        if hits:
+            return hits[0]
+        return None
+
     # ── Enrichment: parent process via Event ID 1 correlation ──────────
 
     def get_process_creation_context(
