@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Header, HTTPException, Query, Body, status
+from fastapi import FastAPI, Header, HTTPException, Query, Body, status, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -142,6 +142,35 @@ async def receive_webhook_alert(
         queued_at=datetime.now(timezone.utc).isoformat(),
         deduplicated=is_dedup
     )
+
+
+@app.get("/webhook/alert", summary="Webhook Endpoint Info", include_in_schema=False)
+@app.get("/api/v1/webhook/alert", include_in_schema=False)
+@app.get("/api/v1/webhook/elastic", include_in_schema=False)
+async def webhook_get_info():
+    """
+    Returns helpful instructions when accessed via GET (e.g. directly in browser).
+    Explains that alert ingestion requires an HTTP POST request.
+    """
+    return {
+        "status": "online",
+        "endpoint": "/webhook/alert",
+        "description": "Elasticsearch & Kibana Alert Webhook Ingestion Gateway.",
+        "accepted_method": "POST",
+        "instruction": "Send an HTTP POST request with JSON payload containing 'alert_id' or Elasticsearch alert document.",
+        "authentication": "X-Webhook-Secret header (or Authorization: Bearer <token> if WEBHOOK_SECRET is set)",
+        "links": {
+            "swagger_docs": "/docs",
+            "health_check": "/health",
+            "recent_results": "/results"
+        }
+    }
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Silences automatic browser favicon 404 requests."""
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.get(
