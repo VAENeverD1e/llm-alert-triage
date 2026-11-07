@@ -8,6 +8,13 @@ import logging
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, List
 
+# Load environment variables from .env file if present
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass
+
 logger = logging.getLogger("APIConfig")
 
 
