@@ -34,30 +34,62 @@ class ReplayHarness:
         orchestrator: Optional[TriageOrchestrator] = None,
         mode: str = "heuristic",
         model_name: str = "llama3:8b",
+        enable_enrichment: bool = True,
+        include_severity: bool = False,
         results_dir: str = "evaluation/results"
     ):
         self.mode = mode
         self.model_name = model_name
+        self.enable_enrichment = enable_enrichment
+        self.include_severity = include_severity
         self.results_dir = results_dir
         os.makedirs(self.results_dir, exist_ok=True)
 
         if orchestrator is not None:
             self.orchestrator = orchestrator
         else:
-            self.orchestrator = self._init_orchestrator(mode, model_name)
+            self.orchestrator = self._init_orchestrator(
+                mode=mode,
+                model_name=model_name,
+                enable_enrichment=enable_enrichment,
+                include_severity=include_severity
+            )
 
     @classmethod
-    def _init_orchestrator(cls, mode: str, model_name: str) -> TriageOrchestrator:
+    def _init_orchestrator(
+        cls,
+        mode: str,
+        model_name: str,
+        enable_enrichment: bool = True,
+        include_severity: bool = False
+    ) -> TriageOrchestrator:
         """Instantiates the appropriate orchestrator configuration for the chosen mode."""
         if mode == "heuristic":
             # Pure heuristic baseline without LLM
-            return TriageOrchestrator.create_default(use_ollama=False, use_rag=True)
+            return TriageOrchestrator.create_default(
+                use_ollama=False,
+                use_rag=True,
+                enable_enrichment=enable_enrichment,
+                include_severity=include_severity
+            )
         elif mode == "llm_no_rag":
             # Local LLM without RAG playbook grounding
-            return TriageOrchestrator.create_default(use_ollama=True, use_rag=False, model_name=model_name)
+            return TriageOrchestrator.create_default(
+                use_ollama=True,
+                use_rag=False,
+                model_name=model_name,
+                enable_enrichment=enable_enrichment,
+                include_severity=include_severity
+            )
         elif mode == "llm_rag":
             # Full two-stage pipeline with local LLM and RAG Playbooks
-            return TriageOrchestrator.create_default(use_ollama=True, use_rag=True, model_name=model_name)
+            return TriageOrchestrator.create_default(
+                use_ollama=True,
+                use_rag=True,
+                model_name=model_name,
+                enable_enrichment=enable_enrichment,
+                include_severity=include_severity
+            )
         else:
             logger.warning(f"Unknown mode '{mode}'; defaulting to heuristic baseline.")
             return TriageOrchestrator.create_default(use_ollama=False, use_rag=True)
@@ -67,10 +99,18 @@ class ReplayHarness:
         cls,
         mode: str = "heuristic",
         model_name: str = "llama3:8b",
+        enable_enrichment: bool = True,
+        include_severity: bool = False,
         results_dir: str = "evaluation/results"
     ) -> "ReplayHarness":
         """Factory helper to create a harness for a specific evaluation mode."""
-        return cls(mode=mode, model_name=model_name, results_dir=results_dir)
+        return cls(
+            mode=mode,
+            model_name=model_name,
+            enable_enrichment=enable_enrichment,
+            include_severity=include_severity,
+            results_dir=results_dir
+        )
 
     def run_ground_truth_eval(
         self,
@@ -278,6 +318,193 @@ class ReplayHarness:
             f.write("\n".join(md_lines))
 
 
+    @classmethod
+    def run_multi_run_benchmark(
+        cls,
+        mode: str = "llm_rag",
+        model_name: str = "llama3:8b",
+        runs: int = 5,
+        enable_enrichment: bool = True,
+        include_severity: bool = False,
+        ground_truth_path: str = "data/ground_truth.jsonl",
+        results_dir: str = "evaluation/results"
+    ) -> Dict[str, Any]:
+        """
+        Executes K repeated benchmark evaluations for a single configuration,
+        calculating Mean ± Std Dev across runs to measure statistical variance.
+        """
+        logger.info(f"========== Starting Multi-Run Benchmark ({runs} runs) for [{mode.upper()}] ==========")
+        run_results = []
+        metrics_list = []
+
+        for i in range(1, runs + 1):
+            logger.info(f"--- Iteration {i}/{runs} for Mode [{mode}] ---")
+            harness = cls.create_for_mode(
+                mode=mode,
+                model_name=model_name,
+                enable_enrichment=enable_enrichment,
+                include_severity=include_severity,
+                results_dir=results_dir
+            )
+            report = harness.run_ground_truth_eval(ground_truth_path=ground_truth_path, save_results=False)
+            metrics_list.append(report["metrics"])
+            run_results.append({
+                "iteration": i,
+                "matches": report["matches"],
+                "mismatches": report["mismatches"],
+                "metrics": report["metrics"]
+            })
+
+        aggregate_stats = MetricsCalculator.calculate_aggregate_metrics(metrics_list)
+        summary = {
+            "mode": mode,
+            "model_name": model_name,
+            "runs_requested": runs,
+            "enable_enrichment": enable_enrichment,
+            "include_severity": include_severity,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "aggregate_metrics": aggregate_stats,
+            "individual_runs": run_results
+        }
+
+        # Save summary JSON
+        out_name = f"eval_multirun_{mode}_{runs}runs.json"
+        summary_path = os.path.join(results_dir, out_name)
+        with open(summary_path, "w", encoding="utf-8") as f:
+            json.dump(summary, f, indent=2, ensure_ascii=False)
+
+        logger.info(f"Multi-run evaluation complete! Summary saved to {summary_path}")
+        return summary
+
+    @classmethod
+    def run_full_ablation_suite(
+        cls,
+        model_name: str = "llama3:8b",
+        runs: int = 5,
+        include_severity: bool = False,
+        ground_truth_path: str = "data/ground_truth.jsonl",
+        results_dir: str = "evaluation/results/ablation",
+    ) -> Dict[str, Any]:
+        """
+        Runs the full scientific ablation matrix:
+        1. Heuristic Baseline (Deterministic rule baseline)
+        2. LLM Zero-Shot (No RAG, No Enrich)
+        3. LLM + Stage 1 Enrich (Enrichment only)
+        4. LLM + RAG Playbooks (RAG only, No Enrich)
+        5. Full Proposed Pipeline (Stage 1 Enrich + Stage 2 RAG)
+        """
+        os.makedirs(results_dir, exist_ok=True)
+        logger.info(f"========== STARTING FULL SCIENTIFIC ABLATION SUITE (N={runs} runs/config) ==========")
+
+        configs = [
+            {
+                "config_id": "heuristic_baseline",
+                "label": "Heuristic Baseline",
+                "mode": "heuristic",
+                "enable_enrichment": False,
+                "runs": 1,  # Deterministic rule code only needs 1 iteration
+            },
+            {
+                "config_id": "llm_zero_shot",
+                "label": "LLM Zero-Shot (No RAG, No Enrich)",
+                "mode": "llm_no_rag",
+                "enable_enrichment": False,
+                "runs": runs,
+            },
+            {
+                "config_id": "llm_enrich_only",
+                "label": "LLM + Stage 1 Enrich",
+                "mode": "llm_no_rag",
+                "enable_enrichment": True,
+                "runs": runs,
+            },
+            {
+                "config_id": "llm_rag_only",
+                "label": "LLM + RAG Playbooks (No Enrich)",
+                "mode": "llm_rag",
+                "enable_enrichment": False,
+                "runs": runs,
+            },
+            {
+                "config_id": "full_pipeline",
+                "label": "Full Pipeline (Enrich + RAG)",
+                "mode": "llm_rag",
+                "enable_enrichment": True,
+                "runs": runs,
+            },
+        ]
+
+        suite_results = {}
+        for cfg in configs:
+            cid = cfg["config_id"]
+            logger.info(f"\n[Ablation Matrix] Evaluating: {cfg['label']} ({cfg['runs']} iterations)...")
+            res = cls.run_multi_run_benchmark(
+                mode=cfg["mode"],
+                model_name=model_name,
+                runs=cfg["runs"],
+                enable_enrichment=cfg["enable_enrichment"],
+                include_severity=include_severity,
+                ground_truth_path=ground_truth_path,
+                results_dir=results_dir
+            )
+            suite_results[cid] = {
+                "label": cfg["label"],
+                "runs": cfg["runs"],
+                "aggregate": res["aggregate_metrics"]
+            }
+
+        ablation_summary = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "model_name": model_name,
+            "severity_in_prompt": include_severity,
+            "suite_results": suite_results
+        }
+
+        # Save Markdown table
+        md_path = os.path.join(results_dir, "ablation_study_summary.md")
+        cls._export_ablation_markdown(ablation_summary, md_path)
+
+        # Save JSON
+        json_path = os.path.join(results_dir, "ablation_study_summary.json")
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(ablation_summary, f, indent=2, ensure_ascii=False)
+
+        logger.info(f"Full ablation suite complete! Reports written to {md_path} and {json_path}")
+        return ablation_summary
+
+    @staticmethod
+    def _export_ablation_markdown(summary: Dict[str, Any], output_path: str) -> None:
+        """Formats ablation suite aggregate metrics into a research-grade Markdown table."""
+        suite = summary["suite_results"]
+        headers = ["Configuration", "Runs", "Precision", "Recall", "F1-Score", "Cohen's Kappa (κ)", "Mean Time (MTTR)"]
+        separator = ["|---"] * len(headers)
+
+        lines = [
+            "# Empirical Ablation Study: Component Breakdown & Reproducibility",
+            f"**Generated:** {summary['timestamp']}  ",
+            f"**Evaluated Model:** `{summary['model_name']}`  ",
+            f"**Telemetry Severity in Prompt:** `{'Enabled' if summary['severity_in_prompt'] else 'DISABLED (Pure Telemetry Reasoning)'}`  ",
+            "",
+            "| " + " | ".join(headers) + " |",
+            "|".join(separator) + "|",
+        ]
+
+        for cid, data in suite.items():
+            agg = data["aggregate"]
+            p = agg.get("precision_formatted") or f"{agg.get('precision_mean', 0.0):.4f}"
+            r = agg.get("recall_formatted") or f"{agg.get('recall_mean', 0.0):.4f}"
+            f1 = agg.get("f1_score_formatted") or f"{agg.get('f1_score_mean', 0.0):.4f}"
+            k = agg.get("cohens_kappa_formatted") or f"{agg.get('cohens_kappa_mean', 0.0):.4f}"
+            mttr = agg.get("mttr_ms_formatted") or f"{agg.get('mttr_ms_mean', 0.0):.1f} ms"
+
+            row_vals = [data["label"], str(data["runs"]), p, r, f1, k, mttr]
+            lines.append("| " + " | ".join(row_vals) + " |")
+
+        lines.append("")
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Replay Harness for LLM Alert Triage")
     parser.add_argument(
@@ -287,11 +514,35 @@ def main():
         help="Execution mode (default: heuristic)"
     )
     parser.add_argument("--model", default="llama3:8b", help="Ollama model name (default: llama3:8b)")
+    parser.add_argument("--runs", type=int, default=1, help="Number of repeated runs to calculate variance (default: 1)")
+    parser.add_argument("--ablation-suite", action="store_true", help="Run the full 5-configuration scientific ablation suite")
+    parser.add_argument("--include-severity", action="store_true", help="Include severity/risk in prompt (default: False)")
+    parser.add_argument("--no-enrichment", action="store_true", help="Disable Stage 1 enrichment")
     parser.add_argument("--ground-truth", default="data/ground_truth.jsonl", help="Path to ground truth dataset")
     parser.add_argument("--results-dir", default="evaluation/results", help="Directory for output results")
     args = parser.parse_args()
 
-    if args.mode in ("compare", "all"):
+    enable_enrichment = not args.no_enrichment
+
+    if args.ablation_suite:
+        ReplayHarness.run_full_ablation_suite(
+            model_name=args.model,
+            runs=args.runs if args.runs > 1 else 5,
+            include_severity=args.include_severity,
+            ground_truth_path=args.ground_truth,
+            results_dir=os.path.join(args.results_dir, "ablation")
+        )
+    elif args.runs > 1:
+        ReplayHarness.run_multi_run_benchmark(
+            mode=args.mode,
+            model_name=args.model,
+            runs=args.runs,
+            enable_enrichment=enable_enrichment,
+            include_severity=args.include_severity,
+            ground_truth_path=args.ground_truth,
+            results_dir=args.results_dir
+        )
+    elif args.mode in ("compare", "all"):
         modes = ["heuristic", "llm_no_rag", "llm_rag"] if args.mode == "all" else ["heuristic", "llm_rag"]
         res = ReplayHarness.run_comparative_benchmark(
             modes=modes,
@@ -303,7 +554,13 @@ def main():
         for mode, m in res["metrics_comparison"].items():
             print(f"  [{mode.upper()}]: F1={m['f1_score']}, Precision={m['precision']}, Recall={m['recall']}, MTTR={m['mttr_ms']}ms")
     else:
-        harness = ReplayHarness.create_for_mode(mode=args.mode, model_name=args.model, results_dir=args.results_dir)
+        harness = ReplayHarness.create_for_mode(
+            mode=args.mode,
+            model_name=args.model,
+            enable_enrichment=enable_enrichment,
+            include_severity=args.include_severity,
+            results_dir=args.results_dir
+        )
         report = harness.run_ground_truth_eval(ground_truth_path=args.ground_truth, save_results=True)
         m = report["metrics"]
         print(f"\n[+] Run complete for mode [{args.mode.upper()}]:")

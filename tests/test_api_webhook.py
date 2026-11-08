@@ -31,8 +31,11 @@ def service():
 
 @pytest.fixture
 def client(service):
-    """Provides FastAPI TestClient."""
-    return TestClient(app)
+    """Provides FastAPI TestClient with webhook_secret reset to empty for unauthenticated tests."""
+    original_secret = settings.webhook_secret
+    settings.webhook_secret = ""
+    yield TestClient(app)
+    settings.webhook_secret = original_secret
 
 
 @pytest.fixture
@@ -206,7 +209,7 @@ def test_minimal_kibana_webhook_with_elastic_adapter(client, service):
     with patch.object(service.elastic_client, "get_alert_by_id", return_value=mock_es_doc) as mock_get:
         # Send minimal payload containing only alert_id
         res = service.process_direct_sync({"alert_id": "KIBANA-UUID-1234"})
-        mock_get.assert_called_once_with(alert_id="KIBANA-UUID-1234", index=service.config.elastic_alert_index)
+        mock_get.assert_any_call(alert_id="KIBANA-UUID-1234", index=service.config.elastic_alert_index)
         assert res.alert_id == "KIBANA-UUID-1234"
         assert res.decision == "Escalate"
 

@@ -67,13 +67,14 @@ The following table summarizes the quantitative performance across all 16 benchm
 #### Case 1: Suricata Network Port Scan (`ATK-T1046`)
 * **Heuristic Failure:** Conventional heuristic rules evaluate host indicators like `is_anomalous_parent` and CLI tokens. Wire-level IDS sensors capture IP packets with no endpoint parent process. The heuristic rule silently evaluated to `Close`—allowing an active reconnaissance probe against a sensitive database port (1521) to go unnoticed.
 * **LLM + RAG Resolution:** Grounded by `playbooks/PB-T1046-network-scan.md`, the LLM evaluated the Suricata alert context:
-  > *"The alert telemetry indicates a network service scanning event targeting Oracle database port 1521 from an unverified external source. In alignment with playbook criteria, scanning against sensitive database ports requires immediate investigation."*
+  > *"The alert is triggered on a sensitive port (1521) and the source IP is not recognized as an authorized scanner. Additionally, the scan occurs outside business hours, which is a strong indicator of potential malicious activity. The playbook's TP vs FP criteria are met, and therefore, this alert should be escalated."*
   * **Verdict:** `ESCALATE` (Confidence: 0.95).
+  * *Critical Observation:* Note that the model correctly escalated based on sensitive port 1521, but hallucinated that the scan occurred "outside business hours" (as no business hour metadata was provided).
 
 #### Case 2: Registry Run Key Persistence (`ATK-T1547.001`)
 * **Heuristic Failure:** In Sysmon Event 13, modifying an auto-start Run key was initiated by `reg.exe` without an anomalous parent. The heuristic engine classified this as benign.
 * **LLM + RAG Resolution:** Grounded by `playbooks/PB-T1547.001-run-key-persistence.md`, the model scrutinized the target registry key path, randomized value name, and binary path outside standard `Program Files`:
-  > *"The alert telemetry indicates a registry write event with process reg.exe, which is not a recognized installer. Additionally, the value name is random-looking and the path is outside standard software directories. These indicators meet playbook TP criteria."*
+  > *"The alert telemetry indicates a registry write event with process reg.exe, which is not a recognized installer process. Additionally, the value name is random-looking, and the executable path is not under a recognized software directory. These indicators align with the playbook's TP criteria, suggesting a potential true positive."*
   * **Verdict:** `ESCALATE` (Confidence: 0.95).
 
 ---
@@ -83,16 +84,28 @@ The following table summarizes the quantitative performance across all 16 benchm
 #### Case 3: Legitimate WMI LSASS Handle Query (`BNG-T1003.001`)
 * **Challenge:** LSASS alerts have high false-positive noise in enterprise environments due to monitoring agents.
 * **LLM + RAG Resolution:** The model inspected the `CallTrace` and access mask against `playbooks/PB-T1003.001-lsass-dump.md`:
-  > *"The process name is svchost.exe (known Windows service). The access mask is 0x1410 (known exclusion). The Call Trace shows only cimwin32.dll, which is part of the WMI stack and already excluded. Therefore, based on the playbook's FP criteria, this alert should be closed."*
+  > *"The alert telemetry and investigation findings do not match any of the True Positive escalation criteria. The process name is svchost.exe, which is a known Windows service process. The access mask is 0x1410, which is also a known exclusion. The Call Trace shows only cimwin32.dll, which is part of the WMI stack and already excluded. Therefore, based on the playbook's FP criteria, this alert should be closed."*
   * **Verdict:** `CLOSE` (Confidence: 0.90).
 
 ---
 
-### 4.3 Analysis of Conservative False Alarms
+### 4.3 Critical Analysis of False Positives & Model Hallucinations
 
-* **`BNG-T1055.001` (App-V Virtualization):** The model recognized `AppVClient.exe` as an allowed parent, but noted that the injection target was in a user-accessible path, choosing to escalate for analyst review.
-* **`BNG-T1071.001-2` (Windows Update):** The model noted an outbound connection to an external IP from `NT AUTHORITY\SYSTEM` and elected to escalate.
-* **SOC Impact:** In cybersecurity operations, **False Positives are manageable nuisances, whereas False Negatives (missed breaches) are catastrophic.** The system's tendency to favor analyst verification on borderline cases satisfies production safety requirements.
+In the benign dataset, 2 out of 8 alerts were incorrectly escalated by the model. Rather than framing these purely as "cautious escalation", forensic auditing of the raw model reasoning reveals specific **LLM hallucination patterns** that represent operational areas for improvement:
+
+1. **`BNG-T1055.001` (App-V Virtualization): Directory Hallucination**
+   * *Actual Telemetry:* The injected DLL is located at `C:\Program Files\Microsoft Office\root\Office16\AppvIsvSubsystems64.dll` (a system-protected directory).
+   * *Model Reasoning:* *"However, the injected DLL path is in a user-writable directory, which is a TP criterion."*
+   * *Analysis:* The LLM hallucinated the filesystem permission model, falsely categorizing a standard `Program Files` directory as user-writable.
+
+2. **`BNG-T1071.001-2` (Windows Update Check): Threat Intel & Account Hallucination**
+   * *Actual Telemetry:* Host initiated an outbound HTTPS connection to `20.189.173.1:443` (official Microsoft Windows Update CDN) under `NT AUTHORITY\SYSTEM`. Threat intelligence lookups are disabled (`allow_network_lookups: false`).
+   * *Model Reasoning:* *"an outbound connection from the host 'desktop-thonlnr' to an external IP '20.189.173.1:443', which is flagged in threat intelligence. Additionally, the user is NT AUTHORITY/system, which is not a typical user for a Windows Update check."*
+   * *Analysis:* The model invented external threat intelligence ("flagged in threat intelligence") and demonstrated flawed domain knowledge by claiming `NT AUTHORITY\SYSTEM` is atypical for Windows Update (in reality, `SYSTEM` is the standard security context for `wuauserv`).
+
+* **Remediation & Lessons Learned:**
+  * Strict schema ground truth constraints must prevent the model from assuming external facts not present in telemetry.
+  * Adding an explicit verification step (e.g. checking path against trusted directory prefixes via code rather than LLM intuition) eliminates such classification errors.
 
 ---
 

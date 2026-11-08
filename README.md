@@ -33,40 +33,48 @@ An automated two-stage LLM agent system designed to triage SIEM/Elastic security
 ```text
 llm-alert-triage/
 ├── README.md                           # Main project overview and setup guide
+├── api/                                # FastAPI Webhook Ingestion & Alert Gateway
+│   ├── main.py                         # Application entrypoint with sequential FIFO worker
+│   ├── service.py                      # Triage singleton service manager
+│   ├── schemas.py                      # Webhook request/response Pydantic models
+│   └── config.py                       # API settings & authentication configuration
+├── playbooks/                          # Grounded RAG Incident Response Playbooks
+│   └── PB-*.md                         # MITRE ATT&CK response guides (TP vs FP criteria)
+├── soc_portal/                         # SOC Analyst Web Dashboard & Visualizer
+│   ├── backend/                        # FastAPI dashboard endpoints
+│   └── frontend/                       # Vite/React SOC operations interface
 ├── docs/                               # Architectural diagrams, decision logs, and proposals
-│   ├── proposal_condensed.docx         # Thesis / research proposal reference
-│   ├── architecture.png                # High-level architecture diagram
+│   ├── alert-schema-audit.md           # Schema audit & SIEM telemetry mapping
+│   ├── evaluation_results.md           # Empirical benchmark evaluation report
+│   ├── project_limitations_and_analysis.md # In-depth project critique & technical roadmap
 │   └── decisions.md                    # Scope-cut log & architectural decision record (ADR)
 ├── config/                             # Rule definitions & agent parameters
 │   ├── rules_tight.ndjson              # Production-tier SIEM rules (with exclusions)
 │   ├── rules_loose.ndjson              # Unfiltered SIEM rules (for experimentation)
 │   └── agent_config.yaml               # Model configuration, token limits, and tool permissions
 ├── data/                               # Dataset & replay scenarios
-│   ├── attack_scenarios/               # Scripted replay defs for 7 MITRE ATT&CK T-IDs
-│   ├── benign_scenarios/               # Scripted benign-noise generators
-│   ├── optc_subset/                    # DARPA OpTC sample dataset & loader
-│   └── ground_truth.jsonl              # Labeled alert evaluation dataset (alert_id -> Escalate/Close)
-├── agent/                              # Core LLM Triage Logic
-│   ├── fact_finding/                   # Aggregates surrounding event logs without judgment
-│   ├── verdict/                        # Decision-making module (Escalate/Close + reasoning)
-│   ├── schemas/                        # Pydantic / JSON schemas for agent inputs and outputs
-│   └── orchestrator.py                 # Pipeline manager executing stage 1 & stage 2
+│   ├── attack_scenarios/               # Scripted replay defs for MITRE ATT&CK T-IDs
+│   ├── benign_scenarios/               # Scripted benign-noise enterprise scenarios
+│   └── ground_truth.jsonl              # 16 Labeled alert evaluation benchmark (8 ATK / 8 BNG)
+├── agent/                              # Core Two-Stage LLM Triage Logic
+│   ├── fact_finding/                   # Stage 1: Aggregates surrounding event logs without bias
+│   ├── verdict/                        # Stage 2: RAG playbook reasoning & Escalate/Close decision
+│   ├── security/                       # Adversarial PromptGuard delimiter & injection defense
+│   ├── schemas/                        # Pydantic schemas (NormalizedAlert, Context Blocks)
+│   └── orchestrator.py                 # Pipeline manager coordinating Stages 1 & 2
 ├── integrations/                       # External Service Integrations
 │   ├── elastic_client.py               # Ingests alerts and queries Elasticsearch/Kibana
 │   ├── playbook_retriever.py           # RAG retrieval module for security response playbooks
-│   └── ollama_client.py                # Interface for local LLM inference (e.g., Llama 3/Mistral)
+│   └── ollama_client.py                # Interface for local LLM inference (e.g., Llama 3)
 ├── notification/                       # Alerting & Webhooks
-│   └── discord_forwarder.py            # Formats and sends triage results to Discord channels
+│   └── discord_forwarder.py            # Formats and sends color-coded alerts to Discord channels
 ├── evaluation/                         # Benchmarking & Security Testing
 │   ├── replay_harness.py               # Automated execution harness for scenario testing
-│   ├── metrics.py                      # Metrics (Precision, Recall, F1, MTTR, Cohen's kappa)
-│   ├── prompt_injection/               # Adversarial alert payload testing & safety checks
+│   ├── metrics.py                      # Metrics (Precision, Recall, F1, Latency, Cohen's kappa)
+│   ├── prompt_injection/               # Adversarial alert payload testing & safety suite
 │   └── results/                        # Evaluation run outputs (CSV/JSON)
-├── tests/                              # Unit & Integration Tests
-│   ├── test_agent_schema.py            # Validates JSON schemas for agent communications
-│   └── test_orchestrator.py            # End-to-end pipeline execution tests
+├── tests/                              # Unit & Integration Tests (100% pytest suite)
 └── scripts/                            # Operational Scripts
-    └── setup_ollama.sh                 # Environment setup and model pull script for Ollama
 ```
 
 ---

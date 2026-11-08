@@ -26,10 +26,17 @@ class VerdictAgent:
     and adversarial prompt injection defenses.
     """
 
-    def __init__(self, playbook_retriever=None, ollama_client=None, prompt_guard=None):
+    def __init__(
+        self,
+        playbook_retriever=None,
+        ollama_client=None,
+        prompt_guard=None,
+        include_severity: bool = False,
+    ):
         self.playbook_retriever = playbook_retriever
         self.ollama_client = ollama_client
         self.prompt_guard = prompt_guard or PromptGuard()
+        self.include_severity = include_severity
 
     def process(self, alert: SecurityAlert, facts: FactFindingOutput) -> VerdictOutput:
         """
@@ -147,6 +154,8 @@ class VerdictAgent:
         else:
             playbook_snippet = "Inspect host telemetry and escalate if unauthorized activity."
 
+        severity_line = f"- Severity: {alert.severity} (Risk Score: {alert.risk_score})\n" if self.include_severity else ""
+
         user_prompt = f"""### INCIDENT RESPONSE PLAYBOOK GUIDANCE:
 {playbook_snippet}
 
@@ -155,8 +164,7 @@ class VerdictAgent:
 - Alert ID: {alert.alert_id}
 - Rule Name: {alert.rule_name}
 - MITRE Technique: {alert.rule_id}
-- Severity: {alert.severity} (Risk Score: {alert.risk_score})
-- Telemetry Source: {alert.telemetry_source}
+{severity_line}- Telemetry Source: {alert.telemetry_source}
 - Host Name: {alert.host_name or 'Unknown'}
 - User: {alert.user_name or 'Unknown'}
 - Detection Reason: {alert.reason}
@@ -191,7 +199,7 @@ Output ONLY a JSON object:
   "reasoning": "Clear analytical reasoning justifying the verdict based on indicators and playbook...",
   "recommended_playbook": "{playbook_id}",
   "mitre_attack_techniques": ["{alert.rule_id}"],
-  "risk_factors": ["risk factor 1", "risk factor 2"]
+  "risk_factors": ["<specific_risk_indicator_1>", "<specific_risk_indicator_2>"]
 }}
 """
 
@@ -261,6 +269,15 @@ Output ONLY a JSON object:
         risk_factors = data.get("risk_factors")
         if not isinstance(risk_factors, list):
             risk_factors = [f"Severity: {alert.severity}"]
+        else:
+            # Clean any placeholder values copied directly from prompt template
+            cleaned_rf = [
+                rf for rf in risk_factors
+                if isinstance(rf, str)
+                and rf.strip().lower() not in ["risk factor 1", "risk factor 2"]
+                and not rf.strip().startswith("<specific_risk_indicator")
+            ]
+            risk_factors = cleaned_rf or [f"Severity: {alert.severity}"]
 
         # Prompt Injection Override Check
         has_injection = any("Prompt Injection" in ev for ev in facts.evidence_extracted)

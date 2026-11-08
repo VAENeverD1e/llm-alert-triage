@@ -15,6 +15,7 @@ from agent.schemas.triage_schema import (
     TriagePipelineResult,
     TriageDecision
 )
+from agent.security.prompt_guard import PromptGuard, PromptGuardResult
 from agent.fact_finding.collector import FactFindingAgent
 from agent.verdict.evaluator import VerdictAgent
 
@@ -32,13 +33,28 @@ class TriageOrchestrator:
         elastic_client: Optional[Any] = None,
         playbook_retriever: Optional[Any] = None,
         ollama_client: Optional[Any] = None,
-        discord_forwarder: Optional[Any] = None
+        discord_forwarder: Optional[Any] = None,
+        prompt_guard: Optional[PromptGuard] = None,
+        enable_enrichment: bool = True,
+        include_severity: bool = False,
     ):
         self.elastic_client = elastic_client
         self.playbook_retriever = playbook_retriever
         self.ollama_client = ollama_client
-        self.fact_finder = FactFindingAgent(elastic_client=elastic_client, ollama_client=ollama_client)
-        self.verdict_agent = VerdictAgent(playbook_retriever=playbook_retriever, ollama_client=ollama_client)
+        self.prompt_guard = prompt_guard or PromptGuard()
+        self.enable_enrichment = enable_enrichment
+        self.include_severity = include_severity
+        self.fact_finder = FactFindingAgent(
+            elastic_client=elastic_client,
+            ollama_client=ollama_client,
+            enable_enrichment=enable_enrichment
+        )
+        self.verdict_agent = VerdictAgent(
+            playbook_retriever=playbook_retriever,
+            ollama_client=ollama_client,
+            prompt_guard=self.prompt_guard,
+            include_severity=include_severity
+        )
         self.discord_forwarder = discord_forwarder
 
     @classmethod
@@ -52,7 +68,9 @@ class TriageOrchestrator:
         elastic_url: Optional[str] = None,
         elastic_api_key: Optional[str] = None,
         discord_forwarder: Optional[Any] = None,
-        discord_webhook_url: Optional[str] = None
+        discord_webhook_url: Optional[str] = None,
+        enable_enrichment: bool = True,
+        include_severity: bool = False,
     ) -> "TriageOrchestrator":
         """
         Factory method to instantiate a fully configured orchestrator with local RAG, Ollama client,
@@ -78,7 +96,9 @@ class TriageOrchestrator:
             elastic_client=es_client,
             playbook_retriever=retriever,
             ollama_client=llm,
-            discord_forwarder=forwarder
+            discord_forwarder=forwarder,
+            enable_enrichment=enable_enrichment,
+            include_severity=include_severity,
         )
 
     def run_pipeline(self, alert_data: Dict[str, Any]) -> TriagePipelineResult:
@@ -90,13 +110,24 @@ class TriageOrchestrator:
 
         # Parse alert
         if "_source" in alert_data or "kibana.alert.uuid" in alert_data:
-            alert = NormalizedAlert.from_raw_alert(alert_data)
+            raw_alert = NormalizedAlert.from_raw_alert(alert_data)
         else:
-            alert = SecurityAlert(**alert_data)
+            raw_alert = SecurityAlert(**alert_data)
+
+        # Defense-in-Depth: Sanitize untrusted alert telemetry before ANY stage processing
+        guard_res: PromptGuardResult = self.prompt_guard.sanitize_alert(raw_alert)
+        alert = guard_res.sanitized_alert if guard_res.sanitized_alert else raw_alert
 
         try:
-            # Stage 1: Fact-Finding
+            # Stage 1: Fact-Finding (executed on sanitized telemetry)
             facts: FactFindingOutput = self.fact_finder.process(alert)
+            if guard_res.is_injected:
+                evidence_msg = (
+                    f"Adversarial Prompt Injection Detected in telemetry ({', '.join(guard_res.redacted_fields)}): "
+                    f"{', '.join(guard_res.detected_patterns)}"
+                )
+                if evidence_msg not in facts.evidence_extracted:
+                    facts.evidence_extracted.append(evidence_msg)
 
             # Stage 2: Verdict
             verdict: VerdictOutput = self.verdict_agent.process(alert, facts)

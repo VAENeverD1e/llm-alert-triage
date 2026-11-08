@@ -223,12 +223,38 @@ class PromptGuard:
                         all_detected.extend(hits)
                         redacted_fields.append("process.name")
 
+                if getattr(pctx.process, "args", None):
+                    clean_args = []
+                    args_hit = False
+                    for arg in pctx.process.args:
+                        clean_arg, hits = self.sanitize_text(arg)
+                        if hits:
+                            all_detected.extend(hits)
+                            args_hit = True
+                        clean_args.append(clean_arg)
+                    pctx.process.args = clean_args
+                    if args_hit:
+                        redacted_fields.append("process.args")
+
             if pctx.parent_process and pctx.parent_process.command_line:
                 clean, hits = self.sanitize_text(pctx.parent_process.command_line)
                 if hits:
                     pctx.parent_process.command_line = clean
                     all_detected.extend(hits)
                     redacted_fields.append("parent_process.command_line")
+
+            if pctx.parent_process and getattr(pctx.parent_process, "args", None):
+                clean_args = []
+                args_hit = False
+                for arg in pctx.parent_process.args:
+                    clean_arg, hits = self.sanitize_text(arg)
+                    if hits:
+                        all_detected.extend(hits)
+                        args_hit = True
+                    clean_args.append(clean_arg)
+                pctx.parent_process.args = clean_args
+                if args_hit:
+                    redacted_fields.append("parent_process.args")
 
             if pctx.target_process_name:
                 clean, hits = self.sanitize_text(pctx.target_process_name)
@@ -237,9 +263,22 @@ class PromptGuard:
                     all_detected.extend(hits)
                     redacted_fields.append("target_process_name")
 
+            if getattr(pctx, "call_trace", None):
+                clean, hits = self.sanitize_text(pctx.call_trace)
+                if hits:
+                    pctx.call_trace = clean
+                    all_detected.extend(hits)
+                    redacted_fields.append("process.call_trace")
+
         # 3. Registry Context
         if sanitized_alert.registry_context:
             rctx = sanitized_alert.registry_context
+            if getattr(rctx, "path", None):
+                clean, hits = self.sanitize_text(rctx.path)
+                if hits:
+                    rctx.path = clean
+                    all_detected.extend(hits)
+                    redacted_fields.append("registry.path")
             if rctx.data:
                 clean, hits = self.sanitize_text(rctx.data)
                 if hits:
@@ -268,6 +307,12 @@ class PromptGuard:
                     nctx.suricata_signature = clean
                     all_detected.extend(hits)
                     redacted_fields.append("network.suricata_signature")
+            if getattr(nctx, "suricata_category", None):
+                clean, hits = self.sanitize_text(nctx.suricata_category)
+                if hits:
+                    nctx.suricata_category = clean
+                    all_detected.extend(hits)
+                    redacted_fields.append("network.suricata_category")
 
         is_injected = len(all_detected) > 0
         if is_injected:

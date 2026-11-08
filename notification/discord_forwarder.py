@@ -60,7 +60,7 @@ class DiscordForwarder:
             retry_count: Number of retries on transient connection or 5xx server errors.
             dry_run: If True, builds payload and logs without executing actual HTTP request.
         """
-        self.webhook_url = webhook_url or os.environ.get("DISCORD_WEBHOOK_URL", "")
+        self.webhook_url = os.environ.get("DISCORD_WEBHOOK_URL", "") if webhook_url is None else webhook_url
         self.timeout = timeout
         self.retry_count = retry_count
         self.dry_run = dry_run

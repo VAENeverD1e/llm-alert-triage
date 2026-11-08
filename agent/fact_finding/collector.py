@@ -25,24 +25,28 @@ class FactFindingAgent:
     ("not available"), never silently upgraded into a judgment call.
     """
 
-    def __init__(self, elastic_client=None, ollama_client=None):
+    def __init__(self, elastic_client=None, ollama_client=None, enable_enrichment: bool = True):
         self.elastic_client = elastic_client
         self.ollama_client = ollama_client
+        self.enable_enrichment = enable_enrichment
 
     def process(self, alert: SecurityAlert) -> FactFindingOutput:
-        logger.info(f"[Fact-Finding Stage] Gathering facts for alert: {alert.alert_id}")
+        logger.info(f"[Fact-Finding Stage] Gathering facts for alert: {alert.alert_id} (Enrichment: {self.enable_enrichment})")
 
         host_name = alert.host_name
         parent_process: Optional[Dict[str, Any]] = None
         evidence: List[str] = [f"Rule: {alert.rule_id}", f"Severity: {alert.severity}"]
 
-        if alert.telemetry_source == "sysmon" and alert.process_context:
-            parent_process, note = self._resolve_parent_process(alert)
-            evidence.append(note)
+        if self.enable_enrichment:
+            if alert.telemetry_source == "sysmon" and alert.process_context:
+                parent_process, note = self._resolve_parent_process(alert)
+                evidence.append(note)
 
-        if alert.telemetry_source == "suricata" and not host_name:
-            host_name, note = self._resolve_host(alert)
-            evidence.append(note)
+            if alert.telemetry_source == "suricata" and not host_name:
+                host_name, note = self._resolve_host(alert)
+                evidence.append(note)
+        else:
+            evidence.append("Stage 1 Enrichment disabled (Ablation mode: raw alert only).")
 
         processes = self._collect_process_names(alert, parent_process)
         network_calls = self._collect_network_connections(alert)

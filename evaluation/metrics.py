@@ -2,12 +2,15 @@
 Evaluation Metrics Calculator.
 Computes evaluation metrics: Precision, Recall, F1-Score, Mean Time to Respond (MTTR), and Cohen's Kappa.
 """
+import math
+import statistics
 from typing import List, Dict, Any
 
 
 class MetricsCalculator:
     """
-    Computes statistical and performance metrics for triage evaluation runs.
+    Computes statistical and performance metrics for triage evaluation runs,
+    including single-run metrics and multi-run aggregate statistics (mean ± std dev).
     """
 
     @staticmethod
@@ -62,6 +65,32 @@ class MetricsCalculator:
             "mttr_ms": round(mttr, 2),
             "cohens_kappa": round(kappa, 4)
         }
+
+    @staticmethod
+    def calculate_aggregate_metrics(runs: List[Dict[str, float]]) -> Dict[str, Any]:
+        """
+        Computes aggregate statistics (mean and sample standard deviation)
+        across multiple repeated evaluation runs for empirical reproducibility.
+        """
+        if not runs:
+            return {}
+
+        keys = ["precision", "recall", "f1_score", "mttr_ms", "cohens_kappa"]
+        agg: Dict[str, Any] = {"num_runs": len(runs)}
+
+        for k in keys:
+            vals = [float(r.get(k, 0.0)) for r in runs]
+            mean_val = statistics.mean(vals)
+            std_val = statistics.stdev(vals) if len(vals) > 1 else 0.0
+
+            agg[f"{k}_mean"] = round(mean_val, 4)
+            agg[f"{k}_std"] = round(std_val, 4)
+            if k == "mttr_ms":
+                agg[f"{k}_formatted"] = f"{mean_val:.1f} ± {std_val:.1f} ms"
+            else:
+                agg[f"{k}_formatted"] = f"{mean_val:.4f} ± {std_val:.4f}"
+
+        return agg
 
 
 if __name__ == "__main__":
