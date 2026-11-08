@@ -1,0 +1,40 @@
+{
+  "mode": "heuristic",
+  "model_name": "llama3:8b",
+  "runs_requested": 1,
+  "enable_enrichment": false,
+  "include_severity": false,
+  "timestamp": "2026-11-08T03:45:40.821601+00:00",
+  "aggregate_metrics": {
+    "num_runs": 1,
+    "precision_mean": 1.0,
+    "precision_std": 0.0,
+    "precision_formatted": "1.0000 ± 0.0000",
+    "recall_mean": 0.75,
+    "recall_std": 0.0,
+    "recall_formatted": "0.7500 ± 0.0000",
+    "f1_score_mean": 0.8571,
+    "f1_score_std": 0.0,
+    "f1_score_formatted": "0.8571 ± 0.0000",
+    "mttr_ms_mean": 2.81,
+    "mttr_ms_std": 0.0,
+    "mttr_ms_formatted": "2.8 ± 0.0 ms",
+    "cohens_kappa_mean": 0.75,
+    "cohens_kappa_std": 0.0,
+    "cohens_kappa_formatted": "0.7500 ± 0.0000"
+  },
+  "individual_runs": [
+    {
+      "iteration": 1,
+      "matches": 14,
+      "mismatches": 2,
+      "metrics": {
+        "precision": 1.0,
+        "recall": 0.75,
+        "f1_score": 0.8571,
+        "mttr_ms": 2.81,
+        "cohens_kappa": 0.75
+      }
+    }
+  ]
+}

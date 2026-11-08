@@ -260,19 +260,6 @@ Không nên tuyên bố nếu chưa có artifact benchmark mới:
 Các câu trên hoặc dựa vào kết quả cũ đã invalidated, hoặc vượt quá những gì code
 hiện tại thực sự chứng minh.
 
-## 6. Cách mô tả ngắn gọn khi báo cáo với giảng viên
-
-> Đề tài đã xây dựng được một prototype triage alert hai giai đoạn cho Sysmon và
-> Suricata. Hệ thống có schema chuẩn hóa, Elastic enrichment tùy chọn, RAG từ
-> playbook MITRE, Ollama inference, prompt-injection guard, FastAPI webhook và
-> evaluation harness. Tuy nhiên, Stage 1 hiện vẫn là collector Python tĩnh chứ
-> chưa phải LLM tool-calling agent. Bộ dữ liệu đánh giá chỉ có 16 scenario và các
-> kết quả LLM cũ đã bị loại vì phát hiện label leakage và khác biệt giữa attack
-> với benign. Vì vậy cần chạy lại multi-run/ablation trên dataset đã khử leakage
-> trước khi đưa ra bất kỳ con số hiệu năng nào. Enrichment chỉ được coi là đã
-> đánh giá khi Elasticsearch thực sự reachable và artifact ghi nhận enrichment
-> được bật.
-
 ## 7. Việc cần làm tiếp theo
 
 1. Đợi ablation hiện tại hoàn tất hoặc dừng nếu Ollama/Elastic bị treo.
