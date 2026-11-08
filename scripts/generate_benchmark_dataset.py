@@ -152,7 +152,7 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                 timestamp="2026-10-10T08:00:00Z",
                 host_name="desktop-thonlnr",
                 user_name=r"NT AUTHORITY\SYSTEM",
-                reason="Routine WMI host query accessing LSASS process space",
+                reason=None,
                 telemetry_source="sysmon",
                 event_code="10",
                 process_context=ProcessContext(
@@ -182,7 +182,7 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                 timestamp="2026-10-10T08:05:00Z",
                 host_name="sec-scanner-01",
                 user_name="svc-security",
-                reason="Authorized monthly internal vulnerability assessment scan",
+                reason=None,
                 telemetry_source="suricata",
                 event_code=None,
                 network_context=NetworkContext(
@@ -193,8 +193,8 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                     protocol="tcp",
                     direction="ingress",
                     user_agent="Mozilla/5.0 (compatible; Nessus Vulnerability Scanner)",
-                    suricata_signature="ET INFO Authorized Security Vulnerability Scan in progress",
-                    suricata_category="Potential Corporate Scanner",
+                    suricata_signature=None,
+                    suricata_category=None,
                 ),
             ),
             "technique_name": "Network Service Discovery",
@@ -212,7 +212,7 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                 timestamp="2026-10-10T08:10:00Z",
                 host_name="desktop-thonlnr",
                 user_name=r"NT AUTHORITY\SYSTEM",
-                reason="Routine software auto-update task registration",
+                reason=None,
                 telemetry_source="sysmon",
                 event_code="1",
                 process_context=ProcessContext(
@@ -245,7 +245,7 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                 timestamp="2026-10-10T08:15:00Z",
                 host_name="desktop-thonlnr",
                 user_name="victim",
-                reason="Application virtualization subsystem hook injection",
+                reason=None,
                 telemetry_source="sysmon",
                 event_code="1",
                 process_context=ProcessContext(
@@ -278,7 +278,7 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                 timestamp="2026-10-10T08:20:00Z",
                 host_name="desktop-thonlnr",
                 user_name=r"NT AUTHORITY\SYSTEM",
-                reason="Routine IT hardware asset inventory collection",
+                reason=None,
                 telemetry_source="sysmon",
                 event_code="1",
                 process_context=ProcessContext(
@@ -311,7 +311,7 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                 timestamp="2026-10-10T08:25:00Z",
                 host_name="desktop-thonlnr",
                 user_name="victim",
-                reason="Routine enterprise cloud storage sync heartbeat",
+                reason=None,
                 telemetry_source="suricata",
                 event_code=None,
                 network_context=NetworkContext(
@@ -322,8 +322,8 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                     protocol="tls",
                     direction="egress",
                     user_agent="Microsoft OneDrive Sync 24.086.0428.0001",
-                    suricata_signature="ET INFO Microsoft OneDrive Cloud Sync Heartbeat",
-                    suricata_category="Corporate Cloud Storage Traffic",
+                    suricata_signature=None,
+                    suricata_category=None,
                 ),
             ),
             "technique_name": "Application Layer Protocol: Web Protocols (C2)",
@@ -341,7 +341,7 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                 timestamp="2026-10-10T08:30:00Z",
                 host_name="desktop-thonlnr",
                 user_name=r"NT AUTHORITY\SYSTEM",
-                reason="System Windows Update check connection",
+                reason=None,
                 telemetry_source="sysmon",
                 event_code="3",
                 process_context=ProcessContext(
@@ -382,7 +382,7 @@ def setup_benign_scenarios() -> List[Dict[str, Any]]:
                 timestamp="2026-10-10T08:35:00Z",
                 host_name="desktop-thonlnr",
                 user_name="victim",
-                reason="User desktop application auto-launch setting registration",
+                reason=None,
                 telemetry_source="sysmon",
                 event_code="13",
                 process_context=ProcessContext(

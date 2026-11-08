@@ -8,7 +8,7 @@
   "timestamp": "2026-10-10T08:25:00Z",
   "host_name": "desktop-thonlnr",
   "user_name": "victim",
-  "reason": "Routine enterprise cloud storage sync heartbeat",
+  "reason": null,
   "telemetry_source": "suricata",
   "event_code": null,
   "process_context": null,
@@ -21,8 +21,8 @@
     "protocol": "tls",
     "direction": "egress",
     "user_agent": "Microsoft OneDrive Sync 24.086.0428.0001",
-    "suricata_signature": "ET INFO Microsoft OneDrive Cloud Sync Heartbeat",
-    "suricata_category": "Corporate Cloud Storage Traffic"
+    "suricata_signature": null,
+    "suricata_category": null
   },
   "raw_event": {}
 }

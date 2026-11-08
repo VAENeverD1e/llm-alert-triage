@@ -37,6 +37,8 @@ class TriageOrchestrator:
         prompt_guard: Optional[PromptGuard] = None,
         enable_enrichment: bool = True,
         include_severity: bool = False,
+        confidence_threshold_escalate: float = 0.70,
+        confidence_threshold_close: float = 0.85,
     ):
         self.elastic_client = elastic_client
         self.playbook_retriever = playbook_retriever
@@ -53,7 +55,9 @@ class TriageOrchestrator:
             playbook_retriever=playbook_retriever,
             ollama_client=ollama_client,
             prompt_guard=self.prompt_guard,
-            include_severity=include_severity
+            include_severity=include_severity,
+            confidence_threshold_escalate=confidence_threshold_escalate,
+            confidence_threshold_close=confidence_threshold_close,
         )
         self.discord_forwarder = discord_forwarder
 
@@ -71,6 +75,8 @@ class TriageOrchestrator:
         discord_webhook_url: Optional[str] = None,
         enable_enrichment: bool = True,
         include_severity: bool = False,
+        confidence_threshold_escalate: float = 0.70,
+        confidence_threshold_close: float = 0.85,
     ) -> "TriageOrchestrator":
         """
         Factory method to instantiate a fully configured orchestrator with local RAG, Ollama client,
@@ -99,6 +105,8 @@ class TriageOrchestrator:
             discord_forwarder=forwarder,
             enable_enrichment=enable_enrichment,
             include_severity=include_severity,
+            confidence_threshold_escalate=confidence_threshold_escalate,
+            confidence_threshold_close=confidence_threshold_close,
         )
 
     def run_pipeline(self, alert_data: Dict[str, Any]) -> TriagePipelineResult:

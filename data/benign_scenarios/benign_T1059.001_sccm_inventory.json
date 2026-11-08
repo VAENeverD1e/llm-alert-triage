@@ -8,7 +8,7 @@
   "timestamp": "2026-10-10T08:20:00Z",
   "host_name": "desktop-thonlnr",
   "user_name": "NT AUTHORITY\\SYSTEM",
-  "reason": "Routine IT hardware asset inventory collection",
+  "reason": null,
   "telemetry_source": "sysmon",
   "event_code": "1",
   "process_context": {

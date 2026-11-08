@@ -10,6 +10,7 @@ import csv
 import time
 import logging
 import argparse
+from copy import deepcopy
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 
@@ -36,12 +37,16 @@ class ReplayHarness:
         model_name: str = "llama3:8b",
         enable_enrichment: bool = True,
         include_severity: bool = False,
+        elastic_url: Optional[str] = None,
+        sanitize_label_leakage: bool = True,
         results_dir: str = "evaluation/results"
     ):
         self.mode = mode
         self.model_name = model_name
         self.enable_enrichment = enable_enrichment
         self.include_severity = include_severity
+        self.elastic_url = elastic_url or os.getenv("ELASTIC_URL")
+        self.sanitize_label_leakage = sanitize_label_leakage
         self.results_dir = results_dir
         os.makedirs(self.results_dir, exist_ok=True)
 
@@ -52,7 +57,8 @@ class ReplayHarness:
                 mode=mode,
                 model_name=model_name,
                 enable_enrichment=enable_enrichment,
-                include_severity=include_severity
+                include_severity=include_severity,
+                elastic_url=self.elastic_url,
             )
 
     @classmethod
@@ -61,7 +67,8 @@ class ReplayHarness:
         mode: str,
         model_name: str,
         enable_enrichment: bool = True,
-        include_severity: bool = False
+        include_severity: bool = False,
+        elastic_url: Optional[str] = None,
     ) -> TriageOrchestrator:
         """Instantiates the appropriate orchestrator configuration for the chosen mode."""
         if mode == "heuristic":
@@ -70,7 +77,8 @@ class ReplayHarness:
                 use_ollama=False,
                 use_rag=True,
                 enable_enrichment=enable_enrichment,
-                include_severity=include_severity
+                include_severity=include_severity,
+                elastic_url=elastic_url,
             )
         elif mode == "llm_no_rag":
             # Local LLM without RAG playbook grounding
@@ -79,7 +87,8 @@ class ReplayHarness:
                 use_rag=False,
                 model_name=model_name,
                 enable_enrichment=enable_enrichment,
-                include_severity=include_severity
+                include_severity=include_severity,
+                elastic_url=elastic_url,
             )
         elif mode == "llm_rag":
             # Full two-stage pipeline with local LLM and RAG Playbooks
@@ -88,11 +97,16 @@ class ReplayHarness:
                 use_rag=True,
                 model_name=model_name,
                 enable_enrichment=enable_enrichment,
-                include_severity=include_severity
+                include_severity=include_severity,
+                elastic_url=elastic_url,
             )
         else:
             logger.warning(f"Unknown mode '{mode}'; defaulting to heuristic baseline.")
-            return TriageOrchestrator.create_default(use_ollama=False, use_rag=True)
+            return TriageOrchestrator.create_default(
+                use_ollama=False,
+                use_rag=True,
+                elastic_url=elastic_url,
+            )
 
     @classmethod
     def create_for_mode(
@@ -101,6 +115,8 @@ class ReplayHarness:
         model_name: str = "llama3:8b",
         enable_enrichment: bool = True,
         include_severity: bool = False,
+        elastic_url: Optional[str] = None,
+        sanitize_label_leakage: bool = True,
         results_dir: str = "evaluation/results"
     ) -> "ReplayHarness":
         """Factory helper to create a harness for a specific evaluation mode."""
@@ -109,6 +125,8 @@ class ReplayHarness:
             model_name=model_name,
             enable_enrichment=enable_enrichment,
             include_severity=include_severity,
+            elastic_url=elastic_url,
+            sanitize_label_leakage=sanitize_label_leakage,
             results_dir=results_dir
         )
 
@@ -158,6 +176,8 @@ class ReplayHarness:
                         "raw_event": {"notes": item.get("notes", "")}
                     }
 
+                if self.sanitize_label_leakage:
+                    alert_data = self._sanitize_benchmark_alert(alert_data)
                 pipeline_res = self.orchestrator.run_pipeline(alert_data)
                 actual_decision = pipeline_res.verdict.decision.value
                 expected_verdict = item.get("expected_verdict", "Escalate")
@@ -184,6 +204,8 @@ class ReplayHarness:
         report = {
             "mode": self.mode,
             "model_name": self.model_name if "llm" in self.mode else "none",
+            "enrichment_configured": bool(self.elastic_url),
+            "label_leakage_sanitized": self.sanitize_label_leakage,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "total_alerts": len(results),
             "matches": sum(1 for r in results if r["match"]),
@@ -196,6 +218,21 @@ class ReplayHarness:
             self._save_run_results(report)
 
         return report
+
+    @staticmethod
+    def _sanitize_benchmark_alert(alert_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Remove metadata that reveals the expected label in the benchmark."""
+        sanitized = deepcopy(alert_data)
+        sanitized.pop("reason", None)
+        sanitized["host_name"] = "benchmark-host"
+        sanitized["user_name"] = "benchmark-user"
+        network = sanitized.get("network_context")
+        if isinstance(network, dict):
+            network["source_ip"] = "198.51.100.10" if network.get("source_ip") else None
+            network["destination_ip"] = "198.51.100.20" if network.get("destination_ip") else None
+            network["suricata_signature"] = None
+            network["suricata_category"] = None
+        return sanitized
 
     def _save_run_results(self, report: Dict[str, Any]) -> None:
         """Saves evaluation report to JSON and CSV summaries in results_dir."""

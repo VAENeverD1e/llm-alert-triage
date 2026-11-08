@@ -8,7 +8,7 @@
   "timestamp": "2026-10-10T08:05:00Z",
   "host_name": "sec-scanner-01",
   "user_name": "svc-security",
-  "reason": "Authorized monthly internal vulnerability assessment scan",
+  "reason": null,
   "telemetry_source": "suricata",
   "event_code": null,
   "process_context": null,
@@ -21,8 +21,8 @@
     "protocol": "tcp",
     "direction": "ingress",
     "user_agent": "Mozilla/5.0 (compatible; Nessus Vulnerability Scanner)",
-    "suricata_signature": "ET INFO Authorized Security Vulnerability Scan in progress",
-    "suricata_category": "Potential Corporate Scanner"
+    "suricata_signature": null,
+    "suricata_category": null
   },
   "raw_event": {}
 }

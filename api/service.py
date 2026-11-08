@@ -122,7 +122,9 @@ class TriageService:
             model_name=self.config.ollama_model,
             playbooks_dir=self.config.playbooks_dir,
             elastic_client=self.elastic_client,
-            discord_forwarder=self.forwarder
+            discord_forwarder=self.forwarder,
+            confidence_threshold_escalate=self.config.confidence_threshold_escalate,
+            confidence_threshold_close=self.config.confidence_threshold_close,
         )
 
         # Sequential Background Queue & Single Worker Thread

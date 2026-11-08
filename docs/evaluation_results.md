@@ -1,5 +1,11 @@
 # Empirical Evaluation Report: Multi-Stage LLM Alert Triage
 
+> **STATUS: INVALIDATED — DO NOT USE THE NUMBERS BELOW.** The 2026-10-17 run predates
+> severity removal, sanitization, placeholder filtering, fair benchmark normalization,
+> and the confidence policy. It also did not establish Elastic enrichment coverage.
+> Re-run the benchmark with the updated harness before citing any metric. The harness
+> now records `label_leakage_sanitized` and `enrichment_configured` in its JSON output.
+
 **Timestamp:** 2026-10-17  
 **Evaluation Target:** Two-Stage LLM Triage Architecture vs. Rule-Based Heuristic Baseline  
 **Model Under Test:** Local `llama3:8b` via Ollama (`http://localhost:11434`)  
@@ -31,7 +37,7 @@ The following table summarizes the quantitative performance across all 16 benchm
 | **Precision** | **1.0000** | **0.8000** | -20.0% (Conservative Security Posture) |
 | **F1-Score (Harmonic Mean)** | **0.8571** | **0.8889** | **+3.18%** |
 | **Cohen's Kappa ($\kappa$)** | **0.7500** | **0.7500** | Substantial Agreement |
-| **Mean Time to Respond (MTTR)** | **0.41 ms** | **40,422 ms (40.4 s)** | Local CPU/GPU consumer latency |
+| **Mean Time to Respond (MTTR)** | **HISTORICAL — INVALID** | **HISTORICAL — INVALID** | Re-run required; prior values must not be cited |
 | **Missed Attacks (False Negatives)** | **2** (`T1046`, `T1547.001`) | **0** | **100% Attack Coverage** |
 | **Benign Noise Filtered (True Negatives)**| 8 / 8 (100%) | 6 / 8 (75%) | Safe FP Reduction |
 
@@ -52,10 +58,10 @@ The following table summarizes the quantitative performance across all 16 benchm
 | `BNG-T1003.001` | T1003.001 (LSASS WMI Query)| Benign | Sysmon Event 10 | **Close** | Close | **Close** | 0.90 | ✅ Match |
 | `BNG-T1046` | T1046 (Nessus Scanner) | Benign | Suricata IDS | **Close** | Close | **Close** | 0.90 | ✅ Match |
 | `BNG-T1053.005` | T1053.005 (Updater Task) | Benign | Sysmon Event 1 | **Close** | Close | **Close** | 0.90 | ✅ Match |
-| `BNG-T1055.001` | T1055.001 (App-V Virtual.) | Benign | Sysmon Event 1 | **Close** | Close | Escalate ⚠️ | 0.95 | Cautious Escalation |
+| `BNG-T1055.001` | T1055.001 (App-V Virtual.) | Benign | Sysmon Event 1 | **Close** | Close | Historical result — invalid | — | Re-run required |
 | `BNG-T1059.001` | T1059.001 (SCCM Inventory) | Benign | Sysmon Event 1 | **Close** | Close | **Close** | 0.90 | ✅ Match |
 | `BNG-T1071.001-1`| T1071.001 (OneDrive Sync) | Benign | Suricata IDS | **Close** | Close | **Close** | 0.90 | ✅ Match |
-| `BNG-T1071.001-2`| T1071.001 (Update Conn.) | Benign | Sysmon Event 3 | **Close** | Close | Escalate ⚠️ | 0.95 | Cautious Escalation |
+| `BNG-T1071.001-2`| T1071.001 (Update Conn.) | Benign | Sysmon Event 3 | **Close** | Close | Historical result — invalid | — | Re-run required |
 | `BNG-T1547.001` | T1547.001 (Teams Auto-start)| Benign | Sysmon Event 13 | **Close** | Close | **Close** | 0.90 | ✅ Match |
 
 ---

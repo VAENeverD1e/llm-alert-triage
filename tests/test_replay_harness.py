@@ -23,6 +23,30 @@ def test_replay_harness_init_modes():
     assert harness_llm_rag.mode == "llm_rag"
 
 
+def test_benchmark_sanitization_removes_label_leakage():
+    alert = {
+        "reason": "Authorized monthly internal vulnerability assessment scan",
+        "host_name": "sec-scanner-01",
+        "user_name": "svc-security",
+        "network_context": {
+            "source_ip": "192.168.1.10",
+            "destination_ip": "192.168.75.20",
+            "suricata_signature": "ET INFO fake benign signature",
+            "suricata_category": "Corporate Scanner",
+        },
+    }
+
+    sanitized = ReplayHarness._sanitize_benchmark_alert(alert)
+
+    assert "reason" not in sanitized
+    assert sanitized["host_name"] == "benchmark-host"
+    assert sanitized["user_name"] == "benchmark-user"
+    assert sanitized["network_context"]["source_ip"] == "198.51.100.10"
+    assert sanitized["network_context"]["destination_ip"] == "198.51.100.20"
+    assert sanitized["network_context"]["suricata_signature"] is None
+    assert sanitized["network_context"]["suricata_category"] is None
+
+
 def test_replay_harness_eval_mock_dataset(tmp_path):
     """Tests evaluation execution on a controlled mock ground truth JSONL."""
     mock_gt_file = tmp_path / "mock_gt.jsonl"

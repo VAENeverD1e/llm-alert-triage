@@ -32,11 +32,15 @@ class VerdictAgent:
         ollama_client=None,
         prompt_guard=None,
         include_severity: bool = False,
+        confidence_threshold_escalate: float = 0.70,
+        confidence_threshold_close: float = 0.85,
     ):
         self.playbook_retriever = playbook_retriever
         self.ollama_client = ollama_client
         self.prompt_guard = prompt_guard or PromptGuard()
         self.include_severity = include_severity
+        self.confidence_threshold_escalate = confidence_threshold_escalate
+        self.confidence_threshold_close = confidence_threshold_close
 
     def process(self, alert: SecurityAlert, facts: FactFindingOutput) -> VerdictOutput:
         """
@@ -70,12 +74,14 @@ class VerdictAgent:
             try:
                 verdict = self._evaluate_with_llm(effective_alert, facts, playbook_text, playbook_id)
                 if verdict:
-                    return verdict
+                    return self._apply_confidence_policy(verdict)
             except Exception as e:
                 logger.warning(f"[Verdict Stage] LLM evaluation failed or timed out: {e}. Falling back to rule heuristic.")
 
         # Safe fallback if LLM is unavailable or offline
-        return self._evaluate_heuristic(effective_alert, facts, playbook_id)
+        return self._apply_confidence_policy(
+            self._evaluate_heuristic(effective_alert, facts, playbook_id)
+        )
 
     def _evaluate_with_llm(
         self,
@@ -128,8 +134,6 @@ class VerdictAgent:
                 f"- Protocol: {net_ctx.protocol or 'N/A'}\n"
                 f"- Direction: {net_ctx.direction or 'N/A'}\n"
                 f"- User Agent: {net_ctx.user_agent or 'N/A'}\n"
-                f"- Suricata Signature: {net_ctx.suricata_signature or 'N/A'}\n"
-                f"- Suricata Category: {net_ctx.suricata_category or 'N/A'}\n"
             )
 
         registry_details = ""
@@ -167,7 +171,6 @@ class VerdictAgent:
 {severity_line}- Telemetry Source: {alert.telemetry_source}
 - Host Name: {alert.host_name or 'Unknown'}
 - User: {alert.user_name or 'Unknown'}
-- Detection Reason: {alert.reason}
 
 [Process Context]
 {process_details or 'None'}
@@ -305,6 +308,25 @@ Output ONLY a JSON object:
             mitre_attack_techniques=mitre_techs,
             risk_factors=risk_factors
         )
+
+    def _apply_confidence_policy(self, verdict: VerdictOutput) -> VerdictOutput:
+        """Route low-confidence decisions to human review instead of guessing."""
+        threshold = (
+            self.confidence_threshold_escalate
+            if verdict.decision == TriageDecision.ESCALATE
+            else self.confidence_threshold_close
+        )
+        if verdict.decision != TriageDecision.UNKNOWN and verdict.confidence_score < threshold:
+            verdict.decision = TriageDecision.UNKNOWN
+            verdict.recommended_playbook = None
+            verdict.risk_factors = list(dict.fromkeys(
+                [*verdict.risk_factors, "Confidence below configured decision threshold"]
+            ))
+            verdict.reasoning = (
+                f"{verdict.reasoning} Decision routed to human review because confidence "
+                f"{verdict.confidence_score:.2f} is below the {threshold:.2f} threshold."
+            )
+        return verdict
 
     def _evaluate_heuristic(
         self,

@@ -130,22 +130,21 @@ Trong file `docs/evaluation_results.md` mục 4.3, bạn viết rằng LLM ra ph
   * Không hề dùng LLM. Tham số `ollama_client` được nhận vào hàm `__init__` nhưng không hề được sử dụng ở bất kỳ dòng code nào.
   * Hoàn toàn là logic if/else cứng (hardcoded Python dict): chỉ hỗ trợ truy vấn parent process (từ Sysmon) và host name (từ Suricata).
 
-### 2. Các tham số cấu hình quan trọng bị "bỏ xó"
+### 2. Các tham số cấu hình quan trọng
 * File `config/agent_config.yaml` định nghĩa:
   * `context_window_minutes: 5`
   * `max_events_per_alert: 50`
   * `confidence_threshold_escalate: 0.70`
   * `confidence_threshold_close: 0.85`
-* Nhưng trong code xử lý (`collector.py`, `evaluator.py`), các biến này **không bao giờ được nạp hay kiểm tra**.
+* `confidence_threshold_escalate` và `confidence_threshold_close` hiện được truyền vào `VerdictAgent`; quyết định dưới ngưỡng được chuyển thành `Unknown`. Hai tham số context window và giới hạn số event vẫn chưa được thực thi.
 
-### 3. Replay Harness không kết nối Elasticsearch trong bài đánh giá
-* Trong `evaluation/replay_harness.py`:
-  Hàm `_init_orchestrator()` gọi `TriageOrchestrator.create_default(use_ollama=True, use_rag=True)`, hoàn toàn không truyền `elastic_url` hay `elastic_client`.
-* Do đó, `elastic_client` luôn là `None`. Khi benchmark chạy, nhánh query Elasticsearch trong Stage 1 **hoàn toàn bị vô hiệu hóa**. Điểm số đánh giá trong báo cáo thực chất chỉ là chạy trên các file JSON tĩnh có sẵn, chưa từng kiểm chứng năng lực truy vấn log động từ SIEM.
+### 3. Replay Harness và Elasticsearch
+* Harness nhận `ELASTIC_URL` hoặc tham số `elastic_url` và truyền client vào orchestrator.
+* Nếu không cấu hình URL, benchmark ghi `enrichment_configured: false`; kết quả khi đó chỉ đánh giá dữ liệu JSON tĩnh và không được diễn giải là đã kiểm thử enrichment SIEM.
 
 ### 4. Thiếu hiệu chuẩn độ tin cậy (Confidence Calibration) & Thiếu nhãn "Unknown"
 * Điểm confidence trong output (luôn là 0.90 hoặc 0.95) là do LLM tự bịa ra theo prompt ví dụ, không có tính toán phân bố xác suất tin cậy (logit calibration).
-* Không có cơ chế so sánh với ngưỡng `0.70` hay `0.85`. Nếu LLM phân vân (confidence thấp), hệ thống phải gắn nhãn `Unknown` để chuyển human SOC analyst, nhưng trong code trạng thái `Unknown` không bao giờ được kích hoạt.
+* Hệ thống hiện so sánh với ngưỡng `0.70` cho Escalate và `0.85` cho Close. Nếu confidence thấp hơn ngưỡng tương ứng, verdict được gắn `Unknown` để chuyển human SOC analyst. Đây là policy routing, không phải logit calibration.
 
 ### 5. Giới hạn nguồn log (Chưa có Cloud / AWS)
 * Schema `NormalizedAlert` chỉ hỗ trợ đúng Sysmon và Suricata. Toàn bộ 5 kịch bản AWS CloudTrail/GuardDuty đề cập trong mục tiêu ban đầu chưa hề được tích hợp vào pipeline.
@@ -231,4 +230,3 @@ Báo cáo tuyên bố **Attack Success Rate (ASR) = 0%** và **Defense Effective
 | **Trung bình** | **Đính chính thử nghiệm Prompt Injection** | • Nêu rõ trong báo cáo: Prompt Guard là cơ chế phòng thủ **Deterministic Rule-Based Guardrail** (Layer 1) kết hợp LLM (Layer 2).<br>• Cấu hình benchmark chạy có bật Ollama (`use_ollama=True`) để kiểm tra khả năng LLM bị override khi payload lọt qua regex. |
 | **Trung bình** | **Bịt lỗ hổng Prompt Injection** | • Đưa khối `facts.summary_of_events` và `facts.user_context` vào trong phạm vi được kiểm soát hoặc sanitize trước khi đưa vào Stage 2.<br>• Bổ sung sanitize cho `args`, `registry.path`, `call_trace`. |
 | **Thấp** | **Bổ sung Ablation Study** | • Chạy thêm harness với `--mode llm_no_rag` để đưa bảng so sánh 3 cột: Heuristic vs LLM (No RAG) vs LLM + RAG. Điều này sẽ làm tăng sức thuyết phục học thuật lên gấp nhiều lần. |
-

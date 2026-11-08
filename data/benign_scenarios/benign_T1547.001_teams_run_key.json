@@ -8,7 +8,7 @@
   "timestamp": "2026-10-10T08:35:00Z",
   "host_name": "desktop-thonlnr",
   "user_name": "victim",
-  "reason": "User desktop application auto-launch setting registration",
+  "reason": null,
   "telemetry_source": "sysmon",
   "event_code": "13",
   "process_context": {
