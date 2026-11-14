@@ -71,6 +71,7 @@ class TriageOrchestrator:
         elastic_client: Optional[Any] = None,
         elastic_url: Optional[str] = None,
         elastic_api_key: Optional[str] = None,
+        elastic_verify_ssl: bool = True,
         discord_forwarder: Optional[Any] = None,
         discord_webhook_url: Optional[str] = None,
         enable_enrichment: bool = True,
@@ -92,7 +93,11 @@ class TriageOrchestrator:
         
         es_client = elastic_client
         if es_client is None and elastic_url:
-            es_client = ElasticClient(host=elastic_url, api_key=elastic_api_key or "")
+            es_client = ElasticClient(
+                host=elastic_url,
+                api_key=elastic_api_key or "",
+                verify_ssl=elastic_verify_ssl,
+            )
 
         forwarder = discord_forwarder
         if forwarder is None and discord_webhook_url:

@@ -20,6 +20,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from agent.orchestrator import TriageOrchestrator
 from evaluation.metrics import MetricsCalculator
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass
+
 logger = logging.getLogger("ReplayHarness")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
@@ -38,6 +44,8 @@ class ReplayHarness:
         enable_enrichment: bool = True,
         include_severity: bool = False,
         elastic_url: Optional[str] = None,
+        elastic_api_key: Optional[str] = None,
+        elastic_verify_ssl: Optional[bool] = None,
         sanitize_label_leakage: bool = True,
         results_dir: str = "evaluation/results"
     ):
@@ -46,6 +54,12 @@ class ReplayHarness:
         self.enable_enrichment = enable_enrichment
         self.include_severity = include_severity
         self.elastic_url = elastic_url or os.getenv("ELASTIC_URL")
+        self.elastic_api_key = elastic_api_key or os.getenv("ELASTIC_API_KEY")
+        if elastic_verify_ssl is None:
+            elastic_verify_ssl = os.getenv("ELASTIC_VERIFY_SSL", "true").lower() in (
+                "true", "1", "yes"
+            )
+        self.elastic_verify_ssl = elastic_verify_ssl
         self.sanitize_label_leakage = sanitize_label_leakage
         self.results_dir = results_dir
         os.makedirs(self.results_dir, exist_ok=True)
@@ -59,6 +73,8 @@ class ReplayHarness:
                 enable_enrichment=enable_enrichment,
                 include_severity=include_severity,
                 elastic_url=self.elastic_url,
+                elastic_api_key=self.elastic_api_key,
+                elastic_verify_ssl=self.elastic_verify_ssl,
             )
 
     @classmethod
@@ -69,6 +85,8 @@ class ReplayHarness:
         enable_enrichment: bool = True,
         include_severity: bool = False,
         elastic_url: Optional[str] = None,
+        elastic_api_key: Optional[str] = None,
+        elastic_verify_ssl: bool = True,
     ) -> TriageOrchestrator:
         """Instantiates the appropriate orchestrator configuration for the chosen mode."""
         if mode == "heuristic":
@@ -79,6 +97,8 @@ class ReplayHarness:
                 enable_enrichment=enable_enrichment,
                 include_severity=include_severity,
                 elastic_url=elastic_url,
+                elastic_api_key=elastic_api_key,
+                elastic_verify_ssl=elastic_verify_ssl,
             )
         elif mode == "llm_no_rag":
             # Local LLM without RAG playbook grounding
@@ -89,6 +109,8 @@ class ReplayHarness:
                 enable_enrichment=enable_enrichment,
                 include_severity=include_severity,
                 elastic_url=elastic_url,
+                elastic_api_key=elastic_api_key,
+                elastic_verify_ssl=elastic_verify_ssl,
             )
         elif mode == "llm_rag":
             # Full two-stage pipeline with local LLM and RAG Playbooks
@@ -99,6 +121,8 @@ class ReplayHarness:
                 enable_enrichment=enable_enrichment,
                 include_severity=include_severity,
                 elastic_url=elastic_url,
+                elastic_api_key=elastic_api_key,
+                elastic_verify_ssl=elastic_verify_ssl,
             )
         else:
             logger.warning(f"Unknown mode '{mode}'; defaulting to heuristic baseline.")
@@ -106,6 +130,8 @@ class ReplayHarness:
                 use_ollama=False,
                 use_rag=True,
                 elastic_url=elastic_url,
+                elastic_api_key=elastic_api_key,
+                elastic_verify_ssl=elastic_verify_ssl,
             )
 
     @classmethod
@@ -116,6 +142,8 @@ class ReplayHarness:
         enable_enrichment: bool = True,
         include_severity: bool = False,
         elastic_url: Optional[str] = None,
+        elastic_api_key: Optional[str] = None,
+        elastic_verify_ssl: Optional[bool] = None,
         sanitize_label_leakage: bool = True,
         results_dir: str = "evaluation/results"
     ) -> "ReplayHarness":
@@ -126,6 +154,8 @@ class ReplayHarness:
             enable_enrichment=enable_enrichment,
             include_severity=include_severity,
             elastic_url=elastic_url,
+            elastic_api_key=elastic_api_key,
+            elastic_verify_ssl=elastic_verify_ssl,
             sanitize_label_leakage=sanitize_label_leakage,
             results_dir=results_dir
         )

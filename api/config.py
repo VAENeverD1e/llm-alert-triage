@@ -56,7 +56,12 @@ class APISettings:
     # Elasticsearch connection
     elastic_url: str = os.getenv("ELASTIC_URL", "http://192.168.31.130:9200")
     elastic_api_key: str = os.getenv("ELASTIC_API_KEY", "")
+    elastic_verify_ssl: bool = os.getenv("ELASTIC_VERIFY_SSL", "true").lower() in ("true", "1", "yes")
     elastic_alert_index: str = os.getenv("ELASTIC_ALERT_INDEX", ".alerts-security.alerts-*")
+
+    # Elasticsearch Polling (thay thế Kibana webhook connector khi không có Gold license)
+    elastic_poll_enabled: bool = os.getenv("ELASTIC_POLL_ENABLED", "true").lower() in ("true", "1", "yes")
+    elastic_poll_interval: int = int(os.getenv("ELASTIC_POLL_INTERVAL", "30"))
 
     # Discord Notification Settings
     discord_webhook_url: str = os.getenv("DISCORD_WEBHOOK_URL", "")

@@ -6,6 +6,7 @@ Implements:
 3. Elasticsearch Adapter fetching full _source for minimal Kibana webhook payloads.
 4. Thread-safe in-memory results ring buffer (last 20 results).
 5. ElasticClient and DiscordForwarder integration.
+6. Elasticsearch Polling loop replacing Kibana Gold webhook connector.
 """
 import os
 import json
@@ -105,7 +106,8 @@ class TriageService:
         # Initialize Real Integrations
         self.elastic_client = ElasticClient(
             host=self.config.elastic_url,
-            api_key=self.config.elastic_api_key
+            api_key=self.config.elastic_api_key,
+            verify_ssl=self.config.elastic_verify_ssl,
         )
 
         self.forwarder = DiscordForwarder(
@@ -122,6 +124,7 @@ class TriageService:
             model_name=self.config.ollama_model,
             playbooks_dir=self.config.playbooks_dir,
             elastic_client=self.elastic_client,
+            elastic_verify_ssl=self.config.elastic_verify_ssl,
             discord_forwarder=self.forwarder,
             confidence_threshold_escalate=self.config.confidence_threshold_escalate,
             confidence_threshold_close=self.config.confidence_threshold_close,
@@ -137,6 +140,16 @@ class TriageService:
         self._worker_thread.start()
         logger.info("Initialized Sequential Background Worker for LLM Triage.")
 
+        # Elasticsearch Polling Thread (thay Kibana Gold webhook connector)
+        if self.config.elastic_poll_enabled:
+            self._poll_thread = threading.Thread(
+                target=self._poll_loop,
+                daemon=True,
+                name="ElasticAlertPoller",
+            )
+            self._poll_thread.start()
+            logger.info(f"Elastic alert poller started (every {self.config.elastic_poll_interval}s).")
+
     @classmethod
     def get_instance(cls, cfg: Optional[APISettings] = None) -> "TriageService":
         """Thread-safe singleton accessor."""
@@ -144,6 +157,24 @@ class TriageService:
             if cls._instance is None:
                 cls._instance = cls(cfg)
             return cls._instance
+
+    def _poll_loop(self) -> None:
+        """Poll Elasticsearch tìm alert mới thay cho Kibana webhook (không cần license Gold)."""
+        # Chỉ lấy alert sinh ra từ lúc server khởi động, tránh replay alert cũ
+        since = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+        while True:
+            try:
+                hits = self.elastic_client.fetch_new_alerts(
+                    since=since,
+                    index=self.config.elastic_alert_index,
+                )
+                for hit in hits:
+                    self.enqueue_alert(hit)  # hit có _id và _source nên không cần query lại
+                if hits:
+                    since = hits[-1]["_source"].get("@timestamp", since)
+            except Exception as e:
+                logger.error(f"[Poller] Error: {e}", exc_info=True)
+            time.sleep(self.config.elastic_poll_interval)
 
     def enqueue_alert(self, payload: Dict[str, Any]) -> Tuple[str, bool, str]:
         """

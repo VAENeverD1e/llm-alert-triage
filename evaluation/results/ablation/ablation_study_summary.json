@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-11-14T11:08:51.154242+00:00",
+  "model_name": "llama3:8b",
+  "severity_in_prompt": false,
+  "suite_results": {
+    "heuristic_baseline": {
+      "label": "Heuristic Baseline",
+      "runs": 1,
+      "aggregate": {
+        "num_runs": 1,
+        "precision_mean": 1.0,
+        "precision_std": 0.0,
+        "precision_formatted": "1.0000 ± 0.0000",
+        "recall_mean": 0.75,
+        "recall_std": 0.0,
+        "recall_formatted": "0.7500 ± 0.0000",
+        "f1_score_mean": 0.8571,
+        "f1_score_std": 0.0,
+        "f1_score_formatted": "0.8571 ± 0.0000",
+        "mttr_ms_mean": 1.74,
+        "mttr_ms_std": 0.0,
+        "mttr_ms_formatted": "1.7 ± 0.0 ms",
+        "cohens_kappa_mean": 0.75,
+        "cohens_kappa_std": 0.0,
+        "cohens_kappa_formatted": "0.7500 ± 0.0000"
+      }
+    },
+    "llm_zero_shot": {
+      "label": "LLM Zero-Shot (No RAG, No Enrich)",
+      "runs": 5,
+      "aggregate": {
+        "num_runs": 5,
+        "precision_mean": 0.5,
+        "precision_std": 0.0,
+        "precision_formatted": "0.5000 ± 0.0000",
+        "recall_mean": 1.0,
+        "recall_std": 0.0,
+        "recall_formatted": "1.0000 ± 0.0000",
+        "f1_score_mean": 0.6667,
+        "f1_score_std": 0.0,
+        "f1_score_formatted": "0.6667 ± 0.0000",
+        "mttr_ms_mean": 20660.612,
+        "mttr_ms_std": 4130.007,
+        "mttr_ms_formatted": "20660.6 ± 4130.0 ms",
+        "cohens_kappa_mean": 0.0,
+        "cohens_kappa_std": 0.0,
+        "cohens_kappa_formatted": "0.0000 ± 0.0000"
+      }
+    },
+    "llm_enrich_only": {
+      "label": "LLM + Stage 1 Enrich",
+      "runs": 5,
+      "aggregate": {
+        "num_runs": 5,
+        "precision_mean": 0.5,
+        "precision_std": 0.0,
+        "precision_formatted": "0.5000 ± 0.0000",
+        "recall_mean": 1.0,
+        "recall_std": 0.0,
+        "recall_formatted": "1.0000 ± 0.0000",
+        "f1_score_mean": 0.6667,
+        "f1_score_std": 0.0,
+        "f1_score_formatted": "0.6667 ± 0.0000",
+        "mttr_ms_mean": 18759.278,
+        "mttr_ms_std": 1700.6352,
+        "mttr_ms_formatted": "18759.3 ± 1700.6 ms",
+        "cohens_kappa_mean": 0.0,
+        "cohens_kappa_std": 0.0,
+        "cohens_kappa_formatted": "0.0000 ± 0.0000"
+      }
+    },
+    "llm_rag_only": {
+      "label": "LLM + RAG Playbooks (No Enrich)",
+      "runs": 5,
+      "aggregate": {
+        "num_runs": 5,
+        "precision_mean": 0.5573,
+        "precision_std": 0.0364,
+        "precision_formatted": "0.5573 ± 0.0364",
+        "recall_mean": 1.0,
+        "recall_std": 0.0,
+        "recall_formatted": "1.0000 ± 0.0000",
+        "f1_score_mean": 0.7153,
+        "f1_score_std": 0.0294,
+        "f1_score_formatted": "0.7153 ± 0.0294",
+        "mttr_ms_mean": 27609.838,
+        "mttr_ms_std": 6144.6127,
+        "mttr_ms_formatted": "27609.8 ± 6144.6 ms",
+        "cohens_kappa_mean": 0.2,
+        "cohens_kappa_std": 0.1118,
+        "cohens_kappa_formatted": "0.2000 ± 0.1118"
+      }
+    },
+    "full_pipeline": {
+      "label": "Full Pipeline (Enrich + RAG)",
+      "runs": 5,
+      "aggregate": {
+        "num_runs": 5,
+        "precision_mean": 0.5209,
+        "precision_std": 0.0317,
+        "precision_formatted": "0.5209 ± 0.0317",
+        "recall_mean": 1.0,
+        "recall_std": 0.0,
+        "recall_formatted": "1.0000 ± 0.0000",
+        "f1_score_mean": 0.6846,
+        "f1_score_std": 0.027,
+        "f1_score_formatted": "0.6846 ± 0.0270",
+        "mttr_ms_mean": 24050.648,
+        "mttr_ms_std": 539.5964,
+        "mttr_ms_formatted": "24050.6 ± 539.6 ms",
+        "cohens_kappa_mean": 0.075,
+        "cohens_kappa_std": 0.1118,
+        "cohens_kappa_formatted": "0.0750 ± 0.1118"
+      }
+    }
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "mode": "llm_rag",
+  "model_name": "llama3:8b",
+  "runs_requested": 5,
+  "enable_enrichment": true,
+  "include_severity": false,
+  "timestamp": "2026-11-14T11:08:51.154242+00:00",
+  "aggregate_metrics": {
+    "num_runs": 5,
+    "precision_mean": 0.5209,
+    "precision_std": 0.0317,
+    "precision_formatted": "0.5209 ± 0.0317",
+    "recall_mean": 1.0,
+    "recall_std": 0.0,
+    "recall_formatted": "1.0000 ± 0.0000",
+    "f1_score_mean": 0.6846,
+    "f1_score_std": 0.027,
+    "f1_score_formatted": "0.6846 ± 0.0270",
+    "mttr_ms_mean": 24050.648,
+    "mttr_ms_std": 539.5964,
+    "mttr_ms_formatted": "24050.6 ± 539.6 ms",
+    "cohens_kappa_mean": 0.075,
+    "cohens_kappa_std": 0.1118,
+    "cohens_kappa_formatted": "0.0750 ± 0.1118"
+  },
+  "individual_runs": [
+    {
+      "iteration": 1,
+      "matches": 8,
+      "mismatches": 8,
+      "metrics": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1_score": 0.6667,
+        "mttr_ms": 24793.44,
+        "cohens_kappa": 0.0
+      }
+    },
+    {
+      "iteration": 2,
+      "matches": 9,
+      "mismatches": 7,
+      "metrics": {
+        "precision": 0.5333,
+        "recall": 1.0,
+        "f1_score": 0.6957,
+        "mttr_ms": 24415.43,
+        "cohens_kappa": 0.125
+      }
+    },
+    {
+      "iteration": 3,
+      "matches": 8,
+      "mismatches": 8,
+      "metrics": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1_score": 0.6667,
+        "mttr_ms": 23790.69,
+        "cohens_kappa": 0.0
+      }
+    },
+    {
+      "iteration": 4,
+      "matches": 10,
+      "mismatches": 6,
+      "metrics": {
+        "precision": 0.5714,
+        "recall": 1.0,
+        "f1_score": 0.7273,
+        "mttr_ms": 23789.7,
+        "cohens_kappa": 0.25
+      }
+    },
+    {
+      "iteration": 5,
+      "matches": 8,
+      "mismatches": 8,
+      "metrics": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1_score": 0.6667,
+        "mttr_ms": 23463.98,
+        "cohens_kappa": 0.0
+      }
+    }
+  ]
+}

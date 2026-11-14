@@ -1,7 +1,9 @@
 {
   "mode": "heuristic",
   "model_name": "none",
-  "timestamp": "2026-11-08T03:08:20.958768+00:00",
+  "enrichment_configured": true,
+  "label_leakage_sanitized": true,
+  "timestamp": "2026-11-14T13:07:30.059539+00:00",
   "total_alerts": 16,
   "matches": 14,
   "mismatches": 2,
@@ -9,7 +11,7 @@
     "precision": 1.0,
     "recall": 0.75,
     "f1_score": 0.8571,
-    "mttr_ms": 2.03,
+    "mttr_ms": 3752.94,
     "cohens_kappa": 0.75
   },
   "results": [
@@ -23,7 +25,7 @@
       "actual": "Escalate",
       "match": true,
       "confidence": 0.92,
-      "processing_time_ms": 3.0188560485839844,
+      "processing_time_ms": 10009.825229644775,
       "reasoning": "[Rule Heuristic] Alert 'LSASS Memory Access' triggered with severity 'high'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['rundll32.exe']). Recommended triage action is Escalate.",
       "recommended_playbook": "PB-T1003.001",
       "risk_factors": [
@@ -41,7 +43,7 @@
       "actual": "Close",
       "match": false,
       "confidence": 0.88,
-      "processing_time_ms": 1.7139911651611328,
+      "processing_time_ms": 10002.199172973633,
       "reasoning": "[Rule Heuristic] Alert 'Network Service Discovery (Suricata)' triggered with severity 'medium'. Fact-finding revealed anomalous parent process pattern: False (Processes: []). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -59,7 +61,7 @@
       "actual": "Escalate",
       "match": true,
       "confidence": 0.92,
-      "processing_time_ms": 3.161191940307617,
+      "processing_time_ms": 1.0497570037841797,
       "reasoning": "[Rule Heuristic] Alert 'Suspicious Scheduled Task Creation' triggered with severity 'high'. Fact-finding revealed anomalous parent process pattern: True (Processes: ['schtasks.exe', 'cmd.exe']). Recommended triage action is Escalate.",
       "recommended_playbook": "PB-T1053.005",
       "risk_factors": [
@@ -77,7 +79,7 @@
       "actual": "Escalate",
       "match": true,
       "confidence": 0.92,
-      "processing_time_ms": 3.9114952087402344,
+      "processing_time_ms": 1.8024444580078125,
       "reasoning": "[Rule Heuristic] Alert 'DLL Injection via CreateRemoteThread' triggered with severity 'high'. Fact-finding revealed anomalous parent process pattern: True (Processes: ['mavinject.exe', 'powershell.exe']). Recommended triage action is Escalate.",
       "recommended_playbook": "PB-T1055.001",
       "risk_factors": [
@@ -95,7 +97,7 @@
       "actual": "Escalate",
       "match": true,
       "confidence": 0.92,
-      "processing_time_ms": 5.104541778564453,
+      "processing_time_ms": 2.0248889923095703,
       "reasoning": "[Rule Heuristic] Alert 'Encoded PowerShell Execution Detection' triggered with severity 'high'. Fact-finding revealed anomalous parent process pattern: True (Processes: ['powershell.exe']). Recommended triage action is Escalate.",
       "recommended_playbook": "PB-T1059.001",
       "risk_factors": [
@@ -113,7 +115,7 @@
       "actual": "Escalate",
       "match": true,
       "confidence": 0.92,
-      "processing_time_ms": 1.0192394256591797,
+      "processing_time_ms": 10015.278100967407,
       "reasoning": "[Rule Heuristic] Alert 'Malicious HTTP User Agent (C2 Beaconing)' triggered with severity 'high'. Fact-finding revealed anomalous parent process pattern: False (Processes: []). Recommended triage action is Escalate.",
       "recommended_playbook": "PB-T1071.001",
       "risk_factors": [
@@ -131,7 +133,7 @@
       "actual": "Escalate",
       "match": true,
       "confidence": 0.92,
-      "processing_time_ms": 2.0051002502441406,
+      "processing_time_ms": 10009.872436523438,
       "reasoning": "[Rule Heuristic] Alert 'Suspicious Script-Based Outbound Network Connection' triggered with severity 'high'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['powershell.exe']). Recommended triage action is Escalate.",
       "recommended_playbook": "PB-T1071.001",
       "risk_factors": [
@@ -149,7 +151,7 @@
       "actual": "Close",
       "match": false,
       "confidence": 0.88,
-      "processing_time_ms": 2.0804405212402344,
+      "processing_time_ms": 10001.543045043945,
       "reasoning": "[Rule Heuristic] Alert 'Registry Run Key Persistence' triggered with severity 'medium'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['reg.exe']). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -167,7 +169,7 @@
       "actual": "Close",
       "match": true,
       "confidence": 0.88,
-      "processing_time_ms": 2.043008804321289,
+      "processing_time_ms": 10003.432273864746,
       "reasoning": "[Rule Heuristic] Alert 'LSASS Memory Access' triggered with severity 'low'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['svchost.exe']). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -185,7 +187,7 @@
       "actual": "Close",
       "match": true,
       "confidence": 0.88,
-      "processing_time_ms": 1.0197162628173828,
+      "processing_time_ms": 0.0,
       "reasoning": "[Rule Heuristic] Alert 'Network Service Scanning' triggered with severity 'low'. Fact-finding revealed anomalous parent process pattern: False (Processes: []). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -203,7 +205,7 @@
       "actual": "Close",
       "match": true,
       "confidence": 0.88,
-      "processing_time_ms": 2.5794506072998047,
+      "processing_time_ms": 0.0,
       "reasoning": "[Rule Heuristic] Alert 'Scheduled Task Creation' triggered with severity 'low'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['schtasks.exe', 'GoogleUpdate.exe']). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -221,7 +223,7 @@
       "actual": "Close",
       "match": true,
       "confidence": 0.88,
-      "processing_time_ms": 0.9875297546386719,
+      "processing_time_ms": 0.0,
       "reasoning": "[Rule Heuristic] Alert 'Process Injection: Dynamic-link Library Injection' triggered with severity 'low'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['mavinject.exe', 'AppVClient.exe']). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -239,7 +241,7 @@
       "actual": "Close",
       "match": true,
       "confidence": 0.88,
-      "processing_time_ms": 0.9839534759521484,
+      "processing_time_ms": 0.0,
       "reasoning": "[Rule Heuristic] Alert 'PowerShell Script Execution' triggered with severity 'low'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['powershell.exe', 'CcmExec.exe']). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -257,7 +259,7 @@
       "actual": "Close",
       "match": true,
       "confidence": 0.88,
-      "processing_time_ms": 0.9939670562744141,
+      "processing_time_ms": 0.0,
       "reasoning": "[Rule Heuristic] Alert 'Suspicious C2 Web Communication' triggered with severity 'low'. Fact-finding revealed anomalous parent process pattern: False (Processes: []). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -275,7 +277,7 @@
       "actual": "Close",
       "match": true,
       "confidence": 0.88,
-      "processing_time_ms": 0.5192756652832031,
+      "processing_time_ms": 0.0,
       "reasoning": "[Rule Heuristic] Alert 'Outbound Script Network Connection' triggered with severity 'low'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['powershell.exe', 'svchost.exe']). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [
@@ -293,7 +295,7 @@
       "actual": "Close",
       "match": true,
       "confidence": 0.88,
-      "processing_time_ms": 1.2683868408203125,
+      "processing_time_ms": 0.0,
       "reasoning": "[Rule Heuristic] Alert 'Registry Run Key Persistence' triggered with severity 'low'. Fact-finding revealed anomalous parent process pattern: False (Processes: ['ms-teams.exe', 'explorer.exe']). Recommended triage action is Close.",
       "recommended_playbook": null,
       "risk_factors": [

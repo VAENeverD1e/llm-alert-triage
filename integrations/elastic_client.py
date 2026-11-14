@@ -27,8 +27,7 @@ import requests
 logger = logging.getLogger(__name__)
 
 DEFAULT_INDEX = "logs-*"
-
-
+    
 def _parse_timestamp(timestamp: str) -> Optional[datetime]:
     if not timestamp:
         return None
@@ -56,9 +55,20 @@ class ElasticClient:
     with context the alert document doesn't already contain.
     """
 
-    def __init__(self, host: str = "http://localhost:9200", api_key: str = ""):
+    def __init__(
+        self,
+        host: str = "http://localhost:9200",
+        api_key: str = "",
+        verify_ssl: bool = True,
+    ):
         self.host = host.rstrip("/")
         self.api_key = api_key
+        self.verify_ssl = verify_ssl
+        if not verify_ssl:
+            logger.warning(
+                "Elasticsearch TLS certificate verification is disabled; "
+                "use only in an isolated lab environment."
+            )
         logger.info(f"Initialized ElasticClient targeting host: {self.host}")
 
     # ── Low-level search helper ─────────────────────────────────────────
@@ -76,7 +86,10 @@ class ElasticClient:
             headers["Authorization"] = f"ApiKey {self.api_key}"
 
         try:
-            resp = requests.post(url, headers=headers, json=query, timeout=10)
+            request_options = {"headers": headers, "json": query, "timeout": 10}
+            if not self.verify_ssl:
+                request_options["verify"] = False
+            resp = requests.post(url, **request_options)
             resp.raise_for_status()
             return resp.json().get("hits", {}).get("hits", [])
         except requests.exceptions.RequestException as e:
@@ -89,7 +102,10 @@ class ElasticClient:
             headers = {"Content-Type": "application/json"}
             if self.api_key:
                 headers["Authorization"] = f"ApiKey {self.api_key}"
-            resp = requests.get(f"{self.host}/", headers=headers, timeout=3)
+            request_options = {"headers": headers, "timeout": 3}
+            if not self.verify_ssl:
+                request_options["verify"] = False
+            resp = requests.get(f"{self.host}/", **request_options)
             return resp.status_code == 200
         except Exception:
             return False
@@ -127,7 +143,22 @@ class ElasticClient:
         return None
 
     # ── Enrichment: parent process via Event ID 1 correlation ──────────
-
+    def fetch_new_alerts(
+        self,
+        since: str,
+        index: str = ".alerts-security.alerts-*",
+        size: int = 50,
+    ) -> List[Dict[str, Any]]:
+        """Trả về các alert có @timestamp >= since, cũ trước mới sau."""
+        query = {
+            "query": {"bool": {"filter": [
+                {"range": {"@timestamp": {"gte": since}}}
+            ]}},
+            "sort": [{"@timestamp": {"order": "asc"}}],
+            "size": size,
+        }
+        return self._search(query, index=index)
+        
     def get_process_creation_context(
         self,
         entity_id: Optional[str] = None,
