@@ -45,3 +45,6 @@ evaluation/results/*_[0-9]*.json
 
 worklog.md
 DATA_COLLECTION_PLAN.md
+# Local Claude Code config and skills (machine-specific)
+.claude/
+CLAUDE.md
