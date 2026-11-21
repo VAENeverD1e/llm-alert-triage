@@ -129,6 +129,8 @@ class ReplayHarness:
             return TriageOrchestrator.create_default(
                 use_ollama=False,
                 use_rag=True,
+                enable_enrichment=enable_enrichment,
+                include_severity=include_severity,
                 elastic_url=elastic_url,
                 elastic_api_key=elastic_api_key,
                 elastic_verify_ssl=elastic_verify_ssl,
@@ -199,7 +201,8 @@ class ReplayHarness:
                         "alert_id": item.get("alert_id", f"ALT-{line_no:04d}"),
                         "rule_id": item.get("technique_id", "UNKNOWN"),
                         "rule_name": item.get("technique_name", f"Rule for {item.get('technique_id', 'UNKNOWN')}"),
-                        "severity": "high" if item.get("expected_verdict") == "Escalate" else "low",
+                        # Constant severity: deriving it from the expected label would leak the answer.
+                        "severity": "medium",
                         "timestamp": "2026-10-10T08:00:00Z",
                         "host_name": "EVAL-HOST-01",
                         "user_name": "eval_user",
@@ -227,20 +230,27 @@ class ReplayHarness:
                     "reasoning": pipeline_res.verdict.reasoning,
                     "recommended_playbook": pipeline_res.verdict.recommended_playbook,
                     "risk_factors": pipeline_res.verdict.risk_factors or [],
+                    "verdict_source": pipeline_res.verdict.verdict_source,
+                    # False = the benign sample matches an exclusion of the real Kibana rule,
+                    # so it could never be produced as an alert in the lab.
+                    "rule_would_fire": item.get("rule_would_fire", True) is not False,
                 }
                 results.append(record)
 
-        metrics = MetricsCalculator.calculate_metrics(results)
         report = {
             "mode": self.mode,
             "model_name": self.model_name if "llm" in self.mode else "none",
+            "enable_enrichment": self.enable_enrichment,
             "enrichment_configured": bool(self.elastic_url),
+            "include_severity": self.include_severity,
             "label_leakage_sanitized": self.sanitize_label_leakage,
+            "temperature": getattr(self.orchestrator.verdict_agent, "temperature", None),
+            "seed": getattr(self.orchestrator.ollama_client, "seed", None),
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "total_alerts": len(results),
             "matches": sum(1 for r in results if r["match"]),
             "mismatches": sum(1 for r in results if not r["match"]),
-            "metrics": metrics,
+            **self.summarize_results(results),
             "results": results
         }
 
@@ -250,16 +260,122 @@ class ReplayHarness:
         return report
 
     @staticmethod
-    def _sanitize_benchmark_alert(alert_data: Dict[str, Any]) -> Dict[str, Any]:
+    def summarize_results(results: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Headline metrics plus the realistic-only subset and per-group breakdowns."""
+        realistic = [r for r in results if r.get("rule_would_fire", True)]
+        return {
+            "metrics": MetricsCalculator.calculate_metrics(results),
+            "metrics_realistic_only": MetricsCalculator.calculate_metrics(realistic),
+            "excluded_unrealistic_alerts": [
+                r["alert_id"] for r in results if not r.get("rule_would_fire", True)
+            ],
+            "metrics_by_technique": MetricsCalculator.calculate_breakdown(results, "technique_id"),
+            "metrics_by_scenario_type": MetricsCalculator.calculate_breakdown(results, "scenario_type"),
+        }
+
+    # Fields of a raw Kibana alert that reveal analyst handling or the lab identity.
+    _RAW_DROP_PREFIXES = ("kibana.alert.workflow_", "signal.status", "signal.reason")
+    _RAW_DROP_KEYS = ("kibana.alert.reason", "kibana.alert.status")
+    _HOST_PATHS = (
+        ("host", "name"), ("host", "hostname"), ("agent", "name"),
+        ("observer", "hostname"), ("winlog", "computer_name"),
+    )
+    _USER_PATHS = (("user", "name"), ("user", "domain"), ("winlog", "user", "name"))
+    _IP_PATHS = (
+        ("source", "ip"), ("source", "address"),
+        ("destination", "ip"), ("destination", "address"),
+        ("suricata", "eve", "flow", "src_ip"), ("suricata", "eve", "flow", "dest_ip"),
+        ("suricata", "eve", "src_ip"), ("suricata", "eve", "dest_ip"),
+    )
+
+    @staticmethod
+    def _class_preserving_ip_mapper():
+        """Maps IPs to documentation ranges while keeping private vs public semantics."""
+        import ipaddress
+        mapping: Dict[str, str] = {}
+        counters = {"private": 0, "public": 0}
+
+        def map_ip(value: Any) -> Any:
+            if not isinstance(value, str) or not value:
+                return value
+            if value in mapping:
+                return mapping[value]
+            try:
+                ip = ipaddress.ip_address(value)
+            except ValueError:
+                return value
+            kind = "private" if (ip.is_private or ip.is_loopback or ip.is_link_local) else "public"
+            counters[kind] += 1
+            n = counters[kind]
+            mapping[value] = f"10.255.0.{n}" if kind == "private" else f"203.0.113.{n}"
+            return mapping[value]
+
+        return map_ip
+
+    @staticmethod
+    def _set_path(doc: Dict[str, Any], path: tuple, fn) -> None:
+        node: Any = doc
+        for key in path[:-1]:
+            if not isinstance(node, dict) or key not in node:
+                break
+            node = node[key]
+        else:
+            if isinstance(node, dict) and path[-1] in node and node[path[-1]] not in (None, ""):
+                node[path[-1]] = fn(node[path[-1]])
+        flat = ".".join(path)
+        if flat in doc and doc[flat] not in (None, ""):
+            doc[flat] = fn(doc[flat])
+
+    @classmethod
+    def _sanitize_raw_kibana_source(cls, src: Dict[str, Any]) -> None:
+        """In-place removal of label-revealing metadata from a Kibana ``_source`` doc."""
+        for key in list(src.keys()):
+            if key in cls._RAW_DROP_KEYS or key.startswith(cls._RAW_DROP_PREFIXES):
+                src.pop(key, None)
+        if isinstance(src.get("kibana"), dict):
+            alert_block = src["kibana"].get("alert")
+            if isinstance(alert_block, dict):
+                for key in [k for k in alert_block if k.startswith("workflow_") or k in ("reason", "status")]:
+                    alert_block.pop(key, None)
+
+        for path in cls._HOST_PATHS:
+            cls._set_path(src, path, lambda _v: "benchmark-host")
+        for path in cls._USER_PATHS:
+            cls._set_path(src, path, lambda _v: "benchmark-user")
+
+        map_ip = cls._class_preserving_ip_mapper()
+        for path in cls._IP_PATHS:
+            cls._set_path(src, path, map_ip)
+        related = src.get("related")
+        if isinstance(related, dict) and isinstance(related.get("ip"), list):
+            related["ip"] = [map_ip(ip) for ip in related["ip"]]
+        if isinstance(related, dict) and isinstance(related.get("hosts"), list):
+            related["hosts"] = ["benchmark-host" for _ in related["hosts"]]
+        if isinstance(related, dict) and isinstance(related.get("user"), list):
+            related["user"] = ["benchmark-user" for _ in related["user"]]
+
+    @classmethod
+    def _sanitize_benchmark_alert(cls, alert_data: Dict[str, Any]) -> Dict[str, Any]:
         """Remove metadata that reveals the expected label in the benchmark."""
         sanitized = deepcopy(alert_data)
+
+        # Raw Kibana alert (search hit or bare _source)
+        if "_source" in sanitized or "kibana.alert.uuid" in sanitized:
+            # The flattened ``fields`` block duplicates every value (incl. workflow status).
+            sanitized.pop("fields", None)
+            src = sanitized["_source"] if isinstance(sanitized.get("_source"), dict) else sanitized
+            cls._sanitize_raw_kibana_source(src)
+            return sanitized
+
+        # Flat, pre-normalized alert
         sanitized.pop("reason", None)
         sanitized["host_name"] = "benchmark-host"
         sanitized["user_name"] = "benchmark-user"
         network = sanitized.get("network_context")
         if isinstance(network, dict):
-            network["source_ip"] = "198.51.100.10" if network.get("source_ip") else None
-            network["destination_ip"] = "198.51.100.20" if network.get("destination_ip") else None
+            map_ip = cls._class_preserving_ip_mapper()
+            network["source_ip"] = map_ip(network.get("source_ip")) if network.get("source_ip") else None
+            network["destination_ip"] = map_ip(network.get("destination_ip")) if network.get("destination_ip") else None
             network["suricata_signature"] = None
             network["suricata_category"] = None
         return sanitized
@@ -288,7 +404,9 @@ class ReplayHarness:
             "actual",
             "match",
             "confidence",
-            "processing_time_ms"
+            "processing_time_ms",
+            "verdict_source",
+            "rule_would_fire",
         ]
         with open(csv_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -302,7 +420,9 @@ class ReplayHarness:
                     "actual": r["actual"],
                     "match": r["match"],
                     "confidence": r["confidence"],
-                    "processing_time_ms": f"{r['processing_time_ms']:.2f}"
+                    "processing_time_ms": f"{r['processing_time_ms']:.2f}",
+                    "verdict_source": r.get("verdict_source", ""),
+                    "rule_would_fire": r.get("rule_would_fire", True),
                 })
 
         logger.info(f"[{mode_str.upper()}] Evaluation results saved to {latest_json_path} and {csv_path}")
@@ -313,7 +433,10 @@ class ReplayHarness:
         modes: Optional[List[str]] = None,
         model_name: str = "llama3:8b",
         ground_truth_path: str = "data/ground_truth.jsonl",
-        results_dir: str = "evaluation/results"
+        results_dir: str = "evaluation/results",
+        enable_enrichment: bool = True,
+        include_severity: bool = False,
+        sanitize_label_leakage: bool = True,
     ) -> Dict[str, Any]:
         """
         Runs multiple triage modes sequentially and outputs a unified comparative benchmark table.
@@ -323,7 +446,14 @@ class ReplayHarness:
 
         for mode in modes:
             logger.info(f"========== Running Benchmark Mode: {mode.upper()} ==========")
-            harness = cls.create_for_mode(mode=mode, model_name=model_name, results_dir=results_dir)
+            harness = cls.create_for_mode(
+                mode=mode,
+                model_name=model_name,
+                enable_enrichment=enable_enrichment,
+                include_severity=include_severity,
+                sanitize_label_leakage=sanitize_label_leakage,
+                results_dir=results_dir,
+            )
             report = harness.run_ground_truth_eval(ground_truth_path=ground_truth_path, save_results=True)
             benchmark_results[mode] = report
 
@@ -332,8 +462,14 @@ class ReplayHarness:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "model_name": model_name,
             "modes_evaluated": modes,
+            "enable_enrichment": enable_enrichment,
+            "include_severity": include_severity,
+            "label_leakage_sanitized": sanitize_label_leakage,
             "metrics_comparison": {
                 mode: benchmark_results[mode]["metrics"] for mode in modes
+            },
+            "metrics_comparison_realistic_only": {
+                mode: benchmark_results[mode]["metrics_realistic_only"] for mode in modes
             },
             "detailed_reports": benchmark_results
         }
@@ -363,8 +499,15 @@ class ReplayHarness:
             ("Precision", lambda m: f"{metrics_dict[m]['precision']:.4f}"),
             ("Recall", lambda m: f"{metrics_dict[m]['recall']:.4f}"),
             ("F1-Score", lambda m: f"{metrics_dict[m]['f1_score']:.4f}"),
-            ("Mean Time to Respond (MTTR)", lambda m: f"{metrics_dict[m]['mttr_ms']:.2f} ms"),
-            ("Cohen's Kappa (Agreement)", lambda m: f"{metrics_dict[m]['cohens_kappa']:.4f}"),
+            ("Cohen's Kappa (vs. ground truth)", lambda m: f"{metrics_dict[m]['cohens_kappa']:.4f}"),
+            ("Mean pipeline latency", lambda m: f"{metrics_dict[m]['mean_latency_ms']:.2f} ms"),
+        ]
+        coverage_rows = [
+            ("Coverage (decided / total)", lambda m: f"{metrics_dict[m]['coverage']:.4f}"),
+            ("Recall (strict, Unknown = miss)", lambda m: f"{metrics_dict[m]['recall_strict']:.4f}"),
+            ("Unknown verdicts", lambda m: str(metrics_dict[m]['unknown_count'])),
+            ("LLM -> heuristic fallbacks", lambda m: str(metrics_dict[m]['heuristic_fallback_count'])),
+            ("Pipeline error fallbacks", lambda m: str(metrics_dict[m]['error_fallback_count'])),
         ]
 
         md_lines = [
@@ -380,7 +523,30 @@ class ReplayHarness:
             line_vals = [label] + [formatter(m) for m in modes]
             md_lines.append("| " + " | ".join(line_vals) + " |")
 
-        md_lines.append("")
+        for label, formatter in coverage_rows:
+            line_vals = [label] + [formatter(m) for m in modes]
+            md_lines.append("| " + " | ".join(line_vals) + " |")
+
+        realistic = comparison.get("metrics_comparison_realistic_only")
+        if realistic:
+            md_lines += [
+                "",
+                "## Realistic-only subset (excludes benign samples the Kibana rule would never fire on)",
+                "",
+                "| " + " | ".join(headers) + " |",
+                "|".join(separator) + "|",
+            ]
+            for label, key in (("Precision", "precision"), ("Recall", "recall"),
+                               ("F1-Score", "f1_score"), ("Cohen's Kappa", "cohens_kappa")):
+                md_lines.append("| " + " | ".join([label] + [f"{realistic[m][key]:.4f}" for m in modes]) + " |")
+
+        md_lines += [
+            "",
+            "_Precision/Recall/F1/Kappa are computed on alerts with a binary decision; "
+            "Unknown verdicts are reported via Coverage and penalised in Recall (strict). "
+            "Latency is pipeline/inference time, not an operational SOC MTTR._",
+            "",
+        ]
         with open(output_path, "w", encoding="utf-8") as f:
             f.write("\n".join(md_lines))
 
@@ -394,7 +560,8 @@ class ReplayHarness:
         enable_enrichment: bool = True,
         include_severity: bool = False,
         ground_truth_path: str = "data/ground_truth.jsonl",
-        results_dir: str = "evaluation/results"
+        results_dir: str = "evaluation/results",
+        sanitize_label_leakage: bool = True,
     ) -> Dict[str, Any]:
         """
         Executes K repeated benchmark evaluations for a single configuration,
@@ -403,6 +570,8 @@ class ReplayHarness:
         logger.info(f"========== Starting Multi-Run Benchmark ({runs} runs) for [{mode.upper()}] ==========")
         run_results = []
         metrics_list = []
+        realistic_list = []
+        harness = None
 
         for i in range(1, runs + 1):
             logger.info(f"--- Iteration {i}/{runs} for Mode [{mode}] ---")
@@ -411,10 +580,12 @@ class ReplayHarness:
                 model_name=model_name,
                 enable_enrichment=enable_enrichment,
                 include_severity=include_severity,
+                sanitize_label_leakage=sanitize_label_leakage,
                 results_dir=results_dir
             )
             report = harness.run_ground_truth_eval(ground_truth_path=ground_truth_path, save_results=False)
             metrics_list.append(report["metrics"])
+            realistic_list.append(report["metrics_realistic_only"])
             run_results.append({
                 "iteration": i,
                 "matches": report["matches"],
@@ -429,8 +600,12 @@ class ReplayHarness:
             "runs_requested": runs,
             "enable_enrichment": enable_enrichment,
             "include_severity": include_severity,
+            "enrichment_configured": bool(harness and harness.elastic_url),
+            "label_leakage_sanitized": sanitize_label_leakage,
+            "seed": getattr(harness.orchestrator.ollama_client, "seed", None) if harness else None,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "aggregate_metrics": aggregate_stats,
+            "aggregate_metrics_realistic_only": MetricsCalculator.calculate_aggregate_metrics(realistic_list),
             "individual_runs": run_results
         }
 
@@ -451,6 +626,7 @@ class ReplayHarness:
         include_severity: bool = False,
         ground_truth_path: str = "data/ground_truth.jsonl",
         results_dir: str = "evaluation/results/ablation",
+        sanitize_label_leakage: bool = True,
     ) -> Dict[str, Any]:
         """
         Runs the full scientific ablation matrix:
@@ -512,18 +688,21 @@ class ReplayHarness:
                 enable_enrichment=cfg["enable_enrichment"],
                 include_severity=include_severity,
                 ground_truth_path=ground_truth_path,
-                results_dir=results_dir
+                results_dir=results_dir,
+                sanitize_label_leakage=sanitize_label_leakage,
             )
             suite_results[cid] = {
                 "label": cfg["label"],
                 "runs": cfg["runs"],
-                "aggregate": res["aggregate_metrics"]
+                "aggregate": res["aggregate_metrics"],
+                "aggregate_realistic_only": res["aggregate_metrics_realistic_only"],
             }
 
         ablation_summary = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "model_name": model_name,
             "severity_in_prompt": include_severity,
+            "label_leakage_sanitized": sanitize_label_leakage,
             "suite_results": suite_results
         }
 
@@ -583,13 +762,23 @@ def main():
     parser.add_argument("--model", default="llama3:8b", help="Ollama model name (default: llama3:8b)")
     parser.add_argument("--runs", type=int, default=1, help="Number of repeated runs to calculate variance (default: 1)")
     parser.add_argument("--ablation-suite", action="store_true", help="Run the full 5-configuration scientific ablation suite")
-    parser.add_argument("--include-severity", action="store_true", help="Include severity/risk in prompt (default: False)")
+    parser.add_argument("--include-severity", action="store_true", help="Include severity/risk in prompt and heuristic (default: False)")
     parser.add_argument("--no-enrichment", action="store_true", help="Disable Stage 1 enrichment")
+    parser.add_argument("--no-sanitize", action="store_true", help="Disable benchmark label-leakage sanitization (not recommended)")
     parser.add_argument("--ground-truth", default="data/ground_truth.jsonl", help="Path to ground truth dataset")
     parser.add_argument("--results-dir", default="evaluation/results", help="Directory for output results")
     args = parser.parse_args()
 
     enable_enrichment = not args.no_enrichment
+    sanitize = not args.no_sanitize
+
+    def fmt(m: Dict[str, Any]) -> str:
+        return (
+            f"P={m['precision']} R={m['recall']} F1={m['f1_score']} kappa={m['cohens_kappa']} | "
+            f"coverage={m['coverage']} recall_strict={m['recall_strict']} unknown={m['unknown_count']} "
+            f"llm_fallbacks={m['heuristic_fallback_count']} errors={m['error_fallback_count']} | "
+            f"latency={m['mean_latency_ms']}ms"
+        )
 
     if args.ablation_suite:
         ReplayHarness.run_full_ablation_suite(
@@ -597,7 +786,8 @@ def main():
             runs=args.runs if args.runs > 1 else 5,
             include_severity=args.include_severity,
             ground_truth_path=args.ground_truth,
-            results_dir=os.path.join(args.results_dir, "ablation")
+            results_dir=os.path.join(args.results_dir, "ablation"),
+            sanitize_label_leakage=sanitize,
         )
     elif args.runs > 1:
         ReplayHarness.run_multi_run_benchmark(
@@ -607,7 +797,8 @@ def main():
             enable_enrichment=enable_enrichment,
             include_severity=args.include_severity,
             ground_truth_path=args.ground_truth,
-            results_dir=args.results_dir
+            results_dir=args.results_dir,
+            sanitize_label_leakage=sanitize,
         )
     elif args.mode in ("compare", "all"):
         modes = ["heuristic", "llm_no_rag", "llm_rag"] if args.mode == "all" else ["heuristic", "llm_rag"]
@@ -615,24 +806,30 @@ def main():
             modes=modes,
             model_name=args.model,
             ground_truth_path=args.ground_truth,
-            results_dir=args.results_dir
+            results_dir=args.results_dir,
+            enable_enrichment=enable_enrichment,
+            include_severity=args.include_severity,
+            sanitize_label_leakage=sanitize,
         )
         print(f"\n[+] Benchmark finished across {len(modes)} modes.")
         for mode, m in res["metrics_comparison"].items():
-            print(f"  [{mode.upper()}]: F1={m['f1_score']}, Precision={m['precision']}, Recall={m['recall']}, MTTR={m['mttr_ms']}ms")
+            print(f"  [{mode.upper()}] all:       {fmt(m)}")
+            print(f"  [{mode.upper()}] realistic: {fmt(res['metrics_comparison_realistic_only'][mode])}")
     else:
         harness = ReplayHarness.create_for_mode(
             mode=args.mode,
             model_name=args.model,
             enable_enrichment=enable_enrichment,
             include_severity=args.include_severity,
+            sanitize_label_leakage=sanitize,
             results_dir=args.results_dir
         )
         report = harness.run_ground_truth_eval(ground_truth_path=args.ground_truth, save_results=True)
-        m = report["metrics"]
         print(f"\n[+] Run complete for mode [{args.mode.upper()}]:")
         print(f"    - Total: {report['total_alerts']} | Matches: {report['matches']} | Mismatches: {report['mismatches']}")
-        print(f"    - Precision: {m['precision']} | Recall: {m['recall']} | F1: {m['f1_score']} | MTTR: {m['mttr_ms']}ms")
+        print(f"    - All alerts:     {fmt(report['metrics'])}")
+        print(f"    - Realistic only: {fmt(report['metrics_realistic_only'])} "
+              f"(excluded: {', '.join(report['excluded_unrealistic_alerts']) or 'none'})")
 
 
 if __name__ == "__main__":

@@ -96,36 +96,62 @@ class NormalizedAlert(BaseModel):
 
     @classmethod
     def from_raw_alert(cls, raw: Dict[str, Any]) -> "NormalizedAlert":
-        """Builds a NormalizedAlert from a raw Kibana signals _source document."""
-        src = raw.get("_source", raw)
+        """
+        Builds a NormalizedAlert from a raw Kibana signals document.
 
-        module = src.get("event", {}).get("module") or src.get("event.module")
+        Accepts a search hit (``_source``), a bare ``_source`` dict, or a hit that
+        only carries the flattened ``fields`` block (``{"a.b": [value]}``).
+        """
+        if "_source" in raw and isinstance(raw["_source"], dict):
+            src = raw["_source"]
+        elif "fields" in raw and isinstance(raw["fields"], dict) and "kibana.alert.uuid" not in raw:
+            src = _unflatten_fields(raw["fields"])
+        else:
+            src = raw
+
+        module = _dig(src, "event", "module")
         telemetry_source = "suricata" if module == "suricata" else "sysmon"
-        event_code = (
-            src.get("event", {}).get("code")
-            or src.get("event.code")
-            or src.get("kibana.alert.original_event.code")
+        event_code = _first_present(
+            _dig(src, "event", "code"),
+            src.get("kibana.alert.original_event.code"),
         )
         if event_code is not None:
             event_code = str(event_code)
 
         # MITRE technique id: prefer the subtechnique id if present
         rule_id = "UNKNOWN"
-        threat = src.get("kibana.alert.rule.threat") or (src.get("kibana", {}).get("alert", {}).get("rule", {}).get("threat"))
-        if threat:
-            technique = threat[0].get("technique", [{}])[0]
+        threat = src.get("kibana.alert.rule.threat") or _dig(src, "kibana", "alert", "rule", "threat")
+        if isinstance(threat, dict):
+            threat = [threat]
+        if threat and isinstance(threat[0], dict):
+            techniques = threat[0].get("technique") or [{}]
+            technique = techniques[0] if isinstance(techniques[0], dict) else {}
             subtech = technique.get("subtechnique") or []
-            rule_id = subtech[0]["id"] if subtech else technique.get("id", "UNKNOWN")
+            if subtech and isinstance(subtech[0], dict) and subtech[0].get("id"):
+                rule_id = subtech[0]["id"]
+            else:
+                rule_id = technique.get("id") or "UNKNOWN"
+        if rule_id == "UNKNOWN":
+            # Flattened form, e.g. from a ``fields`` block
+            flat_id = _first_present(
+                src.get("kibana.alert.rule.threat.technique.subtechnique.id"),
+                src.get("kibana.alert.rule.threat.technique.id"),
+            )
+            if isinstance(flat_id, list):
+                flat_id = flat_id[0] if flat_id else None
+            if flat_id:
+                rule_id = str(flat_id)
 
-        rule_name = (
-            src.get("kibana.alert.rule.name")
-            or src.get("kibana", {}).get("alert", {}).get("rule", {}).get("name", "UNKNOWN")
-        )
-        rule_desc = (
-            src.get("kibana.alert.rule.description")
-            or src.get("kibana.alert.rule.parameters", {}).get("description")
-            or src.get("kibana", {}).get("alert", {}).get("rule", {}).get("description", "")
-        )
+        rule_name = _first_present(
+            src.get("kibana.alert.rule.name"),
+            _dig(src, "kibana", "alert", "rule", "name"),
+        ) or "UNKNOWN"
+        params = src.get("kibana.alert.rule.parameters")
+        rule_desc = _first_present(
+            src.get("kibana.alert.rule.description"),
+            params.get("description") if isinstance(params, dict) else None,
+            _dig(src, "kibana", "alert", "rule", "description"),
+        ) or ""
         if "." not in rule_id:
             subtech_match = re.search(r"(T\d{4}\.\d{3})", f"{rule_name} {rule_desc}")
             if subtech_match:
@@ -133,77 +159,115 @@ class NormalizedAlert(BaseModel):
             elif rule_id == "T1003" and "lsass" in f"{rule_name} {rule_desc}".lower():
                 rule_id = "T1003.001"
 
-        def get_process(block: Optional[Dict[str, Any]]) -> Optional[ProcessInfo]:
-            if not block:
+        def get_process(block: Any) -> Optional[ProcessInfo]:
+            if not isinstance(block, dict) or not block:
                 return None
-            hashes = block.get("hash", {})
+            hashes = block.get("hash") if isinstance(block.get("hash"), dict) else {}
+            args = block.get("args") or []
+            if isinstance(args, str):
+                args = [args]
             return ProcessInfo(
                 name=block.get("name"),
                 executable=block.get("executable"),
                 command_line=block.get("command_line"),
                 pid=block.get("pid"),
-                args=block.get("args", []),
+                args=[str(a) for a in args],
                 md5=hashes.get("md5"),
                 sha256=hashes.get("sha256"),
             )
 
+        def event_data(field: str) -> Any:
+            return _dig(src, "winlog", "event_data", field)
+
         process_context = None
-        if "process" in src:
+        if isinstance(src.get("process"), dict):
             proc = src["process"]
             process_context = ProcessContext(
                 process=get_process(proc),
                 parent_process=get_process(proc.get("parent")),
-                target_process_name=src.get("winlog", {}).get("event_data", {}).get("TargetImage") or src.get("winlog.event_data.TargetImage"),
-                granted_access=src.get("winlog", {}).get("event_data", {}).get("GrantedAccess") or src.get("winlog.event_data.GrantedAccess"),
-                call_trace=src.get("winlog", {}).get("event_data", {}).get("CallTrace") or src.get("winlog.event_data.CallTrace"),
+                target_process_name=event_data("TargetImage"),
+                granted_access=event_data("GrantedAccess"),
+                call_trace=event_data("CallTrace"),
             )
 
         registry_context = None
-        if "registry" in src:
+        if isinstance(src.get("registry"), dict):
             reg = src["registry"]
+            reg_data = reg.get("data")
+            if isinstance(reg_data, dict):
+                strings = reg_data.get("strings")
+                if isinstance(strings, list):
+                    data_value = strings[0] if strings else None
+                else:
+                    data_value = strings
+            else:
+                data_value = reg_data
             registry_context = RegistryContext(
                 path=reg.get("path"),
                 value_name=reg.get("value"),
-                data=(reg.get("data", {}).get("strings") or [None])[0],
+                data=str(data_value) if data_value is not None else None,
                 hive=reg.get("hive"),
             )
 
         network_context = None
-        if "source" in src or "destination" in src or telemetry_source == "suricata":
-            source = src.get("source", {})
-            destination = src.get("destination", {})
-            network = src.get("network", {})
-            rule_block = src.get("rule", {})
+        has_source = isinstance(src.get("source"), dict)
+        has_destination = isinstance(src.get("destination"), dict)
+        if has_source or has_destination or telemetry_source == "suricata":
+            source = src.get("source") if has_source else {}
+            destination = src.get("destination") if has_destination else {}
+            network = src.get("network") if isinstance(src.get("network"), dict) else {}
+            rule_block = src.get("rule") if isinstance(src.get("rule"), dict) else {}
+            user_agent = src.get("user_agent") if isinstance(src.get("user_agent"), dict) else {}
             network_context = NetworkContext(
-                source_ip=source.get("ip") or source.get("address"),
+                source_ip=_first_present(source.get("ip"), source.get("address")),
                 source_port=source.get("port"),
-                destination_ip=destination.get("ip") or destination.get("address"),
+                destination_ip=_first_present(destination.get("ip"), destination.get("address")),
                 destination_port=destination.get("port"),
-                protocol=network.get("protocol") or network.get("transport"),
-                direction=network.get("direction"),
-                user_agent=src.get("user_agent", {}).get("original"),
+                protocol=_first_present(network.get("protocol"), network.get("transport")),
+                direction=_first_present(
+                    network.get("direction"),
+                    _dig(src, "suricata", "eve", "direction"),
+                ),
+                user_agent=user_agent.get("original"),
                 suricata_signature=rule_block.get("name") if telemetry_source == "suricata" else None,
                 suricata_category=rule_block.get("category") if telemetry_source == "suricata" else None,
             )
 
-        user_name = (
-            src.get("user", {}).get("name")
-            or src.get("user.name")
-            or src.get("winlog", {}).get("event_data", {}).get("SourceUser")
-            or src.get("winlog.event_data.SourceUser")
+        user_name = _first_present(
+            _dig(src, "user", "name"),
+            event_data("SourceUser"),
+        )
+
+        severity = _first_present(
+            src.get("kibana.alert.severity"),
+            _dig(src, "kibana", "alert", "severity"),
+        )
+        risk_score = _first_present(
+            src.get("kibana.alert.risk_score"),
+            _dig(src, "kibana", "alert", "risk_score"),
         )
 
         return cls(
-            alert_id=src.get("kibana.alert.uuid") or src.get("kibana", {}).get("alert", {}).get("uuid", "UNKNOWN"),
-            rule_uuid=src.get("kibana.alert.rule.uuid") or src.get("kibana", {}).get("alert", {}).get("rule", {}).get("uuid", "UNKNOWN"),
+            alert_id=str(_first_present(
+                src.get("kibana.alert.uuid"),
+                _dig(src, "kibana", "alert", "uuid"),
+                raw.get("_id"),
+            ) or "UNKNOWN"),
+            rule_uuid=str(_first_present(
+                src.get("kibana.alert.rule.uuid"),
+                _dig(src, "kibana", "alert", "rule", "uuid"),
+            ) or "UNKNOWN"),
             rule_id=rule_id,
-            rule_name=rule_name,
-            severity=src.get("kibana.alert.severity") or src.get("kibana", {}).get("alert", {}).get("severity", "unknown"),
-            risk_score=src.get("kibana.alert.risk_score") or src.get("kibana", {}).get("alert", {}).get("risk_score"),
-            timestamp=src.get("@timestamp", ""),
-            host_name=src.get("host", {}).get("name") or src.get("host", {}).get("hostname") or src.get("host.name"),
+            rule_name=str(rule_name),
+            severity=str(severity).lower() if severity is not None else "unknown",
+            risk_score=int(risk_score) if risk_score is not None else None,
+            timestamp=src.get("@timestamp", "") or "",
+            host_name=_first_present(_dig(src, "host", "name"), _dig(src, "host", "hostname")),
             user_name=user_name,
-            reason=src.get("kibana.alert.reason") or src.get("kibana", {}).get("alert", {}).get("reason"),
+            reason=_first_present(
+                src.get("kibana.alert.reason"),
+                _dig(src, "kibana", "alert", "reason"),
+            ),
             telemetry_source=telemetry_source,
             event_code=event_code,
             process_context=process_context,
@@ -211,6 +275,56 @@ class NormalizedAlert(BaseModel):
             network_context=network_context,
             raw_event=src,
         )
+
+
+def _first_present(*values: Any) -> Any:
+    """Returns the first value that is not None or an empty string (0 and False are kept)."""
+    for value in values:
+        if value is None:
+            continue
+        if isinstance(value, str) and value == "":
+            continue
+        return value
+    return None
+
+
+def _dig(src: Dict[str, Any], *path: str) -> Any:
+    """Looks up a value by nested path, falling back to the flattened dotted key."""
+    node: Any = src
+    for key in path:
+        if isinstance(node, dict) and key in node:
+            node = node[key]
+        else:
+            node = None
+            break
+    if node is not None:
+        return node
+    return src.get(".".join(path)) if isinstance(src, dict) else None
+
+
+def _unflatten_fields(fields: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Converts a Kibana ``fields`` block (``{"a.b.c": [v]}``) into a nested dict.
+    Single-element lists are unwrapped; ``kibana.*`` keys stay flattened because
+    the parser reads them in that form.
+    """
+    nested: Dict[str, Any] = {}
+    for dotted, value in fields.items():
+        if isinstance(value, list) and len(value) == 1:
+            value = value[0]
+        if dotted.startswith("kibana.") or dotted.startswith("signal."):
+            nested[dotted] = value
+            continue
+        parts = dotted.split(".")
+        node = nested
+        for part in parts[:-1]:
+            existing = node.get(part)
+            if not isinstance(existing, dict):
+                existing = {}
+                node[part] = existing
+            node = existing
+        node[parts[-1]] = value
+    return nested
 
 
 # Backwards compatibility alias
@@ -230,6 +344,9 @@ class FactFindingOutput(BaseModel):
     evidence_extracted: List[str] = Field(default_factory=list)
 
 
+VerdictSource = Literal["llm", "heuristic", "heuristic_fallback", "error_fallback"]
+
+
 class VerdictOutput(BaseModel):
     alert_id: str
     decision: TriageDecision
@@ -238,6 +355,9 @@ class VerdictOutput(BaseModel):
     recommended_playbook: Optional[str] = None
     mitre_attack_techniques: List[str] = Field(default_factory=list)
     risk_factors: List[str] = Field(default_factory=list)
+    # Which path produced this verdict. "heuristic_fallback" = LLM was requested but
+    # failed/returned unusable output; "error_fallback" = pipeline exception.
+    verdict_source: VerdictSource = "heuristic"
 
 
 class TriagePipelineResult(BaseModel):

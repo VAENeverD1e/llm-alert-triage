@@ -13,3 +13,15 @@ This directory contains scripted benign telemetry noise mimicking everyday enter
 | `benign_T1071.001_2_update_connection.json` | T1071.001 | Suspicious Script Outbound Network Connection | Sysmon Event 3: Windows Update service (`wuauserv`) outbound check to Microsoft CDN | **Close** |
 | `benign_T1547.001_teams_run_key.json` | T1547.001 | Registry Run Keys / Startup Folder | Sysmon Event 13: Microsoft Teams registering auto-start under user HKCU Run key | **Close** |
 
+## Known limitations
+
+- These files are hand-written, pre-normalized JSON (no Kibana `_source`), whereas the attack files are raw
+  Kibana alerts. The two classes therefore take different parsing paths. New benign samples should be exported
+  from Kibana in the same raw format (see `DATA_COLLECTION_PLAN.md`).
+- Three samples match an exclusion of the corresponding real Kibana rule and could never be raised as alerts.
+  They are kept for comparability but flagged in `data/ground_truth.jsonl` with `"rule_would_fire": false`
+  and excluded from `metrics_realistic_only`:
+  - `benign_T1003.001_lsass_wmi.json` (rule excludes `svchost.exe` + `0x1410` and `wmiprvse` + `cimwin32`)
+  - `benign_T1055.001_appv_virtualization.json` (rule excludes parent `AppVClient.exe`)
+  - `benign_T1071.001_2_update_connection.json` (rule only matches destination ports 8080/4444/8888/1337)
+

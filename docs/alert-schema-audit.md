@@ -1,17 +1,17 @@
 # Alert Schema Audit & Master Comparison
-This document provides an exhaustive, field-by-field comparative audit across all 8 live SIEM alert samples in [`docs/samples/`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/). It maps the structural split between host-based Sysmon and network-based Suricata alerts, surfaces concrete query/field discrepancies against the SIEM rule definitions (`config/rules_tight.ndjson`), and formally establishes the field taxonomy for Phase 2 Context Enrichment.
+This document provides an exhaustive, field-by-field comparative audit across all 8 live SIEM alert samples in [`docs/samples/`](samples/). It maps the structural split between host-based Sysmon and network-based Suricata alerts, surfaces concrete query/field discrepancies against the SIEM rule definitions (`config/rules_tight.ndjson`), and formally establishes the field taxonomy for Phase 2 Context Enrichment.
 ---
 ## 1. High-Level Telemetry & Context Availability Matrix
 | Sample File | Telemetry Source | Event Code | MITRE Threat Block | Host Name | User Name | Process | Parent Proc | Registry | Network |
 |---|---|---|---|---|---|---|---|---|---|
-| [`T1003.001.json`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/T1003.001.json) | `windows` | `10` | `T1003 (No subtech)` | ✅ `desktop-thonlnr` | ⚠️ `id only` | ✅ `rundll32.exe` | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT |
-| [`T1046.json`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/T1046.json) | `suricata` | `-` | `T1046 (No subtech)` | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ✅ Present |
-| [`T1053.005.json`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/T1053.005.json) | `windows` | `1` | `T1053 (T1053.005)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `schtasks.exe` | ✅ `cmd.exe` | ❌ ABSENT | ❌ ABSENT |
-| [`T1055.001.json`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/T1055.001.json) | `windows` | `1` | `T1055 (T1055.001)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `mavinject.exe` | ✅ `powershell.exe` | ❌ ABSENT | ❌ ABSENT |
-| [`T1059.001.json`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/T1059.001.json) | `windows` | `1` | `T1059 (T1059.001)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `powershell.exe` | ✅ `powershell.exe` | ❌ ABSENT | ❌ ABSENT |
-| [`T1071.001(1).json`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/T1071.001(1).json) | `suricata` | `-` | `T1071 (T1071.001)` | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ✅ Present |
-| [`T1071.001(2).json`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/T1071.001(2).json) | `windows` | `3` | `T1071 (T1071.001)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `powershell.exe` | ❌ ABSENT | ❌ ABSENT | ✅ Present |
-| [`T1547.001.json`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/T1547.001.json) | `windows` | `13` | `T1547 (No subtech)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `reg.exe` | ❌ ABSENT | ✅ Present | ❌ ABSENT |
+| [`T1003.001.json`](samples/T1003.001.json) | `windows` | `10` | `T1003 (No subtech)` | ✅ `desktop-thonlnr` | ⚠️ `id only` | ✅ `rundll32.exe` | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT |
+| [`T1046.json`](samples/T1046.json) | `suricata` | `-` | `T1046 (No subtech)` | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ✅ Present |
+| [`T1053.005.json`](samples/T1053.005.json) | `windows` | `1` | `T1053 (T1053.005)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `schtasks.exe` | ✅ `cmd.exe` | ❌ ABSENT | ❌ ABSENT |
+| [`T1055.001.json`](samples/T1055.001.json) | `windows` | `1` | `T1055 (T1055.001)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `mavinject.exe` | ✅ `powershell.exe` | ❌ ABSENT | ❌ ABSENT |
+| [`T1059.001.json`](samples/T1059.001.json) | `windows` | `1` | `T1059 (T1059.001)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `powershell.exe` | ✅ `powershell.exe` | ❌ ABSENT | ❌ ABSENT |
+| [`T1071.001(1).json`](samples/T1071.001(1).json) | `suricata` | `-` | `T1071 (T1071.001)` | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ❌ ABSENT | ✅ Present |
+| [`T1071.001(2).json`](samples/T1071.001(2).json) | `windows` | `3` | `T1071 (T1071.001)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `powershell.exe` | ❌ ABSENT | ❌ ABSENT | ✅ Present |
+| [`T1547.001.json`](samples/T1547.001.json) | `windows` | `13` | `T1547 (No subtech)` | ✅ `desktop-thonlnr` | ✅ `victim` | ✅ `reg.exe` | ❌ ABSENT | ✅ Present | ❌ ABSENT |
 
 ---
 ## 2. Master Detailed Comparison Tables
@@ -68,7 +68,7 @@ Each cell indicates: Status (`PRESENT` / `ABSENT`), Path (flat dotted key or nes
 ---
 ## 3. Concrete Field-Name Mismatches & Detection Bugs Flagged
 
-During this cross-sample comparison against the SIEM rule definitions in [`config/rules_tight.ndjson`](file:///c:/Users/Huy/Desktop/llm-alert-triage/config/rules_tight.ndjson) and [`normalized_alert_schema.py`](file:///c:/Users/Huy/Desktop/llm-alert-triage/normalized_alert_schema.py), the following **7 concrete discrepancies and bugs** were uncovered:
+During this cross-sample comparison against the SIEM rule definitions in [`config/rules_tight.ndjson`](../config/rules_tight.ndjson) and [`agent/schemas/triage_schema.py`](../agent/schemas/triage_schema.py), the following **7 concrete discrepancies and bugs** were uncovered:
 
 ### Bug 1: LSASS Source Image vs. Process Name Mismatch (T1003.001)
 * **What `config/rules_tight.ndjson` assumes:**
@@ -86,7 +86,7 @@ During this cross-sample comparison against the SIEM rule definitions in [`confi
 ### Bug 2: Missing `user.name` on LSASS Alerts (T1003.001)
 * **What `config/rules_tight.ndjson` assumes:**
   `"exclusions": ["user.name: AdminBackup"]`
-* **What `normalized_alert_schema.py` does:**
+* **What `agent/schemas/triage_schema.py` does:**
   `user_name = src.get("user", {}).get("name")`
 * **What the live alert actually contains (`docs/samples/T1003.001.json`):**
   `"user": {"id": "S-1-5-18"}` — **`user.name` is completely absent!**
@@ -108,7 +108,7 @@ During this cross-sample comparison against the SIEM rule definitions in [`confi
   "id": "T1003",
   "subtechnique": []
   ```
-* **What `normalized_alert_schema.py` parses:**
+* **What `agent/schemas/triage_schema.py` parses:**
   ```python
   subtech = technique.get("subtechnique") or []
   rule_id = subtech[0]["id"] if subtech else technique.get("id", "UNKNOWN")
@@ -144,7 +144,7 @@ During this cross-sample comparison against the SIEM rule definitions in [`confi
 
 ### Bug 7: Sysmon Rule Tagging Mismatched with Suricata Signatures
 * **Observed Data:** In `T1547.001.json`, the alert contains `rule.name: "T1060,RunKey"`.
-* **What happened:** In `normalized_alert_schema.py:L170`, `suricata_signature=rule_block.get("name")`. If `rule.name` is present in a Sysmon alert, the schema risks conflating internal Sysmon config rule tags with Suricata IDS signatures.
+* **What happened:** In `agent/schemas/triage_schema.py` (`NormalizedAlert.from_raw_alert`), `suricata_signature=rule_block.get("name")`. If `rule.name` is present in a Sysmon alert, the schema risks conflating internal Sysmon config rule tags with Suricata IDS signatures.
 * **Fix required:** Only populate `suricata_signature` when `telemetry_source == "suricata"`.
 
 ---

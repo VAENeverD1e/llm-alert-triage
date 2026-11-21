@@ -1,15 +1,21 @@
 # LLM Agent & Triage Pipeline Configuration
+#
+# Read by api/config.py (API / webhook path only). The replay harness and the
+# prompt-injection checker use their own CLI flags and code defaults.
+# Keys marked "NOT ENFORCED YET" are documented intent only: no code reads them.
 
 models:
   primary:
-    provider: "ollama"
+    provider: "ollama"                 # NOT ENFORCED YET (only Ollama is implemented)
     model_name: "llama3:8b"
     base_url: "http://localhost:11434"
     temperature: 0.1
-    max_tokens: 2048
+    max_tokens: 2048                   # NOT ENFORCED YET
+    # Per-request HTTP timeout. A local 8B model on CPU can need >30 s per alert;
+    # raise this (or set OLLAMA_TIMEOUT) if verdicts fall back to the heuristic.
     timeout_seconds: 30
 
-  fallback:
+  fallback:                            # NOT ENFORCED YET (no secondary-model routing)
     provider: "ollama"
     model_name: "mistral:7b"
     base_url: "http://localhost:11434"
@@ -17,20 +23,22 @@ models:
     max_tokens: 2048
 
 pipeline:
-  context_window_minutes: 5
-  max_events_per_alert: 50
+  context_window_minutes: 5            # NOT ENFORCED YET
+  max_events_per_alert: 50             # NOT ENFORCED YET
   confidence_threshold_escalate: 0.70
   confidence_threshold_close: 0.85
+  # NOT ENFORCED YET: pipeline exceptions always fall back to Escalate and are
+  # flagged with verdict_source = "error_fallback".
   default_action_on_failure: "Escalate"
 
-tool_permissions:
+tool_permissions:                      # NOT ENFORCED YET (no permission gate in code)
   allow_elastic_queries: true
   allow_playbook_rag: true
-  allow_network_lookups: false
+  allow_network_lookups: false         # no threat-intel lookup exists in the code base
   allow_system_commands: false
 
-prompt_injection_guard:
-  enabled: true
+prompt_injection_guard:                # NOT ENFORCED YET: PromptGuard is always on and
+  enabled: true                        # covers a fixed field list (agent/security/prompt_guard.py)
   sanitize_fields:
     - "process.command_line"
     - "user.name"

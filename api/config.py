@@ -78,6 +78,7 @@ class APISettings:
     ollama_model: str = ""
     ollama_host: str = ""
     ollama_timeout: int = 30
+    ollama_temperature: float = 0.1
 
     # Pipeline Thresholds
     confidence_threshold_escalate: float = 0.70
@@ -96,6 +97,7 @@ class APISettings:
         self.ollama_model = os.getenv("OLLAMA_MODEL", yaml_model_name)
         self.ollama_host = os.getenv("OLLAMA_HOST", yaml_host)
         self.ollama_timeout = int(os.getenv("OLLAMA_TIMEOUT", str(yaml_timeout)))
+        self.ollama_temperature = float(os.getenv("OLLAMA_TEMPERATURE", str(primary_model.get("temperature", 0.1))))
 
         # Extract pipeline parameters from YAML
         pipeline_cfg = self.yaml_config.get("pipeline", {})

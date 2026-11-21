@@ -128,6 +128,9 @@ class TriageService:
             discord_forwarder=self.forwarder,
             confidence_threshold_escalate=self.config.confidence_threshold_escalate,
             confidence_threshold_close=self.config.confidence_threshold_close,
+            ollama_host=self.config.ollama_host,
+            ollama_timeout=self.config.ollama_timeout,
+            temperature=self.config.ollama_temperature,
         )
 
         # Sequential Background Queue & Single Worker Thread

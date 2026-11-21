@@ -39,7 +39,7 @@ def format_cell(present, path_str, val_str):
 
 lines = []
 lines.append("# Alert Schema Audit & Master Comparison\n")
-lines.append("This document provides an exhaustive, field-by-field comparative audit across all 8 live SIEM alert samples in [`docs/samples/`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/). It maps the structural split between host-based Sysmon and network-based Suricata alerts, surfaces concrete query/field discrepancies against the SIEM rule definitions (`config/rules_tight.ndjson`), and formally establishes the field taxonomy for Phase 2 Context Enrichment.\n")
+lines.append("This document provides an exhaustive, field-by-field comparative audit across all 8 live SIEM alert samples in [`docs/samples/`](samples/). It maps the structural split between host-based Sysmon and network-based Suricata alerts, surfaces concrete query/field discrepancies against the SIEM rule definitions (`config/rules_tight.ndjson`), and formally establishes the field taxonomy for Phase 2 Context Enrichment.\n")
 
 lines.append("---\n")
 lines.append("## 1. High-Level Telemetry & Context Availability Matrix\n")
@@ -67,7 +67,7 @@ for fname, title in files:
     reg = "✅ Present" if "registry" in src else "❌ ABSENT"
     net = "✅ Present" if ("source" in src or "destination" in src or telem == "suricata") else "❌ ABSENT"
 
-    lines.append(f"| [`{fname}`](file:///c:/Users/Huy/Desktop/llm-alert-triage/docs/samples/{fname}) | `{telem}` | `{code}` | `{threat_str}` | {host} | {user} | {proc} | {parent} | {reg} | {net} |\n")
+    lines.append(f"| [`{fname}`](samples/{fname}) | `{telem}` | `{code}` | `{threat_str}` | {host} | {user} | {proc} | {parent} | {reg} | {net} |\n")
 
 lines.append("\n---\n")
 lines.append("## 2. Master Detailed Comparison Tables\n")
@@ -191,7 +191,7 @@ for fname, title in files:
 lines.append("\n---\n")
 lines.append("## 3. Concrete Field-Name Mismatches & Detection Bugs Flagged\n\n")
 
-lines.append("During this cross-sample comparison against the SIEM rule definitions in [`config/rules_tight.ndjson`](file:///c:/Users/Huy/Desktop/llm-alert-triage/config/rules_tight.ndjson) and [`normalized_alert_schema.py`](file:///c:/Users/Huy/Desktop/llm-alert-triage/normalized_alert_schema.py), the following **7 concrete discrepancies and bugs** were uncovered:\n\n")
+lines.append("During this cross-sample comparison against the SIEM rule definitions in [`config/rules_tight.ndjson`](../config/rules_tight.ndjson) and [`agent/schemas/triage_schema.py`](../agent/schemas/triage_schema.py), the following **7 concrete discrepancies and bugs** were uncovered:\n\n")
 
 lines.append("""### Bug 1: LSASS Source Image vs. Process Name Mismatch (T1003.001)
 * **What `config/rules_tight.ndjson` assumes:**
@@ -209,7 +209,7 @@ lines.append("""### Bug 1: LSASS Source Image vs. Process Name Mismatch (T1003.0
 ### Bug 2: Missing `user.name` on LSASS Alerts (T1003.001)
 * **What `config/rules_tight.ndjson` assumes:**
   `"exclusions": ["user.name: AdminBackup"]`
-* **What `normalized_alert_schema.py` does:**
+* **What `agent/schemas/triage_schema.py` does:**
   `user_name = src.get("user", {}).get("name")`
 * **What the live alert actually contains (`docs/samples/T1003.001.json`):**
   `"user": {"id": "S-1-5-18"}` — **`user.name` is completely absent!**
@@ -231,7 +231,7 @@ lines.append("""### Bug 1: LSASS Source Image vs. Process Name Mismatch (T1003.0
   "id": "T1003",
   "subtechnique": []
   ```
-* **What `normalized_alert_schema.py` parses:**
+* **What `agent/schemas/triage_schema.py` parses:**
   ```python
   subtech = technique.get("subtechnique") or []
   rule_id = subtech[0]["id"] if subtech else technique.get("id", "UNKNOWN")
@@ -267,7 +267,7 @@ lines.append("""### Bug 1: LSASS Source Image vs. Process Name Mismatch (T1003.0
 
 ### Bug 7: Sysmon Rule Tagging Mismatched with Suricata Signatures
 * **Observed Data:** In `T1547.001.json`, the alert contains `rule.name: "T1060,RunKey"`.
-* **What happened:** In `normalized_alert_schema.py:L170`, `suricata_signature=rule_block.get("name")`. If `rule.name` is present in a Sysmon alert, the schema risks conflating internal Sysmon config rule tags with Suricata IDS signatures.
+* **What happened:** In `agent/schemas/triage_schema.py` (`NormalizedAlert.from_raw_alert`), `suricata_signature=rule_block.get("name")`. If `rule.name` is present in a Sysmon alert, the schema risks conflating internal Sysmon config rule tags with Suricata IDS signatures.
 * **Fix required:** Only populate `suricata_signature` when `telemetry_source == "suricata"`.
 """)
 

@@ -6,6 +6,15 @@
 > Re-run the benchmark with the updated harness before citing any metric. The harness
 > now records `label_leakage_sanitized` and `enrichment_configured` in its JSON output.
 
+> **2026-11 update (evaluation integrity fixes).** The harness now (a) strips Kibana workflow status,
+> `kibana.alert.reason`, the `fields` block, host/user names and real IPs from raw alerts, (b) no longer
+> lets severity reach the heuristic or Stage 1 evidence unless `--include-severity` is set, (c) reports
+> `Unknown` verdicts (`coverage`, `recall_strict`) and LLM/pipeline fallbacks (`verdict_source`), and
+> (d) flags 3 benign samples (`BNG-T1003.001`, `BNG-T1055.001`, `BNG-T1071.001-2`) with
+> `rule_would_fire: false` because the real Kibana rules exclude them; `metrics_realistic_only` omits them.
+> With these fixes the heuristic baseline (no severity) scores P=1.00, R=0.375, F1=0.5455 on the 16 alerts:
+> the earlier heuristic recall of 0.75 depended on the severity shortcut. LLM numbers must be re-run.
+
 **Timestamp:** 2026-10-17  
 **Evaluation Target:** Two-Stage LLM Triage Architecture vs. Rule-Based Heuristic Baseline  
 **Model Under Test:** Local `llama3:8b` via Ollama (`http://localhost:11434`)  
@@ -22,7 +31,7 @@ This evaluation measures the empirical effectiveness of the **Two-Stage LLM Aler
 1. **Zero Missed Breaches (100% Recall):** The LLM + RAG pipeline achieved a **Recall of 1.0000** (8/8 attacks detected), successfully detecting attacks that bypassed the rule-based baseline.
 2. **Elimination of Rule Blindspots:** The heuristic baseline missed 25% of true attacks (**Recall: 0.7500**) because conventional rules depend heavily on anomalous parent-process chains, which are absent in network IDS alerts (`T1046`) and direct registry modifications (`T1547.001`). The LLM + RAG pipeline correctly escalated both.
 3. **High-Fidelity False Positive Filtering:** The LLM + RAG pipeline successfully filtered **75% of benign enterprise noise** (6/8 alerts closed), accurately quoting the exact exclusion criteria (WMI DLL stacks, authorized subnets, signed vendor binaries) specified in the incident playbooks.
-4. **Fail-Safe Posture:** For the remaining 2 benign alerts, the model rendered a cautious `Escalate` decision due to suspicious indicators (e.g., user-writable paths and external IP contacts), aligning with the system's core principle of **Fail-Safe Triage (ADR-005/006)**.
+4. **Two False Positives Were LLM Hallucinations:** The 2 benign alerts the model escalated were driven by fabricated evidence (an invented threat-intelligence hit and a Program Files path misread as user-writable), not by a cautious posture. See Section 4.3.
 
 ---
 
@@ -34,7 +43,7 @@ The following table summarizes the quantitative performance across all 16 benchm
 |---|:---:|:---:|:---:|
 | **Evaluated Scenarios** | 16 (8 Attack / 8 Benign) | 16 (8 Attack / 8 Benign) | — |
 | **Detection Recall (Sensitivity)** | **0.7500** (6/8 detected) | **1.0000** (8/8 detected) | **+25.0% (Zero Breaches Missed)** |
-| **Precision** | **1.0000** | **0.8000** | -20.0% (Conservative Security Posture) |
+| **Precision** | **1.0000** | **0.8000** | -20.0% (2 hallucination-driven FPs, see 4.3) |
 | **F1-Score (Harmonic Mean)** | **0.8571** | **0.8889** | **+3.18%** |
 | **Cohen's Kappa ($\kappa$)** | **0.7500** | **0.7500** | Substantial Agreement |
 | **Mean Time to Respond (MTTR)** | **HISTORICAL — INVALID** | **HISTORICAL — INVALID** | Re-run required; prior values must not be cited |

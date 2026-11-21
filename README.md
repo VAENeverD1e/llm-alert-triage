@@ -18,7 +18,7 @@ An automated two-stage LLM agent system designed to triage SIEM/Elastic security
 
 ### Key Components
 
-- **Detection**: Ingests SIEM rules (`config/rules_tight.ndjson`, `config/rules_loose.ndjson`).
+- **Detection**: Alerts come from Kibana detection rules in the lab; the exact rule queries are embedded in each raw alert under `data/attack_scenarios/`. `config/rules_tight.ndjson` / `rules_loose.ndjson` are reference descriptions only and are not read by the pipeline.
 - **Fact-Finding Agent** (`agent/fact_finding/`): Aggregates raw process, network, and user logs around an alert without making diagnostic judgments.
 - **Verdict Agent** (`agent/verdict/`): Analyzes aggregated facts grounded by security playbooks (`integrations/playbook_retriever.py`) to render an `Escalate` or `Close` verdict with detailed reasoning and confidence scores.
 - **Orchestrator** (`agent/orchestrator.py`): Coordinates the two-stage execution pipeline.
@@ -40,7 +40,7 @@ llm-alert-triage/
 │   └── config.py                       # API settings & authentication configuration
 ├── playbooks/                          # Grounded RAG Incident Response Playbooks
 │   └── PB-*.md                         # MITRE ATT&CK response guides (TP vs FP criteria)
-├── soc_portal/                         # SOC Analyst Web Dashboard & Visualizer
+├── soc_portal/                         # SOC Analyst Web Dashboard (gitignored - not included in a clone)
 │   ├── backend/                        # FastAPI dashboard endpoints
 │   └── frontend/                       # Vite/React SOC operations interface
 ├── docs/                               # Architectural diagrams, decision logs, and proposals
@@ -49,13 +49,13 @@ llm-alert-triage/
 │   ├── project_limitations_and_analysis.md # In-depth project critique & technical roadmap
 │   └── decisions.md                    # Scope-cut log & architectural decision record (ADR)
 ├── config/                             # Rule definitions & agent parameters
-│   ├── rules_tight.ndjson              # Production-tier SIEM rules (with exclusions)
-│   ├── rules_loose.ndjson              # Unfiltered SIEM rules (for experimentation)
+│   ├── rules_tight.ndjson              # Reference rule descriptions with exclusions (not read by code)
+│   ├── rules_loose.ndjson              # Reference rule descriptions without exclusions (not read by code)
 │   └── agent_config.yaml               # Model configuration, token limits, and tool permissions
 ├── data/                               # Dataset & replay scenarios
-│   ├── attack_scenarios/               # Scripted replay defs for MITRE ATT&CK T-IDs
-│   ├── benign_scenarios/               # Scripted benign-noise enterprise scenarios
-│   └── ground_truth.jsonl              # 16 Labeled alert evaluation benchmark (8 ATK / 8 BNG)
+│   ├── attack_scenarios/               # Raw Kibana alerts exported from the Atomic Red Team lab
+│   ├── benign_scenarios/               # Hand-written, pre-normalized benign alerts (see README there)
+│   └── ground_truth.jsonl              # 16 labeled alerts (8 ATK / 8 BNG); 3 benign flagged rule_would_fire=false
 ├── agent/                              # Core Two-Stage LLM Triage Logic
 │   ├── fact_finding/                   # Stage 1: Aggregates surrounding event logs without bias
 │   ├── verdict/                        # Stage 2: RAG playbook reasoning & Escalate/Close decision
@@ -73,7 +73,7 @@ llm-alert-triage/
 │   ├── metrics.py                      # Metrics (Precision, Recall, F1, Latency, Cohen's kappa)
 │   ├── prompt_injection/               # Adversarial alert payload testing & safety suite
 │   └── results/                        # Evaluation run outputs (CSV/JSON)
-├── tests/                              # Unit & Integration Tests (100% pytest suite)
+├── tests/                              # Unit & integration tests (pytest)
 └── scripts/                            # Operational Scripts
 ```
 
@@ -84,7 +84,7 @@ llm-alert-triage/
 ### Prerequisites
 
 - Python 3.10+
-- [Ollama](https://ollama.ai/) installed locally (or access to an OpenAI-compatible API)
+- [Ollama](https://ollama.ai/) installed locally (only Ollama is supported as LLM backend)
 - Elasticsearch / Kibana instance (optional for local mock testing)
 
 ### Setup
@@ -96,7 +96,7 @@ llm-alert-triage/
    cd llm-alert-triage
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt  # (Create environment dependencies)
+   pip install -r requirements.txt
    ```
 
 2. **Pull Ollama Models**
@@ -118,9 +118,31 @@ llm-alert-triage/
 Run the evaluation harness to compute performance metrics across benign and attack scenarios:
 
 ```bash
-python -m evaluation.replay_harness
-python -m evaluation.metrics
+# Heuristic baseline (no LLM needed)
+python evaluation/replay_harness.py --mode heuristic
+
+# LLM + RAG, 5 repeated runs (mean ± std), fixed seed
+python evaluation/replay_harness.py --mode llm_rag --runs 5
+
+# Full 5-configuration ablation suite
+python evaluation/replay_harness.py --ablation-suite --runs 5
+
+# Prompt-injection suite (default: regex guard + heuristic; add --mode llm_rag to involve the LLM)
+python evaluation/prompt_injection/checker.py --mode llm_rag
 ```
+
+Reports contain, besides precision/recall/F1/kappa on decided alerts:
+
+- `coverage`, `unknown_count`, `recall_strict` — `Unknown` verdicts are not silently dropped;
+- `verdict_source` per alert and `heuristic_fallback_count` / `error_fallback_count` — LLM failures are not
+  counted as LLM decisions;
+- `metrics_realistic_only` — excludes benign samples the real Kibana rule would never fire on;
+- `metrics_by_technique`, `metrics_by_scenario_type`.
+
+`mean_latency_ms` (alias `mttr_ms`) is pipeline/inference latency, not an operational SOC MTTR. Severity is
+excluded from the prompt, Stage 1 evidence and the heuristic unless `--include-severity` is passed, and raw
+Kibana alerts are stripped of workflow status, `kibana.alert.reason`, the `fields` block, host/user names and real
+IPs unless `--no-sanitize` is passed.
 
 ---
 
