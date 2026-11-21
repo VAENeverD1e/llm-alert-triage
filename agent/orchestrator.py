@@ -39,6 +39,7 @@ class TriageOrchestrator:
         include_severity: bool = False,
         confidence_threshold_escalate: float = 0.70,
         confidence_threshold_close: float = 0.85,
+        temperature: float = 0.1,
     ):
         self.elastic_client = elastic_client
         self.playbook_retriever = playbook_retriever
@@ -48,8 +49,9 @@ class TriageOrchestrator:
         self.include_severity = include_severity
         self.fact_finder = FactFindingAgent(
             elastic_client=elastic_client,
-            ollama_client=ollama_client,
-            enable_enrichment=enable_enrichment
+            enable_enrichment=enable_enrichment,
+            include_severity=include_severity,
+            prompt_guard=self.prompt_guard,
         )
         self.verdict_agent = VerdictAgent(
             playbook_retriever=playbook_retriever,
@@ -58,6 +60,7 @@ class TriageOrchestrator:
             include_severity=include_severity,
             confidence_threshold_escalate=confidence_threshold_escalate,
             confidence_threshold_close=confidence_threshold_close,
+            temperature=temperature,
         )
         self.discord_forwarder = discord_forwarder
 
@@ -78,6 +81,10 @@ class TriageOrchestrator:
         include_severity: bool = False,
         confidence_threshold_escalate: float = 0.70,
         confidence_threshold_close: float = 0.85,
+        ollama_host: Optional[str] = None,
+        ollama_timeout: Optional[float] = None,
+        temperature: float = 0.1,
+        seed: Optional[int] = 42,
     ) -> "TriageOrchestrator":
         """
         Factory method to instantiate a fully configured orchestrator with local RAG, Ollama client,
@@ -89,7 +96,14 @@ class TriageOrchestrator:
         from notification.discord_forwarder import DiscordForwarder
 
         retriever = PlaybookRetriever(playbooks_dir=playbooks_dir) if use_rag else None
-        llm = OllamaClient(model_name=model_name) if use_ollama else None
+        llm = None
+        if use_ollama:
+            llm_kwargs: Dict[str, Any] = {"model_name": model_name, "seed": seed}
+            if ollama_host:
+                llm_kwargs["base_url"] = ollama_host
+            if ollama_timeout:
+                llm_kwargs["timeout"] = ollama_timeout
+            llm = OllamaClient(**llm_kwargs)
         
         es_client = elastic_client
         if es_client is None and elastic_url:
@@ -112,6 +126,7 @@ class TriageOrchestrator:
             include_severity=include_severity,
             confidence_threshold_escalate=confidence_threshold_escalate,
             confidence_threshold_close=confidence_threshold_close,
+            temperature=temperature,
         )
 
     def run_pipeline(self, alert_data: Dict[str, Any]) -> TriagePipelineResult:
@@ -121,17 +136,20 @@ class TriageOrchestrator:
         start_time = time.time()
         logger.info(f"--- Starting Triage Pipeline for Alert {alert_data.get('alert_id')} ---")
 
-        # Parse alert
-        if "_source" in alert_data or "kibana.alert.uuid" in alert_data:
-            raw_alert = NormalizedAlert.from_raw_alert(alert_data)
-        else:
-            raw_alert = SecurityAlert(**alert_data)
-
-        # Defense-in-Depth: Sanitize untrusted alert telemetry before ANY stage processing
-        guard_res: PromptGuardResult = self.prompt_guard.sanitize_alert(raw_alert)
-        alert = guard_res.sanitized_alert if guard_res.sanitized_alert else raw_alert
-
+        alert: Optional[NormalizedAlert] = None
         try:
+            # Parse alert
+            if "_source" in alert_data or "kibana.alert.uuid" in alert_data or (
+                "fields" in alert_data and "alert_id" not in alert_data
+            ):
+                raw_alert = NormalizedAlert.from_raw_alert(alert_data)
+            else:
+                raw_alert = SecurityAlert(**alert_data)
+
+            # Defense-in-Depth: Sanitize untrusted alert telemetry before ANY stage processing
+            guard_res: PromptGuardResult = self.prompt_guard.sanitize_alert(raw_alert)
+            alert = guard_res.sanitized_alert if guard_res.sanitized_alert else raw_alert
+
             # Stage 1: Fact-Finding (executed on sanitized telemetry)
             facts: FactFindingOutput = self.fact_finder.process(alert)
             if guard_res.is_injected:
@@ -147,17 +165,26 @@ class TriageOrchestrator:
 
         except Exception as e:
             logger.error(f"Error executing triage pipeline: {e}. Falling back to default Escalate.")
+            if alert is None:
+                # Parsing itself failed: keep a minimal envelope so the result is still reportable.
+                alert = NormalizedAlert(
+                    alert_id=str(alert_data.get("alert_id") or alert_data.get("_id") or "UNPARSEABLE"),
+                    rule_name="UNPARSEABLE_ALERT",
+                )
             facts = FactFindingOutput(
                 alert_id=alert.alert_id,
                 summary_of_events=f"Pipeline error encountered: {str(e)}",
                 user_context=f"User: {alert.user_name}"
             )
+            # Operationally safe default (Escalate), but explicitly flagged so that
+            # benchmarks can separate pipeline failures from model decisions.
             verdict = VerdictOutput(
                 alert_id=alert.alert_id,
                 decision=TriageDecision.ESCALATE,
                 confidence_score=0.5,
                 reasoning=f"Pipeline error fallback trigger: {str(e)}",
-                risk_factors=["Pipeline Execution Failure"]
+                risk_factors=["Pipeline Execution Failure"],
+                verdict_source="error_fallback",
             )
 
         elapsed_ms = (time.time() - start_time) * 1000.0

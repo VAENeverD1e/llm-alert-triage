@@ -21,11 +21,14 @@ class OllamaClient:
         self,
         base_url: str = "http://localhost:11434",
         model_name: str = "llama3:8b",
-        timeout: float = 180.0
+        timeout: float = 180.0,
+        seed: Optional[int] = 42,
     ):
         self.base_url = base_url.rstrip("/")
         self.model_name = model_name
         self.timeout = timeout
+        # Fixed sampling seed for reproducible benchmark runs (None = Ollama default/random).
+        self.seed = seed
         logger.info(f"Initialized OllamaClient: base_url={self.base_url}, model={self.model_name}")
 
     def is_alive(self) -> bool:
@@ -58,7 +61,8 @@ class OllamaClient:
         system_prompt: Optional[str] = None,
         json_format: bool = False,
         temperature: float = 0.1,
-        fallback_mock: bool = True
+        fallback_mock: bool = True,
+        seed: Optional[int] = None,
     ) -> str:
         """
         Sends generation request to local Ollama instance (/api/generate).
@@ -74,9 +78,7 @@ class OllamaClient:
             "model": self.model_name,
             "prompt": prompt,
             "stream": False,
-            "options": {
-                "temperature": temperature
-            }
+            "options": self._options(temperature, seed),
         }
         if system_prompt:
             payload["system"] = system_prompt
@@ -105,7 +107,8 @@ class OllamaClient:
         messages: List[Dict[str, str]],
         json_format: bool = False,
         temperature: float = 0.1,
-        fallback_mock: bool = True
+        fallback_mock: bool = True,
+        seed: Optional[int] = None,
     ) -> str:
         """
         Sends multi-turn chat request to local Ollama instance (/api/chat).
@@ -114,9 +117,7 @@ class OllamaClient:
             "model": self.model_name,
             "messages": messages,
             "stream": False,
-            "options": {
-                "temperature": temperature
-            }
+            "options": self._options(temperature, seed),
         }
         if json_format:
             payload["format"] = "json"
@@ -138,6 +139,13 @@ class OllamaClient:
                 last_msg = messages[-1]["content"] if messages else ""
                 return self._generate_fallback(last_msg, json_format)
             raise
+
+    def _options(self, temperature: float, seed: Optional[int]) -> Dict[str, Any]:
+        options: Dict[str, Any] = {"temperature": temperature}
+        effective_seed = seed if seed is not None else self.seed
+        if effective_seed is not None:
+            options["seed"] = effective_seed
+        return options
 
     def _generate_fallback(self, prompt: str, json_format: bool) -> str:
         """

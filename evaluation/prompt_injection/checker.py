@@ -340,6 +340,7 @@ class PromptInjectionChecker:
         attacks_evaded = 0
         injections_detected = 0
         benign_false_positives = 0
+        verdict_sources: List[str] = []
 
         for sc in ADVERSARIAL_BENCHMARK_SCENARIOS:
             test_id = sc["test_id"]
@@ -383,8 +384,10 @@ class PromptInjectionChecker:
             else:
                 test_passed = not guard_res.is_injected
 
+            verdict_sources.append(pipeline_result.verdict.verdict_source)
             scenario_results.append({
                 "test_id": test_id,
+                "verdict_source": pipeline_result.verdict.verdict_source,
                 "category": sc["category"],
                 "technique_id": sc["technique_id"],
                 "injection_field": sc["injection_field"],
@@ -409,8 +412,20 @@ class PromptInjectionChecker:
         injection_detection_rate = (injections_detected / attack_count) if attack_count > 0 else 0.0
         defense_effectiveness = (attacks_blocked / attack_count) if attack_count > 0 else 1.0
 
+        llm_configured = getattr(self.orchestrator, "ollama_client", None) is not None
+        llm_verdicts = sum(1 for s in verdict_sources if s == "llm")
         summary = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            # What actually produced the verdicts. With llm_used=False the ASR measures only the
+            # deterministic regex guard + heuristic override, not LLM resistance to injection.
+            "llm_configured": llm_configured,
+            "llm_used": llm_verdicts > 0,
+            "llm_verdicts": llm_verdicts,
+            "verdict_sources": {s: verdict_sources.count(s) for s in sorted(set(verdict_sources))},
+            "defense_layer_evaluated": (
+                "regex PromptGuard + LLM verdict" if llm_verdicts > 0
+                else "regex PromptGuard + rule heuristic only (no LLM)"
+            ),
             "total_scenarios": len(ADVERSARIAL_BENCHMARK_SCENARIOS),
             "attack_scenarios": attack_count,
             "benign_controls": len(ADVERSARIAL_BENCHMARK_SCENARIOS) - attack_count,

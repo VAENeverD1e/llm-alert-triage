@@ -14,6 +14,33 @@ Tài liệu này giải thích chi tiết, minh bạch bản chất kỹ thuật
 
 ---
 
+## ✅ Trạng thái khắc phục (cập nhật 2026-11)
+
+| Mục | Trạng thái | Ghi chú |
+|---|---|---|
+| A1. N = 16, thiếu phương sai | ⚠️ Còn một phần | `--runs N` cho mean ± std và seed cố định (`seed=42`) đã có; dataset vẫn 16 alert → xem `DATA_COLLECTION_PLAN.md` |
+| A2. Circular evaluation / playbook khớp benign | ⚠️ Còn một phần | Playbook T1003.001 và T1055.001 đã viết lại tiêu chí FP theo nguyên tắc; benign vẫn do tác giả tạo |
+| A3. Format confounding & severity shortcut | ⚠️ Còn một phần | Severity đã bị loại khỏi prompt, Stage 1 evidence và heuristic khi không bật `--include-severity`; alert raw Kibana được sanitize (workflow status, reason, `fields`, host/user, IP). Benign vẫn là JSON phẳng |
+| A4. Heuristic baseline strawman | ⚠️ Còn tồn tại | Đã bỏ phụ thuộc severity (số liệu baseline giảm: R = 0.375); chưa có baseline rule mạnh |
+| A5. Metric (Unknown, MTTR, ablation) | ✅ Đã sửa | Có `coverage`, `unknown_count`, `recall_strict`, `verdict_source`, fallback counts, `mean_latency_ms`, metric theo technique; ablation 5 cấu hình có sẵn |
+| A6. `rules_*.ndjson` | ⚠️ Còn một phần | Đã xóa T1078.003; README ghi rõ file không được pipeline đọc |
+| B1–B3. Hallucination | ✅ Đã đính chính | `evaluation_results.md` mục 1 & 4.3 gọi đúng là hallucination; prompt cấm bịa threat intel/business hours |
+| B4. Copy placeholder prompt | ✅ Đã sửa | Ví dụ JSON không còn giá trị copy được (`ESCALATE`, `0.95`); decision lạ / thiếu confidence → `Unknown` |
+| C1. Stage 1 không dùng LLM | ⚠️ Còn tồn tại | Đã bỏ tham số `ollama_client` không dùng; Stage 1 vẫn là Python tất định (ghi rõ trong code) |
+| C2. Config không được dùng | ⚠️ Còn một phần | `timeout_seconds`, `base_url`, `temperature` đã được truyền vào API; các key chưa thực thi được đánh dấu `NOT ENFORCED YET` |
+| C4. Confidence calibration | ⚠️ Còn tồn tại | Vẫn là policy routing; LLM fallback không bao giờ tự Close |
+| D1. Injection test chạy heuristic | ⚠️ Còn một phần | Report ghi `llm_used`, `verdict_sources`, `defense_layer_evaluated`; cần chạy `--mode llm_rag` để đo LLM |
+| D3. Stage 1 nằm ngoài thẻ untrusted | ✅ Đã sửa | Stage 1 nằm trong `<untrusted_enrichment>`; giá trị lấy từ Elastic được sanitize |
+| D4. Trường chưa sanitize | ✅ Đã sửa | Thêm `rule_name`, `process.executable`, `parent_process.name/executable`, `registry.hive` |
+| E1. `api/server.py`, `api/routes.py` | ✅ Đã sửa | `routes.py` đã xóa, `server.py` là shim tới `api.main` |
+| E2. `normalized_alert_schema.py`, README | ✅ Đã sửa | File đã xóa, tham chiếu trong docs đã cập nhật; README có `requirements.txt` và lệnh benchmark mới |
+| E4. Notes trong `ground_truth.jsonl` | ✅ Đã sửa | Thêm cờ `rule_would_fire: false` cho 3 benign bị rule loại trừ |
+| Mới: 3 benign không thể sinh alert | ⚠️ Gắn cờ | `BNG-T1003.001`, `BNG-T1055.001`, `BNG-T1071.001-2` — xem `metrics_realistic_only` |
+
+Các mục dưới đây giữ nguyên mô tả gốc để tham chiếu.
+
+---
+
 ## Nhóm A: Đánh Giá Chưa Đủ Sức Thuyết Phục
 
 ### 1. Kích thước tập đánh giá quá nhỏ (N = 16) và thiếu phương sai thống kê

@@ -205,6 +205,26 @@ class PromptGuard:
                 all_detected.extend(hits)
                 redacted_fields.append("reason")
 
+        def _sanitize_attr(obj: Any, attr: str, field_label: str) -> None:
+            value = getattr(obj, attr, None) if obj is not None else None
+            if not value or not isinstance(value, str):
+                return
+            clean, hits = self.sanitize_text(value)
+            if hits:
+                setattr(obj, attr, clean)
+                all_detected.extend(hits)
+                redacted_fields.append(field_label)
+
+        # Rule name is rendered into both telemetry and Stage 1 summaries.
+        _sanitize_attr(sanitized_alert, "rule_name", "rule_name")
+        if sanitized_alert.process_context:
+            _pctx = sanitized_alert.process_context
+            _sanitize_attr(_pctx.process, "executable", "process.executable")
+            _sanitize_attr(_pctx.parent_process, "name", "parent_process.name")
+            _sanitize_attr(_pctx.parent_process, "executable", "parent_process.executable")
+        if sanitized_alert.registry_context:
+            _sanitize_attr(sanitized_alert.registry_context, "hive", "registry.hive")
+
         # 2. Process Context
         if sanitized_alert.process_context:
             pctx = sanitized_alert.process_context

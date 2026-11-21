@@ -9,6 +9,7 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from agent.schemas.triage_schema import SecurityAlert, FactFindingOutput
+from agent.security.prompt_guard import PromptGuard
 
 logger = logging.getLogger(__name__)
 
@@ -25,26 +26,53 @@ class FactFindingAgent:
     ("not available"), never silently upgraded into a judgment call.
     """
 
-    def __init__(self, elastic_client=None, ollama_client=None, enable_enrichment: bool = True):
+    def __init__(
+        self,
+        elastic_client=None,
+        enable_enrichment: bool = True,
+        include_severity: bool = False,
+        prompt_guard: Optional[PromptGuard] = None,
+        **_ignored: Any,
+    ):
+        # NOTE: Stage 1 is deterministic Python (no LLM). The former unused
+        # ``ollama_client`` argument is still accepted via **_ignored for
+        # backwards compatibility.
         self.elastic_client = elastic_client
-        self.ollama_client = ollama_client
         self.enable_enrichment = enable_enrichment
+        self.include_severity = include_severity
+        self.prompt_guard = prompt_guard or PromptGuard()
+        self.enrichment_injections: List[str] = []
 
     def process(self, alert: SecurityAlert) -> FactFindingOutput:
         logger.info(f"[Fact-Finding Stage] Gathering facts for alert: {alert.alert_id} (Enrichment: {self.enable_enrichment})")
 
         host_name = alert.host_name
         parent_process: Optional[Dict[str, Any]] = None
-        evidence: List[str] = [f"Rule: {alert.rule_id}", f"Severity: {alert.severity}"]
+        evidence: List[str] = [f"Rule: {alert.rule_id}"]
+        if self.include_severity:
+            evidence.append(f"Severity: {alert.severity}")
+        self.enrichment_injections = []
 
         if self.enable_enrichment:
             if alert.telemetry_source == "sysmon" and alert.process_context:
                 parent_process, note = self._resolve_parent_process(alert)
                 evidence.append(note)
+                if parent_process:
+                    parent_process = {
+                        k: self._clean(v, f"enrichment.parent_process.{k}") if isinstance(v, str) else v
+                        for k, v in parent_process.items()
+                    }
 
             if alert.telemetry_source == "suricata" and not host_name:
                 host_name, note = self._resolve_host(alert)
                 evidence.append(note)
+                host_name = self._clean(host_name, "enrichment.host_name")
+
+            if self.enrichment_injections:
+                evidence.append(
+                    "Adversarial Prompt Injection Detected in Elastic enrichment data: "
+                    + ", ".join(sorted(set(self.enrichment_injections)))
+                )
         else:
             evidence.append("Stage 1 Enrichment disabled (Ablation mode: raw alert only).")
 
@@ -73,6 +101,15 @@ class FactFindingAgent:
         )
 
     # ── Enrichment helpers ──────────────────────────────────────────────
+
+    def _clean(self, value: Optional[str], label: str) -> Optional[str]:
+        """Sanitizes a value fetched from Elastic (attacker-influenced) before it reaches the prompt."""
+        if not value:
+            return value
+        clean, hits = self.prompt_guard.sanitize_text(value)
+        if hits:
+            self.enrichment_injections.extend(f"{label}:{h}" for h in hits)
+        return clean
 
     def _resolve_parent_process(self, alert: SecurityAlert) -> Tuple[Optional[Dict[str, Any]], str]:
         """
